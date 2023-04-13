@@ -1,0 +1,1 @@
+starknet-token/=lib/starknet-token/src/starkware/isd/
