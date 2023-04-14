@@ -13,3 +13,26 @@ PoC solidity implementation of the following Starknet Decentralized Protocol pro
 Mainnet
 - $STARK - 0xCa14007Eff0dB1f8135f4C25B34De49AB0d42766
 - Core Contracts - 0x739A654271c565839F0408546706bBea2F1FfE42
+
+### Setup:
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+### Testing:
+
+Unit
+```bash
+forge test -vv
+```
+
+Anvil
+```bash
+./script/local.sh
+
+cast call <BOOKIE_ADDR> "getCurrentEpoch()((address,uint256,uint256)[])"
+
+cast call <BOOKIE_ADDR> "getCurrentSlot()((address,uint256,uint256))"
+```
