@@ -1,1 +1,2 @@
 starknet-token/=lib/starknet-token/src/starkware/isd/
+starknet-cc/=lib/starknet-cc/

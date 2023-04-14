@@ -8,3 +8,8 @@ PoC solidity implementation of the following Starknet Decentralized Protocol pro
 - [V - Checkpoints for Fast Finality](https://community.starknet.io/t/starknet-decentralized-protocol-v-checkpoints-for-fast-finality/6032)
 - [VI - The Buffer Problem](https://community.starknet.io/t/starknet-decentralized-protocol-vi-the-buffer-problem/7098)
 - [VII - Chained Proof Protocols & Braiding](https://community.starknet.io/t/starknet-decentralized-protocol-vii-chained-proof-protocols-braiding/18831)
+
+### Addresses:
+Mainnet
+- $STARK - 0xCa14007Eff0dB1f8135f4C25B34De49AB0d42766
+- Core Contracts - 0x739A654271c565839F0408546706bBea2F1FfE42
