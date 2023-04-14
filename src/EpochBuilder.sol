@@ -22,7 +22,7 @@ abstract contract EpochBuilder {
 
     function getCurrentSlot() public view virtual returns (Slot memory) {
         Slot memory _slot;
-        for (uint i = 0; i < SLOTS_PER_EPOCH; i++) {
+        for (uint i = 0; i < SLOTS_PER_EPOCH; ++i) {
             Slot memory s = epochs[currentEpoch][i];
             if (s.block_number == block.number) {
                 _slot = s;
@@ -51,7 +51,7 @@ abstract contract EpochBuilder {
 
         currentEpoch = ts;
 
-        for (uint i = 0; i < SLOTS_PER_EPOCH; i++) {
+        for (uint i = 0; i < SLOTS_PER_EPOCH; ++i) {
             // TODO: remove once anvil supports difficulty OR randao
             if (rand == 0) {
                 rand = ts;
