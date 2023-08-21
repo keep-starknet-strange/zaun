@@ -27,10 +27,10 @@ sleep 2
 
 PRE_PRIVATE=$(jq -r '.private_keys[0]' $BUILD_DIR/anvil.json)
 
-STARKNET_CC=$(forge create --private-key $PRE_PRIVATE lib/starknet-cc/Starknet.sol:Starknet | grep -i 'deployed to' | awk '{print $3}')
+STARKNET_CC=$(forge create --private-key $PRE_PRIVATE $BUILD_DIR/../lib/starknet-cc/Starknet.sol:Starknet | grep -i 'deployed to' | awk '{print $3}')
 jq -r '.starknet_cc += "'$STARKNET_CC'"' $BUILD_DIR/anvil.json > $BUILD_DIR/anvil-cc.json
 
-STARK_TOKEN=$(forge create --private-key $PRE_PRIVATE lib/starknet-token/src/starkware/isd/solidity/StarkNetToken.sol:StarkNetToken | grep -i 'deployed to' | awk '{print $3}')
+STARK_TOKEN=$(forge create --private-key $PRE_PRIVATE $BUILD_DIR/../lib/starknet-token/src/starkware/isd/solidity/StarkNetToken.sol:StarkNetToken | grep -i 'deployed to' | awk '{print $3}')
 jq -r '.starknet_token += "'$STARK_TOKEN'"' $BUILD_DIR/anvil-cc.json > $BUILD_DIR/anvil.json
 
 rm $BUILD_DIR/anvil-cc.json
