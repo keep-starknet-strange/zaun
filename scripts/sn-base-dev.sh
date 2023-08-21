@@ -18,6 +18,12 @@ if [ -z $BUILD_DIR ]; then
     BUILD_DIR="$PWD/out"
 fi
 
+ZAUN_DIR=$2
+
+if [ -z $ZAUN_DIR ]; then
+    ZAUN_DIR="$PWD"
+fi
+
 rm $BUILD_DIR/anvil.log 2> /dev/null 
 echo "starting anvil..."
 anvil -b 5 --config-out $BUILD_DIR/anvil.json 2>&1  >> $BUILD_DIR/anvil.log &
