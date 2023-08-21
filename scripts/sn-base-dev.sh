@@ -33,6 +33,8 @@ sleep 2
 
 PRE_PRIVATE=$(jq -r '.private_keys[0]' $BUILD_DIR/anvil.json)
 
+forge install --root $ZAUN_DIR
+
 STARKNET_CC=$(forge create --private-key $PRE_PRIVATE $ZAUN_DIR/lib/starknet-cc/Starknet.sol:Starknet | grep -i 'deployed to' | awk '{print $3}')
 jq -r '.starknet_cc += "'$STARKNET_CC'"' $BUILD_DIR/anvil.json > $BUILD_DIR/anvil-cc.json
 
