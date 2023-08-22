@@ -35,7 +35,7 @@ PRE_PRIVATE=$(jq -r '.private_keys[0]' $BUILD_DIR/anvil.json)
 
 forge install --root $ZAUN_DIR
 
-STARKNET_CC=$(forge create --root $ZAUN_DIR --private-key $PRE_PRIVATE lib/starknet-cc/Starknet.sol:Starknet | grep -i 'deployed to' | awk '{print $3}')
+STARKNET_CC=$(forge create --root $ZAUN_DIR --private-key $PRE_PRIVATE src/StarknetValidium.sol:Starknet | grep -i 'deployed to' | awk '{print $3}')
 jq -r '.starknet_cc += "'$STARKNET_CC'"' $BUILD_DIR/anvil.json > $BUILD_DIR/anvil-cc.json
 
 STARK_TOKEN=$(forge create  --root $ZAUN_DIR --private-key $PRE_PRIVATE lib/starknet-token/src/starkware/isd/solidity/StarkNetToken.sol:StarkNetToken | grep -i 'deployed to' | awk '{print $3}')
