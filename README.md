@@ -28,11 +28,14 @@ Unit
 forge test -vv
 ```
 
-Anvil
+### Devnet
+
+Start Avnvil as background process w/ Core Contracts and STARK token:
 ```bash
-./script/local.sh
+./script/sn-base-dev.sh
+```
 
-cast call <BOOKIE_ADDR> "getCurrentEpoch()((address,uint256,uint256)[])"
-
-cast call <BOOKIE_ADDR> "getCurrentSlot()((address,uint256,uint256))"
+Kill Anvil deployment:
+```bash
+./script/sn-base-kill.sh
 ```
