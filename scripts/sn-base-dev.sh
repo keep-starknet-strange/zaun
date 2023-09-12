@@ -26,7 +26,7 @@ fi
 
 rm $BUILD_DIR/anvil.log 2> /dev/null 
 echo "starting anvil..."
-anvil -b 5 --config-out $BUILD_DIR/anvil.json 2>&1  >> $BUILD_DIR/anvil.log &
+anvil -b 5 --config-out $BUILD_DIR/anvil.json 2>&1 >> $BUILD_DIR/anvil.log &
 echo $! > $BUILD_DIR/anvil_pid
 
 sleep 2

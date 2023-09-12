@@ -24,7 +24,19 @@ contract StarknetTest is Test {
     }
 
     function testIsOperator() public {
-        console.logAddress(governor);
-        // assertEq(sn.starknetIsGovernor(deployer), true);
+        uint256 conf = sn.configHash();
+        int256 snBlock = sn.stateBlockNumber();
+
+        uint256[] memory arr = new uint256[](9);
+        arr[0] = 21;
+        arr[1] = 1;
+        arr[2] = uint256(snBlock + 1);
+        arr[3] = conf; // must be 0 to match the HEADER offset conf
+        arr[4] = 100;
+        arr[5] = 200;
+        arr[6] = 1;
+        arr[7] = 1351148242645005540004162531550805076995747746087542030095186557536641755046;
+        arr[8] = 558404273560404778508455254030458021013656352466216690688595011803280448032;
+        sn.updateState(arr);
     }
 }
