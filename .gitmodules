@@ -4,3 +4,6 @@
 [submodule "lib/starknet-token"]
 	path = lib/starknet-token
 	url = https://github.com/starknet-io/starknet-token.git
+[submodule "lib/cairo-lang"]
+	path = lib/cairo-lang
+	url = https://github.com/starkware-libs/cairo-lang
