@@ -1,34 +1,19 @@
-/*
-  Copyright 2019-2022 StarkWare Industries Ltd.
-
-  Licensed under the Apache License, Version 2.0 (the "License").
-  You may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  https://www.starkware.co/open-source-license/
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions
-  and limitations under the License.
-*/
 // SPDX-License-Identifier: Apache-2.0.
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "starknet/Output.sol";
-import "starknet/StarknetGovernance.sol";
-import "starknet/StarknetMessaging.sol";
-import "starknet/StarknetOperator.sol";
-import "starknet/StarknetState.sol";
-import "starknet/GovernedFinalizable.sol";
-import "starknet/OnchainDataFactTreeEncoder.sol";
-import "starknet/ContractInitializer.sol";
-import "starknet/Identity.sol";
-import "starknet/IFactRegistry.sol";
-import "starknet/ProxySupport.sol";
-import "starknet/NamedStorage.sol";
+import "starknet-cc/Output.sol";
+import "starknet-cc/StarknetGovernance.sol";
+import "starknet-cc/StarknetMessaging.sol";
+import "starknet-cc/StarknetOperator.sol";
+import "starknet-cc/StarknetState.sol";
+import "starkware/solidity/components/GovernedFinalizable.sol";
+import "starkware/solidity/components/OnchainDataFactTreeEncoder.sol";
+import "starkware/solidity/interfaces/ContractInitializer.sol";
+import "starkware/solidity/interfaces/Identity.sol";
+import "starkware/solidity/interfaces/IFactRegistry.sol";
+import "starkware/solidity/interfaces/ProxySupport.sol";
+import "starkware/solidity/libraries/NamedStorage.sol";
 
 contract Starknet is
     Identity,
@@ -41,11 +26,25 @@ contract Starknet is
 {
     using StarknetState for StarknetState.State;
 
+    // Indicates a change of the Starknet config hash.
+    event ConfigHashChanged(
+        address indexed changedBy,
+        uint256 oldConfigHash,
+        uint256 newConfigHash
+    );
+
     // Logs the new state following a state update.
-    event LogStateUpdate(uint256 globalRoot, int256 blockNumber);
+    event LogStateUpdate(uint256 globalRoot, int256 blockNumber, uint256 blockHash);
 
     // Logs a stateTransitionFact that was used to update the state.
     event LogStateTransitionFact(bytes32 stateTransitionFact);
+
+    // Indicates a change of the Starknet OS program hash.
+    event ProgramHashChanged(
+        address indexed changedBy,
+        uint256 oldProgramHash,
+        uint256 newProgramHash
+    );
 
     // Random storage slot tags.
     string internal constant PROGRAM_HASH_TAG = "STARKNET_1.0_INIT_PROGRAM_HASH_UINT";
@@ -55,17 +54,20 @@ contract Starknet is
     // The hash of the StarkNet config.
     string internal constant CONFIG_HASH_TAG = "STARKNET_1.0_STARKNET_CONFIG_HASH";
 
-    function setProgramHash(uint256 newProgramHash) external notFinalized {
+    function setProgramHash(uint256 newProgramHash) external notFinalized onlyGovernance {
+        emit ProgramHashChanged(msg.sender, programHash(), newProgramHash);
         programHash(newProgramHash);
     }
 
-    function setConfigHash(uint256 newConfigHash) external notFinalized {
+    function setConfigHash(uint256 newConfigHash) external notFinalized onlyGovernance {
+        emit ConfigHashChanged(msg.sender, configHash(), newConfigHash);
         configHash(newConfigHash);
     }
 
     function setMessageCancellationDelay(uint256 delayInSeconds)
         external
         notFinalized
+        onlyGovernance
     {
         messageCancellationDelay(delayInSeconds);
     }
@@ -116,7 +118,7 @@ contract Starknet is
     }
 
     function validateInitData(bytes calldata data) internal view override {
-        require(data.length == 5 * 32, "ILLEGAL_INIT_DATA_SIZE");
+        require(data.length == 6 * 32, "ILLEGAL_INIT_DATA_SIZE");
         uint256 programHash_ = abi.decode(data[:32], (uint256));
         require(programHash_ != 0, "BAD_INITIALIZATION");
     }
@@ -142,7 +144,7 @@ contract Starknet is
       Returns a string that identifies the contract.
     */
     function identify() external pure override returns (string memory) {
-        return "StarkWare_Starknet_2023_5";
+        return "StarkWare_Starknet_2023_6";
     }
 
     /**
@@ -160,6 +162,13 @@ contract Starknet is
     }
 
     /**
+      Returns the current block hash.
+    */
+    function stateBlockHash() external view returns (uint256) {
+        return state().blockHash;
+    }
+
+    /**
       Updates the state of the StarkNet, based on a proof of the
       StarkNet OS that the state transition is valid.
 
@@ -168,7 +177,9 @@ contract Starknet is
         data_availability_fact - An encoding of the on-chain data associated
         with the 'programOutput'.
     */
-    function updateState(uint256[] calldata programOutput) external {
+    function updateState(
+        uint256[] calldata programOutput
+    ) external onlyOperator {
         // We protect against re-entrancy attacks by reading the block number at the beginning
         // and validating that we have the expected block number at the end.
         int256 initialBlockNumber = state().blockNumber;
@@ -182,7 +193,6 @@ contract Starknet is
             "INVALID_CONFIG_HASH"
         );
 
-        // Perform state update.
         state().update(programOutput);
 
         // Process the messages after updating the state.
@@ -210,7 +220,7 @@ contract Starknet is
         // followed by storage changes.
 
         StarknetState.State storage state_ = state();
-        emit LogStateUpdate(state_.globalRoot, state_.blockNumber);
+        emit LogStateUpdate(state_.globalRoot, state_.blockNumber, state_.blockHash);
         // Re-entrancy protection (see above).
         require(state_.blockNumber == initialBlockNumber + 1, "INVALID_FINAL_BLOCK_NUMBER");
     }
