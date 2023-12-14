@@ -3,7 +3,7 @@ pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "forge-std/Test.sol";
-import "src/StarknetValidium.sol";
+import "src/StarknetSovereign.sol";
 
 contract StarknetTest is Test {
     Starknet sn;
