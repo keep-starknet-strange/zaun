@@ -1,0 +1,21 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/starknet-core-contract-client",
+]
+
+[workspace.package]
+authors = ["Starkware Exploration Team", "OnlyDust Contributors"]
+edition = "2021"
+repository = "https://github.com/keep-starknet-strange/zaun/"
+version = "0.1.0"
+
+[workspace.dependencies]
+ethers = "2.0.7"
+log = "0.4.20"
+thiserror = "1.0.51"
+num-traits = "0.2.17"
+async-trait = "0.1.74"
+
+
+
