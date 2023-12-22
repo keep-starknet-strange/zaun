@@ -6,7 +6,7 @@ use ethers::types::{I256, U256};
 use crate::Error;
 
 abigen!(
-    StarknetContract,
+    StarknetValidityContract,
     r#"[
         function setProgramHash(uint256 newProgramHash) external notFinalized onlyGovernance
         function setConfigHash(uint256 newConfigHash) external notFinalized onlyGovernance
@@ -26,7 +26,7 @@ abigen!(
 );
 
 #[async_trait]
-pub trait StarknetContractTrait<M: Middleware> {
+pub trait StarknetValidityContractTrait<M: Middleware> {
     async fn set_program_hash(&self, new_program_hash: U256) -> Result<(), Error<M>>;
     async fn set_config_hash(&self, new_config_hash: U256) -> Result<(), Error<M>>;
     async fn set_message_cancellation_delay(&self, delay_in_seconds: U256) -> Result<(), Error<M>>;
@@ -48,9 +48,9 @@ pub trait StarknetContractTrait<M: Middleware> {
 }
 
 #[async_trait]
-impl<T, M: Middleware> StarknetContractTrait<M> for T
+impl<T, M: Middleware> StarknetValidityContractTrait<M> for T
 where
-    T: AsRef<StarknetContract<M>> + Send + Sync,
+    T: AsRef<StarknetValidityContract<M>> + Send + Sync,
 {
     async fn set_program_hash(&self, new_program_hash: U256) -> Result<(), Error<M>> {
         self.as_ref()
