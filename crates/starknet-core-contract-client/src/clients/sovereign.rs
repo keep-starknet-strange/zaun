@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    interfaces::{Operator, ProxySupport, StarknetMessaging, StarknetSovereignContract},
+    interfaces::{Operator, ProxySupport, StarknetMessaging, StarknetSovereignContract, StarknetGovernance, GovernedFinalizable},
     LocalMiddleware,
 };
 use ethers::types::Address;
@@ -12,6 +12,8 @@ pub struct StarknetSovereignContractClient {
     messaging: StarknetMessaging<LocalMiddleware>,
     operator: Operator<LocalMiddleware>,
     proxy_support: ProxySupport<LocalMiddleware>,
+    governance: StarknetGovernance<LocalMiddleware>,
+    governed_finalizable: GovernedFinalizable<LocalMiddleware>
 }
 
 impl StarknetSovereignContractClient {
@@ -20,7 +22,9 @@ impl StarknetSovereignContractClient {
             core_contract: StarknetSovereignContract::new(address, client.clone()),
             messaging: StarknetMessaging::new(address, client.clone()),
             operator: Operator::new(address, client.clone()),
-            proxy_support: ProxySupport::new(address, client),
+            proxy_support: ProxySupport::new(address, client.clone()),
+            governance: StarknetGovernance::new(address, client.clone()),
+            governed_finalizable: GovernedFinalizable::new(address, client.clone())
         }
     }
 }
@@ -43,5 +47,15 @@ impl AsRef<ProxySupport<LocalMiddleware>> for StarknetSovereignContractClient {
 impl AsRef<Operator<LocalMiddleware>> for StarknetSovereignContractClient {
     fn as_ref(&self) -> &Operator<LocalMiddleware> {
         &self.operator
+    }
+}
+impl AsRef<StarknetGovernance<LocalMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &StarknetGovernance<LocalMiddleware> {
+        &self.governance
+    }
+}
+impl AsRef<GovernedFinalizable<LocalMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &GovernedFinalizable<LocalMiddleware> {
+        &self.governed_finalizable
     }
 }
