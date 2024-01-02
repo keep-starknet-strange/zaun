@@ -4,19 +4,19 @@ use ethers::abi::Address;
 
 use crate::{
     interfaces::{Operator, ProxySupport, StarknetMessaging, StarknetValidityContract},
-    LocalMiddleware,
+    LocalWalletSignerMiddleware,
 };
 
 /// Client to interact with a Starknet core contract running in `Validity` mode
 pub struct StarknetValidityContractClient {
-    core_contract: StarknetValidityContract<LocalMiddleware>,
-    messaging: StarknetMessaging<LocalMiddleware>,
-    operator: Operator<LocalMiddleware>,
-    proxy_support: ProxySupport<LocalMiddleware>,
+    core_contract: StarknetValidityContract<LocalWalletSignerMiddleware>,
+    messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
+    operator: Operator<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
 }
 
 impl StarknetValidityContractClient {
-    pub fn new(address: Address, client: Arc<LocalMiddleware>) -> Self {
+    pub fn new(address: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
         Self {
             core_contract: StarknetValidityContract::new(address, client.clone()),
             messaging: StarknetMessaging::new(address, client.clone()),
@@ -26,23 +26,25 @@ impl StarknetValidityContractClient {
     }
 }
 
-impl AsRef<StarknetValidityContract<LocalMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &StarknetValidityContract<LocalMiddleware> {
+impl AsRef<StarknetValidityContract<LocalWalletSignerMiddleware>>
+    for StarknetValidityContractClient
+{
+    fn as_ref(&self) -> &StarknetValidityContract<LocalWalletSignerMiddleware> {
         &self.core_contract
     }
 }
-impl AsRef<StarknetMessaging<LocalMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &StarknetMessaging<LocalMiddleware> {
+impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &StarknetMessaging<LocalWalletSignerMiddleware> {
         &self.messaging
     }
 }
-impl AsRef<ProxySupport<LocalMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &ProxySupport<LocalMiddleware> {
+impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }
-impl AsRef<Operator<LocalMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &Operator<LocalMiddleware> {
+impl AsRef<Operator<LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &Operator<LocalWalletSignerMiddleware> {
         &self.operator
     }
 }
