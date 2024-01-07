@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use ethers::{prelude::abigen, providers::Middleware};
+use ethers::{prelude::abigen, providers::Middleware, types::TransactionReceipt, contract::ContractError};
 
 use crate::Error;
 
@@ -14,7 +14,7 @@ abigen!(
 #[async_trait]
 pub trait GovernedFinalizableTrait<M: Middleware> {
     async fn is_finalized(&self) -> Result<bool, Error<M>>;
-    async fn finalize(&self) -> Result<(), Error<M>>;
+    async fn finalize(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -24,17 +24,19 @@ where
 {
     async fn is_finalized(&self) -> Result<bool, Error<M>> {
         self.as_ref()
-        .is_finalized()
-        .call()
-        .await
-        .map_err(Into::into)
+            .is_finalized()
+            .call()
+            .await
+            .map_err(Into::into)
     }
 
-    async fn finalize(&self) -> Result<(), Error<M>> {
+    async fn finalize(&self) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-        .finalize()
-        .call()
-        .await
-        .map_err(Into::into)
+            .finalize()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
     }
 }

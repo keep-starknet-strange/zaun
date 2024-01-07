@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use ethers::{prelude::abigen, providers::Middleware, types::U256};
+use ethers::{prelude::abigen, providers::Middleware, types::{U256, TransactionReceipt}, contract::ContractError};
 
 use crate::Error;
 
@@ -32,21 +32,21 @@ pub trait StarknetMessagingTrait<M: Middleware> {
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
-    ) -> Result<(MessageHash, U256), Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn start_l1_to_l2_message_cancellation(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<MessageHash, Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn cancel_l1_to_l2_message(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<MessageHash, Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -86,10 +86,12 @@ where
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
-    ) -> Result<(MessageHash, U256), Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .send_message_to_l2(to_address, selector, payload)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -100,10 +102,12 @@ where
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<MessageHash, Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .start_l1_to_l2_message_cancellation(to_address, selector, payload, nonce)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -114,10 +118,12 @@ where
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<MessageHash, Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .cancel_l1_to_l2_message(to_address, selector, payload, nonce)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
