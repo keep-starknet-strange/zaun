@@ -60,11 +60,11 @@ mod tests {
             .await
             .expect("Failed to initialize");
 
-        // Second attempt to register as operator should be skipped
+        // Register as operator
         starknet
             .register_operator(starknet.client().address())
             .await
-            .expect("Should not fail");
+            .expect("Failed to register as operator");
 
         // Check that contract is initialized
         let program_hash = starknet

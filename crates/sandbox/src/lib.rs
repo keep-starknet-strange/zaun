@@ -13,7 +13,7 @@ use std::time::Duration;
 
 pub mod unsafe_proxy;
 
-pub type LocalWalletSignerMiddleware = SignerMiddleware<Provider<Http>, LocalWallet>;
+pub use starknet_core_contract_client::LocalWalletSignerMiddleware;
 
 /// Sandbox is typically used for E2E scenarious so we need to speed things up
 const POLLING_INTERVAL_MS: u64 = 10;
