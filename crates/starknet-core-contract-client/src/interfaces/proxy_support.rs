@@ -1,10 +1,10 @@
 use async_trait::async_trait;
 use ethers::{
+    abi::AbiEncode,
+    contract::{ContractError, EthAbiCodec, EthAbiType},
     prelude::abigen,
     providers::Middleware,
-    types::{Bytes, U256, Address, I256, TransactionReceipt},
-    contract::{EthAbiCodec, EthAbiType, ContractError},
-    abi::AbiEncode,
+    types::{Address, Bytes, TransactionReceipt, I256, U256},
 };
 
 use crate::Error;
@@ -21,7 +21,10 @@ abigen!(
 pub trait ProxySupportTrait<M: Middleware> {
     async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn initialize_with<const N: usize>(&self, data: ProxyInitializeData<N>) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn initialize_with<const N: usize>(
+        &self,
+        data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -43,7 +46,10 @@ where
             .map_err(Into::into)
     }
 
-    async fn initialize_with<const N: usize>(&self, data: ProxyInitializeData<N>) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn initialize_with<const N: usize>(
+        &self,
+        data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.initialize(data.into()).await
     }
 }
@@ -75,8 +81,9 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
         [
             self.sub_contract_addresses.encode(),
             self.eic_address.encode(),
-            self.init_data.encode()
-        ].concat()
+            self.init_data.encode(),
+        ]
+        .concat()
     }
 }
 

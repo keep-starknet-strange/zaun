@@ -1,5 +1,10 @@
 use async_trait::async_trait;
-use ethers::{prelude::abigen, providers::Middleware, types::{H160, TransactionReceipt}, contract::ContractError};
+use ethers::{
+    contract::ContractError,
+    prelude::abigen,
+    providers::Middleware,
+    types::{TransactionReceipt, H160},
+};
 
 use crate::Error;
 
@@ -19,8 +24,14 @@ abigen!(
 #[async_trait]
 pub trait StarknetGovernanceTrait<M: Middleware> {
     async fn starknet_is_governor(&self, user: Adress) -> Result<bool, Error<M>>;
-    async fn starknet_nominate_new_governor(&self, new_governor: Adress) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn starknet_remove_governor(&self, governor_for_removal: Adress) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn starknet_nominate_new_governor(
+        &self,
+        new_governor: Adress,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn starknet_remove_governor(
+        &self,
+        governor_for_removal: Adress,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn starknet_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn starknet_cancel_nomination(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
@@ -38,7 +49,10 @@ where
             .map_err(Into::into)
     }
 
-    async fn starknet_nominate_new_governor(&self, new_governor: Adress) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn starknet_nominate_new_governor(
+        &self,
+        new_governor: Adress,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .starknet_nominate_new_governor(new_governor)
             .send()
@@ -48,7 +62,10 @@ where
             .map_err(Into::into)
     }
 
-    async fn starknet_remove_governor(&self, governor_for_removal: Adress) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn starknet_remove_governor(
+        &self,
+        governor_for_removal: Adress,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .starknet_remove_governor(governor_for_removal)
             .send()

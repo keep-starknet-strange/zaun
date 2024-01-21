@@ -48,11 +48,21 @@ pub struct EthereumSandbox {
 
 impl EthereumSandbox {
     /// Creates a new sandbox instance.
-    /// Will try to attach to already running Anvil instance.
-    /// If anvil_endpoint is not specified, a default URL will be used.
+    /// Will try to attach to already running Anvil instance using one
+    /// of the following endpoints:
+    ///     - `anvil_endpoint` parameter (if specified)
+    ///     - ${ANVIL_ENDPOINT} environment variable (if set)
+    ///     - http://127.0.0.1:8545 (default)
     /// Also default values for chain ID and private keys will be used.
-    pub fn attach(anvil_endpoint: Option<&str>) -> Result<Self, Error> {
-        let provider = Provider::<Http>::try_from(anvil_endpoint.unwrap_or(ANVIL_DEFAULT_ENDPOINT))
+    pub fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
+        let anvil_endpoint = anvil_endpoint.unwrap_or_else(|| {
+            std::env::var("ANVIL_ENDPOINT")
+                .map(Into::into)
+                .ok()
+                .unwrap_or_else(|| ANVIL_DEFAULT_ENDPOINT.into())
+        });
+
+        let provider = Provider::<Http>::try_from(anvil_endpoint)
             .map_err(|_| Error::UrlParser)?
             .interval(Duration::from_millis(POLLING_INTERVAL_MS));
 
@@ -72,9 +82,9 @@ impl EthereumSandbox {
 
     /// Creates a new sandbox instance.
     /// A new Anvil instance will be spawned using binary located at:
-    ///     - `anvil_path` (if specified)
+    ///     - `anvil_path` parameter (if specified)
     ///     - ${ANVIL_PATH} environment variable (if set)
-    ///     - ~/.foundry/bin/anvil (by default)
+    ///     - ~/.foundry/bin/anvil (default)
     pub fn spawn(anvil_path: Option<PathBuf>) -> Self {
         let anvil_path: PathBuf = anvil_path.unwrap_or_else(|| {
             std::env::var("ANVIL_PATH")

@@ -27,6 +27,15 @@ Kill Anvil deployment:
 ./script/sn-base-kill.sh
 ```
 
+### Artifacts
+
+Zaun sandbox crate can be used as dev dependency in external projects for integration testing.  
+If any changes made to the Solidity contracts, one has to re-generate Ethers bindings (this won't be done automatically).
+
+```bash
+make artifacts
+```
+
 ### StarkNet Consensus Protocol Contracts
 
 PoC solidity implementation of the following Starknet Decentralized Protocol proposal:

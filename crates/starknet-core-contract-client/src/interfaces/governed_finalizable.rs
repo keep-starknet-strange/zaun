@@ -1,5 +1,7 @@
 use async_trait::async_trait;
-use ethers::{prelude::abigen, providers::Middleware, types::TransactionReceipt, contract::ContractError};
+use ethers::{
+    contract::ContractError, prelude::abigen, providers::Middleware, types::TransactionReceipt,
+};
 
 use crate::Error;
 
