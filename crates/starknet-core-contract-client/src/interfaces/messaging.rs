@@ -37,6 +37,7 @@ pub trait StarknetMessagingTrait<M: Middleware> {
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
+        fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn start_l1_to_l2_message_cancellation(
         &self,
@@ -91,9 +92,11 @@ where
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
+        fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .send_message_to_l2(to_address, selector, payload)
+            .value(fee) // L1 message fee must be between 0 and 1 ether
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
