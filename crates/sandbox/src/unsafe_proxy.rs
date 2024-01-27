@@ -12,11 +12,14 @@ const UNSAFE_PROXY: &str = include_str!("../artifacts/UnsafeProxy.json");
 pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
 ) -> Result<StarknetSovereignContractClient, Error> {
-    // First we deploy the Starknet contract (no explicit contructor)
+    // First we deploy the Starknet core contract (no explicit contructor)
     let core_contract = deploy_contract(client.clone(), STARKNET_SOVEREIGN, ()).await?;
 
-    // Then we deploy a simple delegate proxy to interact with Starknet contract (initialized with its
-    // address)
+    // Once we know the Starknet core contract address (implementation address)
+    // we can deploy and initialize our delegate proxy.
+    // NOTE that real world proxies typically allow changing the implementation
+    // address dynamically (this is basically how upgrades work). In our case,
+    // for simplicity, the proxy is initialized only once during the deployment.
     let proxy_contract =
         deploy_contract(client.clone(), UNSAFE_PROXY, core_contract.address()).await?;
 

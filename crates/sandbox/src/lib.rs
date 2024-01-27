@@ -11,11 +11,18 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
+/// Unsafe proxy is a straightforward implementation of the delegate proxy contract
+/// that is used to make Starknet core contract upgradeable.
+/// This implementation DOES NOT restrict who can invoke the core contract.
+/// For more information see https://l2beat.com/scaling/projects/starknet#contracts
 pub mod unsafe_proxy;
 
+/// Ethers library allows multiple signer backends and transports.
+/// For simplicity we use local wallet (basically private key) and
+/// HTTP transport in this crate.
 pub use starknet_core_contract_client::LocalWalletSignerMiddleware;
 
-/// Sandbox is typically used for E2E scenarious so we need to speed things up
+/// Sandbox is typically used for E2E scenarios so we need to speed things up
 const POLLING_INTERVAL_MS: u64 = 10;
 const ANVIL_DEFAULT_ENDPOINT: &str = "http://127.0.0.1:8545";
 const ANVIL_DEFAULT_CHAIN_ID: u64 = 31337;
@@ -36,6 +43,8 @@ pub enum Error {
     EthersContract(#[from] ContractError<LocalWalletSignerMiddleware>),
     #[error(transparent)]
     EthersProvider(#[from] ProviderError),
+    #[error("Invalid contract build artifacts: missing field `{0}`")]
+    ContractBuildArtifacts(&'static str),
 }
 
 /// A convenient wrapper over an already running or spawned Anvil local devnet
@@ -127,12 +136,19 @@ pub async fn deploy_contract<T: Tokenize>(
 {
     let (abi, bytecode) = {
         let mut artifacts: serde_json::Value = serde_json::from_str(contract_build_artifacts)?;
-        let abi = serde_json::from_value(artifacts["abi"].take())?;
-        let bytecode = Bytes::from_hex(
-            artifacts["bytecode"]["object"]
-                .as_str()
-                .ok_or(Error::BytecodeObject)?,
-        )?;
+        let abi_value = artifacts
+            .get_mut("abi")
+            .ok_or_else(|| Error::ContractBuildArtifacts("abi"))?
+            .take();
+        let bytecode_value = artifacts
+            .get_mut("bytecode")
+            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode"))?
+            .get_mut("object")
+            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode.object"))?
+            .take();
+
+        let abi = serde_json::from_value(abi_value)?;
+        let bytecode = Bytes::from_hex(bytecode_value.as_str().ok_or(Error::BytecodeObject)?)?;
         (abi, bytecode)
     };
 
