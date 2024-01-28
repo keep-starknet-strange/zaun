@@ -1,7 +1,8 @@
 use async_trait::async_trait;
+use ethers::contract::ContractError;
 use ethers::middleware::Middleware;
 use ethers::prelude::abigen;
-use ethers::types::{I256, U256};
+use ethers::types::{TransactionReceipt, I256, U256};
 
 use crate::Error;
 
@@ -27,9 +28,18 @@ abigen!(
 
 #[async_trait]
 pub trait StarknetValidityContractTrait<M: Middleware> {
-    async fn set_program_hash(&self, new_program_hash: U256) -> Result<(), Error<M>>;
-    async fn set_config_hash(&self, new_config_hash: U256) -> Result<(), Error<M>>;
-    async fn set_message_cancellation_delay(&self, delay_in_seconds: U256) -> Result<(), Error<M>>;
+    async fn set_program_hash(
+        &self,
+        new_program_hash: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn set_config_hash(
+        &self,
+        new_config_hash: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn set_message_cancellation_delay(
+        &self,
+        delay_in_seconds: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 
     async fn program_hash(&self) -> Result<U256, Error<M>>;
     async fn config_hash(&self) -> Result<U256, Error<M>>;
@@ -44,7 +54,7 @@ pub trait StarknetValidityContractTrait<M: Middleware> {
         program_output: Vec<U256>,
         onchain_data_hash: U256,
         onchain_data_size: U256,
-    ) -> Result<(), Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -52,26 +62,41 @@ impl<T, M: Middleware> StarknetValidityContractTrait<M> for T
 where
     T: AsRef<StarknetValidityContract<M>> + Send + Sync,
 {
-    async fn set_program_hash(&self, new_program_hash: U256) -> Result<(), Error<M>> {
+    async fn set_program_hash(
+        &self,
+        new_program_hash: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .set_program_hash(new_program_hash)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
 
-    async fn set_config_hash(&self, new_config_hash: U256) -> Result<(), Error<M>> {
+    async fn set_config_hash(
+        &self,
+        new_config_hash: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .set_config_hash(new_config_hash)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
 
-    async fn set_message_cancellation_delay(&self, delay_in_seconds: U256) -> Result<(), Error<M>> {
+    async fn set_message_cancellation_delay(
+        &self,
+        delay_in_seconds: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .set_message_cancellation_delay(delay_in_seconds)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -117,10 +142,12 @@ where
         program_output: Vec<U256>,
         onchain_data_hash: U256,
         onchain_data_size: U256,
-    ) -> Result<(), Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .update_state(program_output, onchain_data_hash, onchain_data_size)
-            .call()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
     }
