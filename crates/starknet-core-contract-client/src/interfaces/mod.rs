@@ -6,6 +6,11 @@ mod operator;
 mod proxy_support;
 mod sovereign_core_contract;
 mod validity_core_contract;
+mod eth_bridge;
+mod registry;
+mod manager;
+mod token_bridge;
+mod dai;
 
 pub use governance::{StarknetGovernance, StarknetGovernanceTrait};
 pub use governed_finalizable::{GovernedFinalizable, GovernedFinalizableTrait};
@@ -21,3 +26,8 @@ pub use proxy_support::{
 };
 pub use sovereign_core_contract::{StarknetSovereignContract, StarknetSovereignContractTrait};
 pub use validity_core_contract::{StarknetValidityContract, StarknetValidityContractTrait};
+pub use eth_bridge::{StarknetEthBridge, StarknetEthBridgeTrait};
+pub use token_bridge::{StarknetTokenBridge, StarknetTokenBridgeTrait};
+pub use manager::{StarkgateManager, StarkgateManagerTrait};
+pub use registry::{StarkgateRegistry, StarkgateRegistryTrait};
+pub use dai::{DaiERC20Token};

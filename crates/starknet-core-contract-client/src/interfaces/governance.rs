@@ -8,7 +8,7 @@ use ethers::{
 
 use crate::Error;
 
-type Adress = H160;
+type Address = H160;
 
 abigen!(
     StarknetGovernance,
@@ -23,14 +23,14 @@ abigen!(
 
 #[async_trait]
 pub trait StarknetGovernanceTrait<M: Middleware> {
-    async fn starknet_is_governor(&self, user: Adress) -> Result<bool, Error<M>>;
+    async fn starknet_is_governor(&self, user: Address) -> Result<bool, Error<M>>;
     async fn starknet_nominate_new_governor(
         &self,
-        new_governor: Adress,
+        new_governor: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn starknet_remove_governor(
         &self,
-        governor_for_removal: Adress,
+        governor_for_removal: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn starknet_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn starknet_cancel_nomination(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
@@ -41,7 +41,7 @@ impl<T, M: Middleware> StarknetGovernanceTrait<M> for T
 where
     T: AsRef<StarknetGovernance<M>> + Send + Sync,
 {
-    async fn starknet_is_governor(&self, user: Adress) -> Result<bool, Error<M>> {
+    async fn starknet_is_governor(&self, user: Address) -> Result<bool, Error<M>> {
         self.as_ref()
             .starknet_is_governor(user)
             .call()
@@ -51,7 +51,7 @@ where
 
     async fn starknet_nominate_new_governor(
         &self,
-        new_governor: Adress,
+        new_governor: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .starknet_nominate_new_governor(new_governor)
@@ -64,7 +64,7 @@ where
 
     async fn starknet_remove_governor(
         &self,
-        governor_for_removal: Adress,
+        governor_for_removal: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .starknet_remove_governor(governor_for_removal)
