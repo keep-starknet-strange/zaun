@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use crate::{interfaces::StarknetEthBridge, LocalWalletSignerMiddleware, StarknetLegacyBridgeContractClient};
+use crate::{interfaces::{StarknetEthBridge, ProxySupport}, LocalWalletSignerMiddleware, StarknetLegacyBridgeContractClient};
 
 use ethers::abi::Address;
-use crate::clients::StarknetSovereignContractClient;
 
 /// Client to interact with a Starknet Eth Bridge
 pub struct StarknetEthBridgeContractClient {
@@ -12,9 +11,9 @@ pub struct StarknetEthBridgeContractClient {
 }
 
 impl StarknetEthBridgeContractClient {
-    pub fn new(eth_bridge: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+    pub fn new(address: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
         Self{
-            eth_bridge: StarknetEthBridge::new(eth_bridge, client.clone()),
+            eth_bridge: StarknetEthBridge::new(address, client.clone()),
             proxy_support: ProxySupport::new(address, client.clone()),
         }
     }
@@ -26,7 +25,7 @@ impl AsRef<StarknetEthBridge<LocalWalletSignerMiddleware>> for StarknetEthBridge
     }
 }
 
-impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetEthBridgeContractClient {
     fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
