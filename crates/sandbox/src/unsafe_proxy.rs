@@ -34,12 +34,10 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
 pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetEthBridgeContractClient, Error> {
-    // Deploy Core and Eth Bridge contracts
-    let core_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_SOVEREIGN, ()).await?;
+    // First we deploy the Eth Bridge contract (no explicit contructor)
     let eth_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_ETH_BRIDGE, ()).await?;
 
     Ok(StarknetEthBridgeContractClient::new(
-        core_contract.address(),
         eth_bridge_contract.address(),
         client.clone(),
     ))
