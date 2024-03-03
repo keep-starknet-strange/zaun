@@ -1,11 +1,8 @@
 use std::sync::Arc;
 
-use crate::{
-    interfaces::{
-        DaiERC20Token, StarkgateManager, StarkgateRegistry, StarknetMessaging, StarknetTokenBridge
-    },
-    LocalWalletSignerMiddleware,
-};
+use crate::{interfaces::{
+    DaiERC20Token, StarkgateManager, StarkgateRegistry, StarknetMessaging, StarknetTokenBridge
+}, LocalWalletSignerMiddleware, StarknetBridgeContractClient};
 
 use ethers::types::Address;
 
@@ -57,5 +54,30 @@ impl AsRef<StarknetTokenBridge<LocalWalletSignerMiddleware>> for StarknetTokenBr
 impl AsRef<DaiERC20Token<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
     fn as_ref(&self) -> &DaiERC20Token<LocalWalletSignerMiddleware> {
         &self.erc20_token
+    }
+}
+
+impl StarknetBridgeContractClient for StarknetTokenBridgeContractClient {
+    fn address(&self) -> Address {
+        self.token_bridge.address()
+    }
+
+    fn manager(&self) -> Address {
+        self.manager.address()
+    }
+
+    fn registry(&self) -> Address {
+        self.registry.address()
+    }
+
+    fn messaging(&self) -> Address {
+        self.messaging.address()
+    }
+
+    fn manager_client(&self) -> Arc<LocalWalletSignerMiddleware> {
+        self.manager.client()
+    }
+    fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
+        self.token_bridge.client()
     }
 }

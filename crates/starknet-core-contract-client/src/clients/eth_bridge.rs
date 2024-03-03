@@ -1,8 +1,6 @@
 use std::sync::Arc;
 
-use crate::{
-    interfaces::{StarknetEthBridge, StarknetMessaging}, LocalWalletSignerMiddleware,
-};
+use crate::{interfaces::{StarknetEthBridge, StarknetMessaging}, LocalWalletSignerMiddleware, StarknetLegacyBridgeContractClient};
 
 use ethers::abi::Address;
 
@@ -33,3 +31,16 @@ impl AsRef<StarknetEthBridge<LocalWalletSignerMiddleware>> for StarknetEthBridge
     }
 }
 
+impl StarknetLegacyBridgeContractClient for StarknetEthBridgeContractClient {
+    fn address(&self) -> Address {
+        self.eth_bridge.address()
+    }
+
+    fn messaging(&self) -> Address {
+        self.messaging.address()
+    }
+
+    fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
+        self.eth_bridge.client()
+    }
+}

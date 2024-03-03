@@ -17,3 +17,26 @@ pub trait StarknetCoreContractClient {
     fn address(&self) -> Address;
     fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
 }
+
+pub trait StarknetLegacyBridgeContractClient {
+    fn address(&self) -> Address;
+
+    fn messaging(&self) -> Address;
+
+    fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
+}
+
+pub trait StarknetBridgeContractClient {
+    fn address(&self) -> Address;
+
+    fn manager(&self) -> Address;
+
+    fn registry(&self) -> Address;
+
+    fn messaging(&self) -> Address;
+
+    fn manager_client(&self) -> Arc<LocalWalletSignerMiddleware>;
+
+    fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
+
+}
