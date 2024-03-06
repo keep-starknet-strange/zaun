@@ -26,7 +26,7 @@ pub trait StarknetEthBridgeTrait<M: Middleware> {
     async fn set_max_total_balance(&self, max_total_balance: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_max_deposit(&self, max_deposit: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_l2_token_bridge(&self, l2_token_bridge: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn deposit(&self, amount: U256, l2recipient: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn deposit(&self, amount: U256, l2recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn identify(&self) -> Result<String, Error<M>>;
 }
 
