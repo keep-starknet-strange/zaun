@@ -65,9 +65,10 @@ impl<T, M: Middleware> StarknetEthBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn deposit(&self, amount: U256, l2recipient: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn deposit(&self, amount: U256, l2recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .deposit(amount, l2recipient)
+            .value(fee)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
