@@ -1,14 +1,13 @@
 use std::sync::Arc;
 
 use crate::{interfaces::{
-    DaiERC20Token, StarkgateManager, StarkgateRegistry, StarknetMessaging, StarknetTokenBridge
+    DaiERC20Token, StarkgateManager, StarkgateRegistry, StarknetTokenBridge
 }, LocalWalletSignerMiddleware, StarknetBridgeContractClient};
 
 use ethers::types::Address;
 
 /// Client to interact with a Token Bridge (ERC20)
 pub struct StarknetTokenBridgeContractClient {
-    messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
     manager: StarkgateManager<LocalWalletSignerMiddleware>,
     registry: StarkgateRegistry<LocalWalletSignerMiddleware>,
     token_bridge: StarknetTokenBridge<LocalWalletSignerMiddleware>,
@@ -16,20 +15,13 @@ pub struct StarknetTokenBridgeContractClient {
 }
 
 impl StarknetTokenBridgeContractClient {
-    pub fn new(messaging: Address, manager: Address, registry: Address, token_bridge: Address, dai: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+    pub fn new(manager: Address, registry: Address, token_bridge: Address, dai: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
         Self {
-            messaging: StarknetMessaging::new(messaging, client.clone()),
             manager: StarkgateManager::new(manager, client.clone()),
             registry: StarkgateRegistry::new(registry, client.clone()),
             token_bridge: StarknetTokenBridge::new(token_bridge, client.clone()),
             erc20_token: DaiERC20Token::new(dai, client.clone()),
         }
-    }
-}
-
-impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
-    fn as_ref(&self) -> &StarknetMessaging<LocalWalletSignerMiddleware> {
-        &self.messaging
     }
 }
 
@@ -70,14 +62,17 @@ impl StarknetBridgeContractClient for StarknetTokenBridgeContractClient {
         self.registry.address()
     }
 
-    fn messaging(&self) -> Address {
-        self.messaging.address()
+    fn token(&self) -> Address {
+        self.erc20_token.address()
     }
 
     fn manager_client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.manager.client()
     }
-    fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
+    fn registry_client(&self) -> Arc<LocalWalletSignerMiddleware> { self.registry.client() }
+    fn bridge_client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.token_bridge.client()
     }
+
+    fn token_client(&self) -> Arc<LocalWalletSignerMiddleware> { self.erc20_token.client() }
 }

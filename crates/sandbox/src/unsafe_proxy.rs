@@ -47,14 +47,12 @@ pub async fn deploy_starknet_token_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetTokenBridgeContractClient, Error> {
     // Deploy the contracts required to bridge ERC20 token from L1
-    let core_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_SOVEREIGN, ()).await?;
     let manager_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_MANAGER, ()).await?;
     let registry_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_REGISTRY, ()).await?;
     let token_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_TOKEN_BRIDGE, ()).await?;
     let token_contract = deploy_contract_behind_unsafe_proxy(client.clone(), ERC20_TOKEN, ()).await?;
 
     Ok(StarknetTokenBridgeContractClient::new(
-        core_contract.address(),
         manager_contract.address(),
         registry_contract.address(),
         token_bridge_contract.address(),

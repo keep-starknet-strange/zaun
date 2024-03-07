@@ -31,10 +31,11 @@ pub trait StarknetBridgeContractClient {
 
     fn registry(&self) -> Address;
 
-    fn messaging(&self) -> Address;
+    fn token(&self) -> Address;
 
     fn manager_client(&self) -> Arc<LocalWalletSignerMiddleware>;
-
-    fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
+    fn registry_client(&self) -> Arc<LocalWalletSignerMiddleware>;
+    fn bridge_client(&self) -> Arc<LocalWalletSignerMiddleware>;
+    fn token_client(&self) -> Arc<LocalWalletSignerMiddleware>;
 
 }
