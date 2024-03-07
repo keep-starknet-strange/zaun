@@ -2,7 +2,7 @@ use std::sync::Arc;
 use ethers::abi::Tokenize;
 use ethers::contract::ContractInstance;
 
-use starknet_core_contract_client::clients::{StarknetSovereignContractClient, StarknetEthBridgeContractClient, StarknetTokenBridgeContractClient};
+use starknet_core_contract_client::clients::{StarknetSovereignContractClient, StarknetEthBridgeContractClient, StarknetTokenBridgeContractClient, StarkgateManagerContractClient, StarkgateRegistryContractClient, DaiERC20ContractClient};
 
 use crate::{deploy_contract, Error, LocalWalletSignerMiddleware};
 
@@ -22,7 +22,7 @@ const UNSAFE_PROXY: &str = include_str!("../artifacts/UnsafeProxy.json");
 pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
 ) -> Result<StarknetSovereignContractClient, Error> {
-    // First we deploy the Starknet core contract (no explicit contructor)
+    // Deploy the Starknet core contract (no explicit contructor)
     let core_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_SOVEREIGN, ()).await?;
 
     Ok(StarknetSovereignContractClient::new(
@@ -34,7 +34,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
 pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetEthBridgeContractClient, Error> {
-    // First we deploy the Eth Bridge contract (no explicit contructor)
+    // Deploy the Eth Bridge contract (no explicit contructor)
     let eth_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_ETH_BRIDGE, ()).await?;
 
     Ok(StarknetEthBridgeContractClient::new(
@@ -43,23 +43,52 @@ pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     ))
 }
 
+pub async fn deploy_starkgate_manager_behind_unsafe_proxy(
+    client: Arc<LocalWalletSignerMiddleware>
+) -> Result<StarkgateManagerContractClient, Error> {
+    // Deploy the Starkgate Manager contract (no explicit contructor)
+    let manager_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_MANAGER, ()).await?;
+
+    Ok(StarkgateManagerContractClient::new(
+        manager_contract.address(),
+        client.clone(),
+    ))
+}
+
+pub async fn deploy_starkgate_registry_behind_unsafe_proxy(
+    client: Arc<LocalWalletSignerMiddleware>
+) -> Result<StarkgateRegistryContractClient, Error> {
+    // Deploy the Starkgate Registry contract (no explicit contructor)
+    let registry_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_REGISTRY, ()).await?;
+
+    Ok(StarkgateRegistryContractClient::new(
+        registry_contract.address(),
+        client.clone(),
+    ))
+}
+
 pub async fn deploy_starknet_token_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetTokenBridgeContractClient, Error> {
-    // Deploy the contracts required to bridge ERC20 token from L1
-    let manager_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_MANAGER, ()).await?;
-    let registry_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_REGISTRY, ()).await?;
     let token_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_TOKEN_BRIDGE, ()).await?;
-    let token_contract = deploy_contract_behind_unsafe_proxy(client.clone(), ERC20_TOKEN, ()).await?;
 
     Ok(StarknetTokenBridgeContractClient::new(
-        manager_contract.address(),
-        registry_contract.address(),
         token_bridge_contract.address(),
+        client.clone(),
+    ))
+}
+
+pub async fn deploy_dai_erc20_behind_unsafe_proxy(
+    client: Arc<LocalWalletSignerMiddleware>
+) -> Result<DaiERC20ContractClient, Error> {
+    let token_contract = deploy_contract_behind_unsafe_proxy(client.clone(), ERC20_TOKEN, ()).await?;
+
+    Ok(DaiERC20ContractClient::new(
         token_contract.address(),
         client.clone(),
     ))
 }
+
 
 pub async fn deploy_contract_behind_unsafe_proxy<T: Tokenize>(
     client: Arc<LocalWalletSignerMiddleware>,

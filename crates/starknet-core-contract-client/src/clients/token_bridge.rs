@@ -1,39 +1,23 @@
 use std::sync::Arc;
 
 use crate::{interfaces::{
-    DaiERC20Token, StarkgateManager, StarkgateRegistry, StarknetTokenBridge
-}, LocalWalletSignerMiddleware, StarknetBridgeContractClient};
+    StarknetTokenBridge, ProxySupport
+}, LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
 
 /// Client to interact with a Token Bridge (ERC20)
 pub struct StarknetTokenBridgeContractClient {
-    manager: StarkgateManager<LocalWalletSignerMiddleware>,
-    registry: StarkgateRegistry<LocalWalletSignerMiddleware>,
     token_bridge: StarknetTokenBridge<LocalWalletSignerMiddleware>,
-    erc20_token: DaiERC20Token<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
 }
 
 impl StarknetTokenBridgeContractClient {
-    pub fn new(manager: Address, registry: Address, token_bridge: Address, dai: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+    pub fn new(address: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
         Self {
-            manager: StarkgateManager::new(manager, client.clone()),
-            registry: StarkgateRegistry::new(registry, client.clone()),
-            token_bridge: StarknetTokenBridge::new(token_bridge, client.clone()),
-            erc20_token: DaiERC20Token::new(dai, client.clone()),
+            token_bridge: StarknetTokenBridge::new(address, client.clone()),
+            proxy_support: ProxySupport::new(address, client.clone()),
         }
-    }
-}
-
-impl AsRef<StarkgateManager<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
-    fn as_ref(&self) -> &StarkgateManager<LocalWalletSignerMiddleware> {
-        &self.manager
-    }
-}
-
-impl AsRef<StarkgateRegistry<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
-    fn as_ref(&self) -> &StarkgateRegistry<LocalWalletSignerMiddleware> {
-        &self.registry
     }
 }
 
@@ -43,36 +27,18 @@ impl AsRef<StarknetTokenBridge<LocalWalletSignerMiddleware>> for StarknetTokenBr
     }
 }
 
-impl AsRef<DaiERC20Token<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
-    fn as_ref(&self) -> &DaiERC20Token<LocalWalletSignerMiddleware> {
-        &self.erc20_token
+impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
+    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
+        &self.proxy_support
     }
 }
 
-impl StarknetBridgeContractClient for StarknetTokenBridgeContractClient {
-    fn address(&self) -> Address {
+impl StarknetContractClient for StarknetTokenBridgeContractClient {
+    fn address(&self) -> ethers::abi::Address {
         self.token_bridge.address()
     }
 
-    fn manager(&self) -> Address {
-        self.manager.address()
-    }
-
-    fn registry(&self) -> Address {
-        self.registry.address()
-    }
-
-    fn token(&self) -> Address {
-        self.erc20_token.address()
-    }
-
-    fn manager_client(&self) -> Arc<LocalWalletSignerMiddleware> {
-        self.manager.client()
-    }
-    fn registry_client(&self) -> Arc<LocalWalletSignerMiddleware> { self.registry.client() }
-    fn bridge_client(&self) -> Arc<LocalWalletSignerMiddleware> {
+    fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.token_bridge.client()
     }
-
-    fn token_client(&self) -> Arc<LocalWalletSignerMiddleware> { self.erc20_token.client() }
 }
