@@ -3,7 +3,7 @@ use ethers::{
     contract::ContractError,
     prelude::abigen,
     providers::Middleware,
-    types::{TransactionReceipt, H160},
+    types::{TransactionReceipt, H160, U256},
 };
 
 use crate::Error;
@@ -29,7 +29,7 @@ pub trait StarkgateManagerTrait<M: Middleware> {
     async fn add_existing_bridge(&self, token: Address, bridge: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn deactivate_token(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn block_token(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn enroll_token_bridge(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn enroll_token_bridge(&self, token: Address, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn get_registry(&self) -> Result<Address, Error<M>>;
     async fn identify(&self) -> Result<String, Error<M>>;
 }
@@ -69,9 +69,10 @@ where
             .map_err(Into::into)
     }
 
-    async fn enroll_token_bridge(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn enroll_token_bridge(&self, token: Address, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .enroll_token_bridge(token)
+            .value(fee)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

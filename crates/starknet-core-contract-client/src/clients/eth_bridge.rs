@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{interfaces::{StarknetEthBridge, ProxySupport}, LocalWalletSignerMiddleware, StarknetContractClient};
 
-use ethers::abi::Address;
+use ethers::types::Address;
 
 /// Client to interact with a Starknet Eth Bridge
 pub struct StarknetEthBridgeContractClient {
