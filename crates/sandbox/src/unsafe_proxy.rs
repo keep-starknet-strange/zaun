@@ -81,10 +81,10 @@ pub async fn deploy_starknet_token_bridge_behind_unsafe_proxy(
 pub async fn deploy_dai_erc20_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<DaiERC20ContractClient, Error> {
-    let token_contract = deploy_contract_behind_unsafe_proxy(client.clone(), ERC20_TOKEN, ()).await?;
+    let contract = deploy_contract(client.clone(), ERC20_TOKEN, ()).await?;
 
     Ok(DaiERC20ContractClient::new(
-        token_contract.address(),
+        contract.address(),
         client.clone(),
     ))
 }
