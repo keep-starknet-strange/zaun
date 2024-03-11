@@ -10,7 +10,7 @@ mod eth_bridge;
 mod registry;
 mod manager;
 mod token_bridge;
-mod dai;
+mod dai_erc20;
 
 pub use governance::{StarknetGovernance, StarknetGovernanceTrait};
 pub use governed_finalizable::{GovernedFinalizable, GovernedFinalizableTrait};
@@ -30,4 +30,4 @@ pub use eth_bridge::{StarknetEthBridge, StarknetEthBridgeTrait};
 pub use token_bridge::{StarknetTokenBridge, StarknetTokenBridgeTrait};
 pub use manager::{StarkgateManager, StarkgateManagerTrait};
 pub use registry::{StarkgateRegistry, StarkgateRegistryTrait};
-pub use dai::{DaiERC20Token};
+pub use dai_erc20::{DaiERC20Token};

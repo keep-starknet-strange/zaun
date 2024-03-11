@@ -13,7 +13,7 @@ const STARKNET_ETH_BRIDGE: &str = include_str!("../artifacts/StarknetEthBridge.j
 const STARKGATE_MANAGER: &str = include_str!("../artifacts/StarkgateManager.json");
 const STARKGATE_REGISTRY: &str = include_str!("../artifacts/StarkgateRegistry.json");
 const STARKNET_TOKEN_BRIDGE: &str = include_str!("../artifacts/StarknetTokenBridge.json");
-const ERC20_TOKEN: &str = include_str!("../artifacts/Dai.json");
+const ERC20_TOKEN: &str = include_str!("../artifacts/DaiERC20.json");
 
 const UNSAFE_PROXY: &str = include_str!("../artifacts/UnsafeProxy.json");
 
@@ -22,7 +22,7 @@ const UNSAFE_PROXY: &str = include_str!("../artifacts/UnsafeProxy.json");
 pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
 ) -> Result<StarknetSovereignContractClient, Error> {
-    // Deploy the Starknet core contract (no explicit contructor)
+    // Deploy the Starknet Core contract (no explicit constructor)
     let core_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_SOVEREIGN, ()).await?;
 
     Ok(StarknetSovereignContractClient::new(
@@ -34,7 +34,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
 pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetEthBridgeContractClient, Error> {
-    // Deploy the Eth Bridge contract (no explicit contructor)
+    // Deploy the Eth Bridge contract (no explicit constructor)
     let eth_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_ETH_BRIDGE, ()).await?;
 
     Ok(StarknetEthBridgeContractClient::new(
@@ -46,7 +46,7 @@ pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
 pub async fn deploy_starkgate_manager_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarkgateManagerContractClient, Error> {
-    // Deploy the Starkgate Manager contract (no explicit contructor)
+    // Deploy the Starkgate Manager contract (no explicit constructor)
     let manager_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_MANAGER, ()).await?;
 
     Ok(StarkgateManagerContractClient::new(
@@ -58,7 +58,7 @@ pub async fn deploy_starkgate_manager_behind_unsafe_proxy(
 pub async fn deploy_starkgate_registry_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarkgateRegistryContractClient, Error> {
-    // Deploy the Starkgate Registry contract (no explicit contructor)
+    // Deploy the Starkgate Registry contract (no explicit constructor)
     let registry_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_REGISTRY, ()).await?;
 
     Ok(StarkgateRegistryContractClient::new(
@@ -70,6 +70,7 @@ pub async fn deploy_starkgate_registry_behind_unsafe_proxy(
 pub async fn deploy_starknet_token_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetTokenBridgeContractClient, Error> {
+    // Deploy the Starknet Token Bridge contract (no explicit constructor)
     let token_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_TOKEN_BRIDGE, ()).await?;
 
     Ok(StarknetTokenBridgeContractClient::new(
@@ -81,7 +82,8 @@ pub async fn deploy_starknet_token_bridge_behind_unsafe_proxy(
 pub async fn deploy_dai_erc20_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<DaiERC20ContractClient, Error> {
-    let contract = deploy_contract(client.clone(), ERC20_TOKEN, ()).await?;
+    // Deploy the Dai ERC20 Token contract (no explicit constructor)
+    let contract = deploy_contract_behind_unsafe_proxy(client.clone(), ERC20_TOKEN, ()).await?;
 
     Ok(DaiERC20ContractClient::new(
         contract.address(),
