@@ -4,6 +4,8 @@ use ethers::{
     providers::Middleware,
     types::{Address, U256},
 };
+use ethers::contract::ContractError;
+use ethers::prelude::TransactionReceipt;
 
 use crate::Error;
 
@@ -75,10 +77,22 @@ impl<T, M: Middleware> DaiERC20TokenTrait<M> for T
     }
 
     async fn approve(&self, address: Address, value: U256) -> Result<bool, Error<M>> {
-        self.as_ref()
+        let txn: Result<Option<TransactionReceipt>, Error<M>> = self.as_ref()
             .approve(address, value)
-            .call()
+            .send()
             .await
-            .map_err(Into::into)
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into);
+
+        match txn {
+            Ok(receipt) => {
+                if let Some(_) = receipt {
+                    return Ok(true)
+                }
+                Ok(false)
+            },
+            Err(err) => Err(err)
+        }
     }
 }
