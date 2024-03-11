@@ -4,7 +4,6 @@ use ethers::{
     providers::Middleware,
     types::{Address, U256},
 };
-use ethers::contract::ContractError;
 
 use crate::Error;
 

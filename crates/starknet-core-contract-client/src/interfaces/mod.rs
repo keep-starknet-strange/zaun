@@ -30,4 +30,4 @@ pub use eth_bridge::{StarknetEthBridge, StarknetEthBridgeTrait};
 pub use token_bridge::{StarknetTokenBridge, StarknetTokenBridgeTrait};
 pub use manager::{StarkgateManager, StarkgateManagerTrait};
 pub use registry::{StarkgateRegistry, StarkgateRegistryTrait};
-pub use dai_erc20::{DaiERC20Token};
+pub use dai_erc20::{DaiERC20Token, DaiERC20TokenTrait};

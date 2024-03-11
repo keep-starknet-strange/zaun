@@ -5,7 +5,6 @@ use crate::{interfaces::{
 }, LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
-use crate::clients::StarknetEthBridgeContractClient;
 
 pub struct DaiERC20ContractClient {
     erc20_token: DaiERC20Token<LocalWalletSignerMiddleware>,
