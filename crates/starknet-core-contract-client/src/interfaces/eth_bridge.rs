@@ -1,3 +1,4 @@
+use std::ops::Add;
 use async_trait::async_trait;
 use ethers::{
     contract::ContractError,
@@ -5,8 +6,11 @@ use ethers::{
     providers::Middleware,
     types::{TransactionReceipt, U256},
 };
+use ethers::prelude::H160;
 
 use crate::Error;
+
+type Address = H160;
 
 abigen!(
     StarknetEthBridge,
@@ -27,7 +31,8 @@ pub trait StarknetEthBridgeTrait<M: Middleware> {
     async fn set_max_total_balance(&self, max_total_balance: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_max_deposit(&self, max_deposit: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_l2_token_bridge(&self, l2_token_bridge: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn deposit(&self, amount: U256, l2recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn deposit(&self, amount: U256, l2_recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn withdraw(&self, amount: U256, l1_recipient: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn identify(&self) -> Result<String, Error<M>>;
 }
 
@@ -66,10 +71,21 @@ impl<T, M: Middleware> StarknetEthBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn deposit(&self, amount: U256, l2recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn deposit(&self, amount: U256, l2_recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .deposit(amount, l2recipient)
+            .deposit(amount, l2_recipient)
             .value(fee)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+
+    }
+
+    async fn withdraw(&self, amount: U256, l1_recipient: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .withdraw(amount, l1_recipient)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
