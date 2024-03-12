@@ -16,6 +16,7 @@ abigen!(
         function setL2TokenBridge(uint256 l2TokenBridge_) external onlyGovernance
 
         function deposit(uint256 amount, uint256 l2Recipient) public payable override
+        function withdraw(uint256 amount, address recipient) public
 
         function identify() external pure override returns (string memory)
     ]"#,

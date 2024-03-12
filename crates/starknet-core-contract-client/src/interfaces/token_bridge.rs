@@ -19,7 +19,7 @@ abigen!(
         function disableWithdrawalLimit(address token) external onlySecurityAdmin
         function setMaxTotalBalance(address token, uint256 maxTotalBalance_) external onlyAppGovernor
 
-        function withdraw(address token, uint256 amount) external
+        function withdraw(address token, uint256 amount, address recipient) public
         function registerAppGovernor(address account) external
         function registerAppRoleAdmin(address account) external
         function registerGovernanceAdmin(address account) external
@@ -47,7 +47,7 @@ pub trait StarknetTokenBridgeTrait<M: Middleware> {
     async fn enable_withdrawal_limit(&self, address: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn disable_withdrawal_limit(&self, address: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_max_total_balance(&self, token: Address, max_total_balance: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn withdraw(&self, token: Address, amount: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn withdraw(&self, token: Address, amount: U256, recipient: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn register_app_governor(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn register_app_role_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn register_governance_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
@@ -122,9 +122,9 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn withdraw(&self, token: Address, amount: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn withdraw(&self, token: Address, amount: U256, recipient: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .withdraw(token, amount)
+            .withdraw(token, amount, recipient)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
