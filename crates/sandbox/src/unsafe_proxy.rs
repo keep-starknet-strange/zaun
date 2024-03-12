@@ -83,7 +83,7 @@ pub async fn deploy_dai_erc20_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<DaiERC20ContractClient, Error> {
     // Deploy the Dai ERC20 Token contract (no explicit constructor)
-    let contract = deploy_contract_behind_unsafe_proxy(client.clone(), ERC20_TOKEN, ()).await?;
+    let contract = deploy_contract(client.clone(), ERC20_TOKEN, ()).await?;
 
     Ok(DaiERC20ContractClient::new(
         contract.address(),
