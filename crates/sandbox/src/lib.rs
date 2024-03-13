@@ -15,7 +15,7 @@ use std::time::Duration;
 /// that is used to make Starknet core contract upgradeable.
 /// This implementation DOES NOT restrict who can invoke the core contract.
 /// For more information see https://l2beat.com/scaling/projects/starknet#contracts
-pub mod unsafe_proxy;
+pub mod deploy;
 
 /// Ethers library allows multiple signer backends and transports.
 /// For simplicity we use local wallet (basically private key) and
@@ -28,6 +28,8 @@ const ANVIL_DEFAULT_ENDPOINT: &str = "http://127.0.0.1:8545";
 const ANVIL_DEFAULT_CHAIN_ID: u64 = 31337;
 const ANVIL_DEFAULT_PRIVATE_KEY: &str =
     "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+
+const UNSAFE_PROXY: &str = include_str!("../artifacts/UnsafeProxy.json");
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -160,4 +162,20 @@ pub async fn deploy_contract<T: Tokenize>(
         .send()
         .await
         .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?)
+}
+
+/// Deploys new unsafe proxy contract:
+///     - Implementation can be set only once at initialization
+///     - Traditional (Safe) proxies can be upgraded multiple times
+pub async fn deploy_contract_behind_unsafe_proxy<T: Tokenize>(
+    client: Arc<LocalWalletSignerMiddleware>,
+    contract_path: &str,
+    constructor_args: T,
+) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error> {
+    let contract = deploy_contract(client.clone(), contract_path, constructor_args).await?;
+
+    let proxy_contract =
+        deploy_contract(client.clone(), UNSAFE_PROXY, contract.address()).await?;
+
+    return Ok(proxy_contract);
 }

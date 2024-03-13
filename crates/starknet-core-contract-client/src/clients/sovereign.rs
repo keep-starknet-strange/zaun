@@ -5,7 +5,7 @@ use crate::{
         GovernedFinalizable, Operator, ProxySupport, StarknetGovernance, StarknetMessaging,
         StarknetSovereignContract,
     },
-    LocalWalletSignerMiddleware, StarknetCoreContractClient,
+    LocalWalletSignerMiddleware, StarknetContractClient,
 };
 use ethers::types::Address;
 
@@ -65,7 +65,7 @@ impl AsRef<GovernedFinalizable<LocalWalletSignerMiddleware>> for StarknetSoverei
     }
 }
 
-impl StarknetCoreContractClient for StarknetSovereignContractClient {
+impl StarknetContractClient for StarknetSovereignContractClient {
     fn address(&self) -> Address {
         self.core_contract.address()
     }

@@ -13,7 +13,7 @@ use ethers::types::Address;
 
 pub type LocalWalletSignerMiddleware = SignerMiddleware<Provider<Http>, LocalWallet>;
 
-pub trait StarknetCoreContractClient {
+pub trait StarknetContractClient {
     fn address(&self) -> Address;
     fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
 }
