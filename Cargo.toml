@@ -20,6 +20,18 @@ async-trait = "0.1.74"
 dirs = "5.0.1"
 serde_json = "1.0.108"
 hex = "0.4.3"
+alloy = { git = "https://github.com/alloy-rs/alloy", rev = "66fa192", features = [
+    "network",
+    "providers",
+    "rpc-types-eth",
+    "sol-types",
+] }
 
-
-
+[patch.crates-io]
+alloy-core = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
+alloy-dyn-abi = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
+alloy-json-abi = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
+alloy-primitives = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
+alloy-sol-macro = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
+alloy-sol-types = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
+syn-solidity = { git = "https://github.com/alloy-rs/core", rev = "525a233" }
