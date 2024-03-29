@@ -1,65 +1,69 @@
 use async_trait::async_trait;
-use ethers::{
-    contract::ContractError,
-    prelude::abigen,
-    providers::Middleware,
-    types::{Address, TransactionReceipt},
-};
 
 use crate::Error;
 
-abigen!(
-    Operator,
-    r#"[
-        function registerOperator(address newOperator) external override onlyGovernance
-        function unregisterOperator(address removedOperator) external override onlyGovernance
+use alloy::{
+    network::Ethereum,
+    primitives::Address,
+    providers::Provider,
+    rpc::types::eth::TransactionReceipt,
+    sol,
+    sol_types::ContractError,
+};
 
-        function isOperator(address user) public view override returns (bool)
-    ]"#,
+sol!(
+    #[allow(missing_docs)]
+    #[sol(rpc)]
+    interface Operator {
+        function registerOperator(address newOperator) external override onlyGovernance;
+        function unregisterOperator(address removedOperator) external override onlyGovernance;
+
+        function isOperator(address user) public view override returns (bool);
+    }
 );
 
 #[async_trait]
-pub trait OperatorTrait<M: Middleware> {
+pub trait OperatorTrait<P: Provider<Ethereum>> {
     async fn register_operator(
         &self,
         new_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<P>>;
     async fn unregister_operator(
         &self,
         removed_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn is_operator(&self, user: Address) -> Result<bool, Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    async fn is_operator(&self, user: Address) -> Result<bool, Error<P>>;
 }
 #[async_trait]
-impl<T, M: Middleware> OperatorTrait<M> for T
+impl<T, P: Provider<Ethereum>> OperatorTrait<P> for T
 where
-    T: AsRef<Operator<M>> + Send + Sync,
+    T: AsRef<Operator::OperatorInstance<Ethereum, T, P>> + Send + Sync,
 {
     async fn register_operator(
         &self,
         new_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .register_operator(new_operator)
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
     async fn unregister_operator(
         &self,
         removed_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .unregister_operator(removed_operator)
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
-    async fn is_operator(&self, user: Address) -> Result<bool, Error<M>> {
+    async fn is_operator(&self, user: Address) -> Result<bool, Error<P>> {
         self.as_ref()
             .is_operator(user)
             .call()

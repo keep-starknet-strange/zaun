@@ -1,47 +1,49 @@
 use async_trait::async_trait;
-use ethers::{
-    contract::ContractError,
-    prelude::abigen,
-    providers::Middleware,
-    types::{TransactionReceipt, H160},
-};
 
 use crate::Error;
 
-type Adress = H160;
+use alloy::{
+    primitives::Address,
+    network::Ethereum,
+    providers::Provider,
+    rpc::types::eth::TransactionReceipt,
+    sol,
+    sol_types::ContractError,
+};
 
-abigen!(
-    StarknetGovernance,
-    r#"[
-        function starknetIsGovernor(address user) external view returns (bool)
-        function starknetNominateNewGovernor(address newGovernor) external
-        function starknetRemoveGovernor(address governorForRemoval) external
-        function starknetAcceptGovernance() external
-        function starknetCancelNomination() external
-    ]"#,
+sol!(
+    #[allow(missing_docs)]
+    #[sol(rpc)]
+    interface StarknetGovernance {
+        function starknetIsGovernor(address user) external view returns (bool);
+        function starknetNominateNewGovernor(address newGovernor) external;
+        function starknetRemoveGovernor(address governorForRemoval) external;
+        function starknetAcceptGovernance() external;
+        function starknetCancelNomination() external;
+    }
 );
 
 #[async_trait]
-pub trait StarknetGovernanceTrait<M: Middleware> {
-    async fn starknet_is_governor(&self, user: Adress) -> Result<bool, Error<M>>;
+pub trait StarknetGovernanceTrait<P: Provider<Ethereum>> {
+    async fn starknet_is_governor(&self, user: Address) -> Result<bool, Error<P>>;
     async fn starknet_nominate_new_governor(
         &self,
-        new_governor: Adress,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+        new_governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<P>>;
     async fn starknet_remove_governor(
         &self,
-        governor_for_removal: Adress,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn starknet_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn starknet_cancel_nomination(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
+        governor_for_removal: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    async fn starknet_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<P>>;
+    async fn starknet_cancel_nomination(&self) -> Result<Option<TransactionReceipt>, Error<P>>;
 }
 
 #[async_trait]
-impl<T, M: Middleware> StarknetGovernanceTrait<M> for T
+impl<T, P: Provider<Ethereum>> StarknetGovernanceTrait<P> for T
 where
-    T: AsRef<StarknetGovernance<M>> + Send + Sync,
+    T: AsRef<StarknetGovernance::StarknetGovernanceInstance<Ethereum, T, P>> + Send + Sync,
 {
-    async fn starknet_is_governor(&self, user: Adress) -> Result<bool, Error<M>> {
+    async fn starknet_is_governor(&self, user: Address) -> Result<bool, Error<P>> {
         self.as_ref()
             .starknet_is_governor(user)
             .call()
@@ -51,46 +53,46 @@ where
 
     async fn starknet_nominate_new_governor(
         &self,
-        new_governor: Adress,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        new_governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .starknet_nominate_new_governor(new_governor)
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
 
     async fn starknet_remove_governor(
         &self,
-        governor_for_removal: Adress,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        governor_for_removal: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .starknet_remove_governor(governor_for_removal)
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
 
-    async fn starknet_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn starknet_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .starknet_accept_governance()
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
 
-    async fn starknet_cancel_nomination(&self) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn starknet_cancel_nomination(&self) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .starknet_cancel_nomination()
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }

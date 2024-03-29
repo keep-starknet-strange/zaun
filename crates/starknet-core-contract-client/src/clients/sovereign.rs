@@ -7,16 +7,19 @@ use crate::{
     },
     LocalWalletSignerMiddleware, StarknetCoreContractClient,
 };
-use ethers::types::Address;
-
+use alloy::{
+    primitives::Address,
+    network::Ethereum,
+    transports::http::Http
+};
 /// Client to interact with a Starknet core contract running in `Sovereign` mode
 pub struct StarknetSovereignContractClient {
-    core_contract: StarknetSovereignContract<LocalWalletSignerMiddleware>,
-    messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
-    operator: Operator<LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
-    governance: StarknetGovernance<LocalWalletSignerMiddleware>,
-    governed_finalizable: GovernedFinalizable<LocalWalletSignerMiddleware>,
+    core_contract: StarknetSovereignContract::StarknetSovereignContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
+    messaging: StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
+    operator: Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
+    governance: StarknetGovernance::StarknetGovernanceInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
+    governed_finalizable: GovernedFinalizable::GovernedFinalizableInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
 }
 
 impl StarknetSovereignContractClient {
@@ -32,35 +35,35 @@ impl StarknetSovereignContractClient {
     }
 }
 
-impl AsRef<StarknetSovereignContract<LocalWalletSignerMiddleware>>
+impl AsRef<StarknetSovereignContract::StarknetSovereignContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>>
     for StarknetSovereignContractClient
 {
-    fn as_ref(&self) -> &StarknetSovereignContract<LocalWalletSignerMiddleware> {
+    fn as_ref(&self) -> &StarknetSovereignContract::StarknetSovereignContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.core_contract
     }
 }
-impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
-    fn as_ref(&self) -> &StarknetMessaging<LocalWalletSignerMiddleware> {
+impl AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.messaging
     }
 }
-impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
-    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }
-impl AsRef<Operator<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
-    fn as_ref(&self) -> &Operator<LocalWalletSignerMiddleware> {
+impl AsRef<Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.operator
     }
 }
-impl AsRef<StarknetGovernance<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
-    fn as_ref(&self) -> &StarknetGovernance<LocalWalletSignerMiddleware> {
+impl AsRef<StarknetGovernance::StarknetGovernanceInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &StarknetGovernance::StarknetGovernanceInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.governance
     }
 }
-impl AsRef<GovernedFinalizable<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
-    fn as_ref(&self) -> &GovernedFinalizable<LocalWalletSignerMiddleware> {
+impl AsRef<GovernedFinalizable::GovernedFinalizableInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &GovernedFinalizable::GovernedFinalizableInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.governed_finalizable
     }
 }

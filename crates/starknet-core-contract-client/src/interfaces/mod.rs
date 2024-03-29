@@ -10,10 +10,9 @@ mod validity_core_contract;
 pub use governance::{StarknetGovernance, StarknetGovernanceTrait};
 pub use governed_finalizable::{GovernedFinalizable, GovernedFinalizableTrait};
 pub use messaging::{StarknetMessaging, StarknetMessagingTrait};
-pub use messaging_events::{
-    ConsumedMessageToL1Filter, ConsumedMessageToL2Filter, LogMessageToL1Filter,
-    LogMessageToL2Filter, MessageToL2CanceledFilter, MessageToL2CancellationStartedFilter,
-    StarknetMessagingEvents,
+pub use messaging_events::StarknetMessagingEvents::{
+    ConsumedMessageToL1, ConsumedMessageToL2, LogMessageToL1, LogMessageToL2, 
+    MessageToL2Canceled, MessageToL2CancellationStarted, StarknetMessagingEventsInstance,
 };
 pub use operator::{Operator, OperatorTrait};
 pub use proxy_support::{

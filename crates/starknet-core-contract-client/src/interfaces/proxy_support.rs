@@ -1,47 +1,50 @@
 use async_trait::async_trait;
-use ethers::{
-    abi::AbiEncode,
-    contract::{ContractError, EthAbiCodec, EthAbiType},
-    prelude::abigen,
-    providers::Middleware,
-    types::{Address, Bytes, TransactionReceipt, I256, U256},
-};
 
 use crate::Error;
 
-abigen!(
-    ProxySupport,
-    r#"[
-        function isFrozen() external view virtual returns (bool)
-        function initialize(bytes calldata data) external notCalledDirectly
-    ]"#,
+use alloy::{
+    primitives::{Address, Bytes, U256, I256},
+    network::Ethereum,
+    providers::Provider,
+    rpc::types::eth::TransactionReceipt,
+    sol,
+    sol_types::ContractError,
+};
+
+sol!(
+    #[allow(missing_docs)]
+    #[sol(rpc)]
+    interface ProxySupport {
+        function isFrozen() external view virtual returns (bool);
+        function initialize(bytes calldata data) external notCalledDirectly;
+    }
 );
 
 #[async_trait]
-pub trait ProxySupportTrait<M: Middleware> {
-    async fn is_frozen(&self) -> Result<bool, Error<M>>;
-    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
+pub trait ProxySupportTrait<P: Provider<Ethereum>> {
+    async fn is_frozen(&self) -> Result<bool, Error<P>>;
+    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<P>>;
     async fn initialize_with<const N: usize>(
         &self,
         data: ProxyInitializeData<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<Option<TransactionReceipt>, Error<P>>;
 }
 
 #[async_trait]
-impl<T, M: Middleware> ProxySupportTrait<M> for T
+impl<T, P: Provider<Ethereum>> ProxySupportTrait<P> for T
 where
-    T: AsRef<ProxySupport<M>> + Send + Sync,
+    T: AsRef<ProxySupport::ProxySupportInstance<Ethereum, T, P>> + Send + Sync,
 {
-    async fn is_frozen(&self) -> Result<bool, Error<M>> {
+    async fn is_frozen(&self) -> Result<bool, Error<P>> {
         self.as_ref().is_frozen().call().await.map_err(Into::into)
     }
 
-    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.as_ref()
             .initialize(data)
             .send()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
+            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -49,19 +52,19 @@ where
     async fn initialize_with<const N: usize>(
         &self,
         data: ProxyInitializeData<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+    ) -> Result<Option<TransactionReceipt>, Error<P>> {
         self.initialize(data.into()).await
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct CoreContractState {
     pub state_root: U256,
     pub block_number: I256,
     pub block_hash: U256,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct CoreContractInitData {
     pub program_hash: U256,
     pub verifier_address: Address,
