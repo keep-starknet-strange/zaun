@@ -64,7 +64,7 @@ pub trait StarknetValidityContractTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> StarknetValidityContractTrait<P> for T
 where
-    T: AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<StarknetValidityContract> + Send + Sync,
 {
     async fn set_program_hash(
         &self,
