@@ -6,12 +6,14 @@ use std::sync::Arc;
 
 pub use error::Error;
 
-use ethers::prelude::SignerMiddleware;
-use ethers::providers::{Http, Provider};
-use ethers::signers::LocalWallet;
-use ethers::types::Address;
+use alloy::{
+    primitives::Address,
+    network::{Ethereum, EthereumSigner},
+    providers::{layers::SignerProvider, RootProvider},
+    transports::http::Http
+};
 
-pub type LocalWalletSignerMiddleware = SignerMiddleware<Provider<Http>, LocalWallet>;
+pub type LocalWalletSignerMiddleware = SignerProvider<Ethereum, Http<reqwest::Client>, RootProvider<Ethereum, Http<reqwest::Client>>, EthereumSigner>;
 
 pub trait StarknetCoreContractClient {
     fn address(&self) -> Address;

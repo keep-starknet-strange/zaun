@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use ethers::abi::Address;
+use alloy::{
+    primitives::Address,
+    network::Ethereum,
+    transports::http::Http
+};
 
 use crate::{
     interfaces::{Operator, ProxySupport, StarknetMessaging, StarknetValidityContract},
@@ -9,7 +13,7 @@ use crate::{
 
 /// Client to interact with a Starknet core contract running in `Validity` mode
 pub struct StarknetValidityContractClient {
-    core_contract: StarknetValidityContract<LocalWalletSignerMiddleware>,
+    core_contract: StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
     messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
     operator: Operator<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
@@ -18,7 +22,7 @@ pub struct StarknetValidityContractClient {
 impl StarknetValidityContractClient {
     pub fn new(address: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
         Self {
-            core_contract: StarknetValidityContract::new(address, client.clone()),
+            core_contract: StarknetValidityContract::StarknetValidityContractInstance::new(address, client.clone()),
             messaging: StarknetMessaging::new(address, client.clone()),
             operator: Operator::new(address, client.clone()),
             proxy_support: ProxySupport::new(address, client),
@@ -26,10 +30,10 @@ impl StarknetValidityContractClient {
     }
 }
 
-impl AsRef<StarknetValidityContract<LocalWalletSignerMiddleware>>
+impl AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>>
     for StarknetValidityContractClient
 {
-    fn as_ref(&self) -> &StarknetValidityContract<LocalWalletSignerMiddleware> {
+    fn as_ref(&self) -> &StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
         &self.core_contract
     }
 }

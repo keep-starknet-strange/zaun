@@ -25,7 +25,14 @@ alloy = { git = "https://github.com/alloy-rs/alloy", rev = "66fa192", features =
     "providers",
     "rpc-types-eth",
     "sol-types",
+    "contract",
+    "rpc",
+    "rpc-client",
+    "signers",
+    "signer-wallet",
+    "transport-http",
 ] }
+reqwest = { version = "0.11.22", default-features = false }
 
 [patch.crates-io]
 alloy-core = { git = "https://github.com/alloy-rs/core", rev = "525a233" }

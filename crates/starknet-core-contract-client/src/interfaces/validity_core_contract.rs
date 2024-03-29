@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use ethers::middleware::Middleware;
 
 use crate::Error;
 
@@ -14,6 +13,7 @@ use alloy::{
 
 sol!(
     #[allow(missing_docs)]
+    #[sol(rpc)]
     interface StarknetValidityContract {
         function setProgramHash(uint256 newProgramHash) external notFinalized onlyGovernance;
         function setConfigHash(uint256 newConfigHash) external notFinalized onlyGovernance;
@@ -59,13 +59,13 @@ pub trait StarknetValidityContractTrait<P: Provider<Ethereum>> {
         program_output: Vec<U256>,
         onchain_data_hash: U256,
         onchain_data_size: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    ) -> Result<Option<TransactionReceipt>, Error<P>>; 
 }
 
 #[async_trait]
 impl<T, P: Provider<Ethereum>> StarknetValidityContractTrait<P> for T
 where
-    T: AsRef<StarknetValidityContract<P>> + Send + Sync,
+    T: AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, T, P>> + Send + Sync,
 {
     async fn set_program_hash(
         &self,
