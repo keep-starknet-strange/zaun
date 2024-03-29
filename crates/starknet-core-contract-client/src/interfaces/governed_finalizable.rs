@@ -7,7 +7,6 @@ use alloy::{
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
     sol,
-    sol_types::ContractError,
 };
 
 sol!(

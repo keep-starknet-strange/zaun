@@ -5,7 +5,7 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-ethers = { workspace = true }
+#ethers = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
 num-traits = { workspace = true }

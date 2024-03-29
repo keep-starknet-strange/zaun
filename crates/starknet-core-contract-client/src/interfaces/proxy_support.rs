@@ -3,7 +3,12 @@ use async_trait::async_trait;
 use crate::Error;
 
 use alloy::{
-    network::Ethereum, primitives::{Address, Bytes, I256, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, sol_types::{ContractError, SolValue}
+    network::Ethereum,
+    primitives::{Address, Bytes, I256, U256},
+    providers::Provider,
+    rpc::types::eth::TransactionReceipt,
+    sol,
+    sol_types::SolValue
 };
 
 sol!(

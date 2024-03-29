@@ -21,7 +21,7 @@ pub struct StarknetValidityContractClient {
 
 impl StarknetValidityContractClient {
     pub fn new(address: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
-        // let client = *client;
+        let client = client.clone();
         Self {
             core_contract: StarknetValidityContract::StarknetValidityContractInstance::new(address, client),
             messaging: StarknetMessaging::StarknetMessagingInstance::new(address, client),

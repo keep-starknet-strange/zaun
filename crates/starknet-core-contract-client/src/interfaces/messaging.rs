@@ -8,7 +8,6 @@ use alloy::{
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
     sol,
-    sol_types::ContractError,
 };
 
 type MessageHash = [u8; 32];

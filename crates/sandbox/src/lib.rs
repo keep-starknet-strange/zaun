@@ -1,12 +1,20 @@
-use ethers::abi::Tokenize;
-use ethers::contract::ContractError;
-use ethers::prelude::SignerMiddleware;
+// use ethers::abi::Tokenize;
+use url::Url;
+use alloy::{
+    primitives::Bytes,
+    hex::FromHex,
+    sol_types::SolCall::Tokenize,
+    sol_types::ContractError,
+    network::{Ethereum, EthereumSigner},
+    providers::{layers::SignerProvider, ProviderBuilder, RootProvider},
+    rpc::client::RpcClient,
+    signers::wallet::LocalWallet,
+    transports::RpcError,
+    node_bindings::{Anvil, AnvilInstance},
+};
+
 use ethers::prelude::{ContractFactory, ContractInstance};
-use ethers::providers::{Http, Provider, ProviderError};
-use ethers::signers::{LocalWallet, Signer};
-use ethers::types::Bytes;
-use ethers::utils::hex::FromHex;
-use ethers::utils::{Anvil, AnvilInstance};
+
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -42,7 +50,7 @@ pub enum Error {
     #[error(transparent)]
     EthersContract(#[from] ContractError<LocalWalletSignerMiddleware>),
     #[error(transparent)]
-    EthersProvider(#[from] ProviderError),
+    EthersProvider(#[from] RpcError),
     #[error("Invalid contract build artifacts: missing field `{0}`")]
     ContractBuildArtifacts(&'static str),
 }
@@ -71,21 +79,16 @@ impl EthereumSandbox {
                 .unwrap_or_else(|| ANVIL_DEFAULT_ENDPOINT.into())
         });
 
-        let provider = Provider::<Http>::try_from(anvil_endpoint)
-            .map_err(|_| Error::UrlParser)?
-            .interval(Duration::from_millis(POLLING_INTERVAL_MS));
-
-        let wallet: LocalWallet = ANVIL_DEFAULT_PRIVATE_KEY
-            .parse()
-            .expect("Failed to parse private key");
-        let client = SignerMiddleware::new(
-            provider.clone(),
-            wallet.with_chain_id(ANVIL_DEFAULT_CHAIN_ID),
-        );
+        let wallet: LocalWallet = ANVIL_DEFAULT_PRIVATE_KEY.try_into().expect("Failed to parse private key");
+        let rpc_client = RpcClient::new_http(Url::parse(&anvil_endpoint).map_err(Error::ProviderUrlParse)?);
+        let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
+            .signer(EthereumSigner::from(wallet::with_chain_id(ANVIL_DEFAULT_CHAIN_ID)))
+            .network::<Ethereum>()
+            .provider(RootProvider::new(rpc_client));
 
         Ok(Self {
             _anvil: None,
-            client: Arc::new(client),
+            client: Arc::new(provider_with_signer),
         })
     }
 
@@ -103,19 +106,19 @@ impl EthereumSandbox {
         });
 
         // Will panic if invalid path
-        let anvil = Anvil::at(anvil_path).spawn();
+        // let anvil = Anvil::at(anvil_path).spawn();
+        let anvil = Anvil::path(self, anvil_path).spawn();
 
-        let provider = Provider::<Http>::try_from(anvil.endpoint())
-            .expect("Failed to connect to Anvil")
-            .interval(Duration::from_millis(POLLING_INTERVAL_MS));
-
-        let wallet: LocalWallet = anvil.keys()[0].clone().into();
-        let client =
-            SignerMiddleware::new(provider.clone(), wallet.with_chain_id(anvil.chain_id()));
+        let wallet: LocalWallet = anvil.keys()[0].clone().try_into().expect("Failed to parse private key");
+        let rpc_client = RpcClient::new_http(Url::parse(&anvil.endpoint()).map_err(RpcError)?);
+        let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
+            .signer(EthereumSigner::from(wallet::with_chain_id(anvil.chain_id())))
+            .network::<Ethereum>()
+            .provider(RootProvider::new(rpc_client));
 
         Self {
             _anvil: Some(anvil),
-            client: Arc::new(client),
+            client: Arc::new(provider_with_signer),
         }
     }
 
