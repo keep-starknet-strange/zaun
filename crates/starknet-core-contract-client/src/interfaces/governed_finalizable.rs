@@ -31,19 +31,15 @@ where
     T: AsRef<GovernedFinalizable::GovernedFinalizableInstance<Ethereum, T, P>> + Send + Sync,
 {
     async fn is_finalized(&self) -> Result<bool, Error<P>> {
-        self.as_ref()
+        self
             .is_finalized()
-            .call()
             .await
             .map_err(Into::into)
     }
 
     async fn finalize(&self) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .finalize()
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }

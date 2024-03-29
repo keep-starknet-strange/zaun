@@ -3,12 +3,7 @@ use async_trait::async_trait;
 use crate::Error;
 
 use alloy::{
-    primitives::{Address, Bytes, U256, I256},
-    network::Ethereum,
-    providers::Provider,
-    rpc::types::eth::TransactionReceipt,
-    sol,
-    sol_types::ContractError,
+    network::Ethereum, primitives::{Address, Bytes, I256, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, sol_types::{ContractError, SolValue}
 };
 
 sol!(
@@ -36,15 +31,12 @@ where
     T: AsRef<ProxySupport::ProxySupportInstance<Ethereum, T, P>> + Send + Sync,
 {
     async fn is_frozen(&self) -> Result<bool, Error<P>> {
-        self.as_ref().is_frozen().call().await.map_err(Into::into)
+        self.is_frozen().await.map_err(Into::into)
     }
 
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .initialize(data)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -82,9 +74,14 @@ pub struct ProxyInitializeData<const N: usize> {
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     fn into(self) -> Vec<u8> {
         [
-            self.sub_contract_addresses.encode(),
-            self.eic_address.encode(),
-            self.init_data.encode(),
+            self.sub_contract_addresses.abi_encode(),
+            self.eic_address.abi_encode(),
+            self.init_data.program_hash.abi_encode(),
+            self.init_data.verifier_address.abi_encode(),
+            self.init_data.config_hash.abi_encode(),
+            self.init_data.initial_state.state_root.abi_encode(),
+            self.init_data.initial_state.block_number.abi_encode(),
+            self.init_data.initial_state.block_hash.abi_encode(),
         ]
         .concat()
     }

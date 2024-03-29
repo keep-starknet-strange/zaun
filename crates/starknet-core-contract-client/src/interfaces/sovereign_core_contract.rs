@@ -69,11 +69,8 @@ where
         &self,
         new_program_hash: U256,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .set_program_hash(new_program_hash)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -82,11 +79,8 @@ where
         &self,
         new_config_hash: U256,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .set_config_hash(new_config_hash)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -95,47 +89,41 @@ where
         &self,
         delay_in_seconds: U256,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .set_message_cancellation_delay(delay_in_seconds)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
 
     async fn program_hash(&self) -> Result<U256, Error<P>> {
-        self.as_ref()
+        self
             .program_hash()
-            .call()
             .await
             .map_err(Into::into)
     }
 
     async fn config_hash(&self) -> Result<U256, Error<P>> {
-        self.as_ref().config_hash().call().await.map_err(Into::into)
+        self.config_hash().await.map_err(Into::into)
     }
 
     async fn identify(&self) -> Result<String, Error<P>> {
-        self.as_ref().identify().call().await.map_err(Into::into)
+        self.identify().await.map_err(Into::into)
     }
 
     async fn state_root(&self) -> Result<U256, Error<P>> {
-        self.as_ref().state_root().call().await.map_err(Into::into)
+        self.state_root().await.map_err(Into::into)
     }
 
     async fn state_block_number(&self) -> Result<I256, Error<P>> {
-        self.as_ref()
+        self
             .state_block_number()
-            .call()
             .await
             .map_err(Into::into)
     }
 
     async fn state_block_hash(&self) -> Result<U256, Error<P>> {
-        self.as_ref()
+        self
             .state_block_hash()
-            .call()
             .await
             .map_err(Into::into)
     }
@@ -144,11 +132,8 @@ where
         &self,
         program_output: Vec<U256>,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .update_state(program_output)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }

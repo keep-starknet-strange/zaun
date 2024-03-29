@@ -43,11 +43,8 @@ where
         &self,
         new_operator: Address,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .register_operator(new_operator)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -55,18 +52,14 @@ where
         &self,
         removed_operator: Address,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .unregister_operator(removed_operator)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
     async fn is_operator(&self, user: Address) -> Result<bool, Error<P>> {
-        self.as_ref()
+        self
             .is_operator(user)
-            .call()
             .await
             .map_err(Into::into)
     }

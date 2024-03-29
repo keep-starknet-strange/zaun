@@ -65,17 +65,15 @@ where
     T: AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, T, P>> + Send + Sync,
 {
     async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>> {
-        self.as_ref()
-            .l_1_to_l2_messages(msg_hash)
-            .call()
+        self
+            .l1_to_l2_messages(msg_hash)
             .await
             .map_err(Into::into)
     }
 
     async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>> {
-        self.as_ref()
-            .l_2_to_l1_messages(msg_hash)
-            .call()
+        self
+            .l2_to_l1_messages(msg_hash)
             .await
             .map_err(Into::into)
     }
@@ -84,9 +82,8 @@ where
         &self,
         msg_hash: MessageHash,
     ) -> Result<U256, Error<P>> {
-        self.as_ref()
-            .l_1_to_l2_message_cancellations(msg_hash)
-            .call()
+        self
+            .l1_to_l2_message_cancellations(msg_hash)
             .await
             .map_err(Into::into)
     }
@@ -98,12 +95,8 @@ where
         payload: Vec<U256>,
         fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
-            .send_message_to_l2(to_address, selector, payload)
-            .value(fee) // L1 message fee must be between 0 and 1 ether
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
+        self
+            .send_message_to_l2(to_address, selector, payload, fee)
             .await
             .map_err(Into::into)
     }
@@ -115,11 +108,8 @@ where
         payload: Vec<U256>,
         nonce: U256,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .start_l1_to_l2_message_cancellation(to_address, selector, payload, nonce)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }
@@ -131,11 +121,8 @@ where
         payload: Vec<U256>,
         nonce: U256,
     ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.as_ref()
+        self
             .cancel_l1_to_l2_message(to_address, selector, payload, nonce)
-            .send()
-            .await
-            .map_err(Into::<ContractError<P>>::into)?
             .await
             .map_err(Into::into)
     }

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use alloy::{
     primitives::Address,
     network::Ethereum,
-    transports::http::Http
+    transports::BoxTransport
 };
 
 use crate::{
@@ -13,42 +13,43 @@ use crate::{
 
 /// Client to interact with a Starknet core contract running in `Validity` mode
 pub struct StarknetValidityContractClient {
-    core_contract: StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
-    messaging: StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
-    operator: Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>,
+    core_contract: StarknetValidityContract::StarknetValidityContractInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>,
+    messaging: StarknetMessaging::StarknetMessagingInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>,
+    operator: Operator::OperatorInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport::ProxySupportInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>,
 }
 
 impl StarknetValidityContractClient {
     pub fn new(address: Address, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+        // let client = *client;
         Self {
-            core_contract: StarknetValidityContract::StarknetValidityContractInstance::new(address, client.clone()),
-            messaging: StarknetMessaging::StarknetMessagingInstance::new(address, client.clone()),
-            operator: Operator::OperatorInstance::new(address, client.clone()),
+            core_contract: StarknetValidityContract::StarknetValidityContractInstance::new(address, client),
+            messaging: StarknetMessaging::StarknetMessagingInstance::new(address, client),
+            operator: Operator::OperatorInstance::new(address, client),
             proxy_support: ProxySupport::ProxySupportInstance::new(address, client),
         }
     }
 }
 
-impl AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>>
+impl AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>>
     for StarknetValidityContractClient
 {
-    fn as_ref(&self) -> &StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
+    fn as_ref(&self) -> &StarknetValidityContract::StarknetValidityContractInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware> {
         &self.core_contract
     }
 }
-impl AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
+impl AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &StarknetMessaging::StarknetMessagingInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware> {
         &self.messaging
     }
 }
-impl AsRef<ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupport::ProxySupportInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &ProxySupport::ProxySupportInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }
-impl AsRef<Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, LocalWalletSignerMiddleware> {
+impl AsRef<Operator::OperatorInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &Operator::OperatorInstance<Ethereum, BoxTransport, LocalWalletSignerMiddleware> {
         &self.operator
     }
 }
