@@ -1,12 +1,15 @@
-use ethers::contract::ContractError;
-use ethers::middleware::Middleware;
+use alloy::{
+    network::Ethereum,
+    providers::Provider,
+    sol_types::ContractError,
+};
 use ethers::providers::ProviderError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum Error<M: Middleware> {
+pub enum Error<P: Provider<Ethereum>> {
     #[error(transparent)]
-    ContractError(#[from] ContractError<M>),
+    ContractError(#[from] ContractError<P>),
     #[error(transparent)]
     ProviderError(#[from] ProviderError),
 }
