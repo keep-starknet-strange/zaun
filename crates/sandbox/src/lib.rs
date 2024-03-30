@@ -1,23 +1,20 @@
 // use ethers::abi::Tokenize;
-use url::Url;
 use alloy::{
-    primitives::Bytes,
-    hex::FromHex,
-    sol_types::SolCall::Tokenize,
-    sol_types::ContractError,
     network::{Ethereum, EthereumSigner},
-    providers::{layers::SignerProvider, ProviderBuilder, RootProvider},
-    rpc::client::RpcClient,
-    signers::wallet::LocalWallet,
-    transports::RpcError,
     node_bindings::{Anvil, AnvilInstance},
+    providers::{ProviderBuilder, RootProvider},
+    signers::{
+        wallet::{LocalWallet, WalletError},
+        Signer,
+    },
+    transports::{
+        BoxTransport,
+        TransportError
+    }
 };
-
-use ethers::prelude::{ContractFactory, ContractInstance};
 
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::Duration;
 
 /// Unsafe proxy is a straightforward implementation of the delegate proxy contract
 /// that is used to make Starknet core contract upgradeable.
@@ -45,14 +42,14 @@ pub enum Error {
     BytecodeObject,
     #[error(transparent)]
     Hex(#[from] hex::FromHexError),
-    #[error("Failed to parse URL")]
-    UrlParser,
+    #[error("Failed to parse provider URL: {0}")]
+    ProviderUrlParse(#[source] url::ParseError),
     #[error(transparent)]
-    EthersContract(#[from] ContractError<LocalWalletSignerMiddleware>),
-    #[error(transparent)]
-    EthersProvider(#[from] RpcError),
+    EthersProvider(#[from] TransportError),
     #[error("Invalid contract build artifacts: missing field `{0}`")]
     ContractBuildArtifacts(&'static str),
+    #[error("Failed to parse private key: {0}")]
+    PrivateKeyParse(#[source] WalletError),
 }
 
 /// A convenient wrapper over an already running or spawned Anvil local devnet
@@ -71,7 +68,7 @@ impl EthereumSandbox {
     ///     - ${ANVIL_ENDPOINT} environment variable (if set)
     ///     - http://127.0.0.1:8545 (default)
     /// Also default values for chain ID and private keys will be used.
-    pub fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
+    pub async fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
         let anvil_endpoint = anvil_endpoint.unwrap_or_else(|| {
             std::env::var("ANVIL_ENDPOINT")
                 .map(Into::into)
@@ -79,12 +76,12 @@ impl EthereumSandbox {
                 .unwrap_or_else(|| ANVIL_DEFAULT_ENDPOINT.into())
         });
 
-        let wallet: LocalWallet = ANVIL_DEFAULT_PRIVATE_KEY.try_into().expect("Failed to parse private key");
-        let rpc_client = RpcClient::new_http(Url::parse(&anvil_endpoint).map_err(Error::ProviderUrlParse)?);
+        let wallet: LocalWallet = String::from(ANVIL_DEFAULT_PRIVATE_KEY).parse::<LocalWallet>().map_err(Error::PrivateKeyParse)?;
+        let wallet = wallet.with_chain_id(Some(ANVIL_DEFAULT_CHAIN_ID));
+        let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil_endpoint.as_str()).await?;
         let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
-            .signer(EthereumSigner::from(wallet::with_chain_id(ANVIL_DEFAULT_CHAIN_ID)))
-            .network::<Ethereum>()
-            .provider(RootProvider::new(rpc_client));
+            .signer(EthereumSigner::from(wallet))
+            .provider(http_provider);
 
         Ok(Self {
             _anvil: None,
@@ -97,7 +94,7 @@ impl EthereumSandbox {
     ///     - `anvil_path` parameter (if specified)
     ///     - ${ANVIL_PATH} environment variable (if set)
     ///     - ~/.foundry/bin/anvil (default)
-    pub fn spawn(anvil_path: Option<PathBuf>) -> Self {
+    pub async fn spawn(anvil_path: Option<PathBuf>) -> Result<Self, Error> {
         let anvil_path: PathBuf = anvil_path.unwrap_or_else(|| {
             std::env::var("ANVIL_PATH")
                 .map(Into::into)
@@ -107,60 +104,22 @@ impl EthereumSandbox {
 
         // Will panic if invalid path
         // let anvil = Anvil::at(anvil_path).spawn();
-        let anvil = Anvil::path(self, anvil_path).spawn();
+        let anvil = Anvil::at(anvil_path).spawn();
 
         let wallet: LocalWallet = anvil.keys()[0].clone().try_into().expect("Failed to parse private key");
-        let rpc_client = RpcClient::new_http(Url::parse(&anvil.endpoint()).map_err(RpcError)?);
+        let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil.endpoint().as_str()).await?;
         let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
-            .signer(EthereumSigner::from(wallet::with_chain_id(anvil.chain_id())))
-            .network::<Ethereum>()
-            .provider(RootProvider::new(rpc_client));
+            .signer(EthereumSigner::from(wallet))
+            .provider(http_provider);
 
-        Self {
+        Ok(Self {
             _anvil: Some(anvil),
             client: Arc::new(provider_with_signer),
-        }
+        })
     }
 
     /// Returns local client configured for the running Anvil instance
     pub fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.client.clone()
     }
-}
-
-/// Deploys new smart contract using:
-///     - Forge build artifacts (JSON file contents)
-///     - Constructor args (use () if no args expected)
-pub async fn deploy_contract<T: Tokenize>(
-    client: Arc<LocalWalletSignerMiddleware>,
-    contract_build_artifacts: &str,
-    contructor_args: T,
-) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error>
-{
-    let (abi, bytecode) = {
-        let mut artifacts: serde_json::Value = serde_json::from_str(contract_build_artifacts)?;
-        let abi_value = artifacts
-            .get_mut("abi")
-            .ok_or_else(|| Error::ContractBuildArtifacts("abi"))?
-            .take();
-        let bytecode_value = artifacts
-            .get_mut("bytecode")
-            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode"))?
-            .get_mut("object")
-            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode.object"))?
-            .take();
-
-        let abi = serde_json::from_value(abi_value)?;
-        let bytecode = Bytes::from_hex(bytecode_value.as_str().ok_or(Error::BytecodeObject)?)?;
-        (abi, bytecode)
-    };
-
-    let factory = ContractFactory::new(abi, bytecode, client.clone());
-
-    Ok(factory
-        .deploy(contructor_args)
-        .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?
-        .send()
-        .await
-        .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?)
 }

@@ -12,6 +12,8 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 hex = { workspace = true }
 alloy = { workspace = true }
+url = { workspace = true }
+reqwest = { workspace = true }
 
 [dev-dependencies]
 tokio = { version = "1.29.1", features = ["rt", "macros", "parking_lot"] }
