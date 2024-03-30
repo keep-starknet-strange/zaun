@@ -22,11 +22,13 @@ sol! {
     "artifacts/UnsafeProxy.json"
 }
 
+type StarknetSovereignContractInstance = StarknetSovereign::StarknetSovereignInstance<Ethereum, BoxTransport, Arc<SignerProvider<Ethereum, BoxTransport, RootProvider<Ethereum, BoxTransport>, EthereumSigner>>>;
+
 /// Deploy Starknet sovereign contract and unsafe proxy for it.
 /// Cached forge atrifacts are used for deployment, make sure they are up to date.
 pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
-) -> Result<UnsafeProxy::UnsafeProxyInstance<Ethereum, BoxTransport, Arc<SignerProvider<Ethereum, BoxTransport, RootProvider<Ethereum, BoxTransport>, EthereumSigner>>>, Error> {
+) -> Result<StarknetSovereignContractInstance, Error> {
     // First we deploy the Starknet core contract (no explicit contructor)
     let core_contract_address = StarknetSovereign::deploy_builder(&client).deploy().await;
     // Once we know the Starknet core contract address (implementation address)
@@ -36,7 +38,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     // for simplicity, the proxy is initialized only once during the deployment.
     let proxy_contract_address = UnsafeProxy::deploy_builder(&client, core_contract_address.unwrap()).deploy().await;
     
-    Ok(UnsafeProxy::new(
+    Ok(StarknetSovereign::new(
         proxy_contract_address.unwrap(),
         client.clone(),
     ))
@@ -46,7 +48,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
 mod tests {
     use super::deploy_starknet_sovereign_behind_unsafe_proxy;
     use crate::EthereumSandbox;
-    use alloy::primitives::U256;
+    use alloy::{primitives::U256, providers::Provider};
     use starknet_core_contract_client::interfaces::{CoreContractInitData, ProxyInitializeData};
 
     #[tokio::test]
@@ -67,21 +69,23 @@ mod tests {
 
         // Initialize state & governance
         starknet
-            .initialize_with(data)
+            .initialize(data.into())
             .await
             .expect("Failed to initialize");
 
         // Register as operator
         starknet
-            .register_operator(starknet.client().address())
+            .registerOperator(starknet.provider().get_accounts().await.unwrap()[0])
             .await
             .expect("Failed to register as operator");
 
         // Check that contract is initialized
         let program_hash = starknet
-            .program_hash()
+            .programHash()
+            .call()
             .await
-            .expect("Failed to query program hash");
-        assert_eq!(program_hash, 1u64.into());
+            .unwrap()._0;
+        assert_eq!(program_hash, U256::from(0_u64));
+
     }
 }
