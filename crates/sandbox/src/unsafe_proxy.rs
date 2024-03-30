@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::{Error, LocalWalletSignerMiddleware};
 use alloy::{
+    primitives::U256,
     network::{Ethereum, EthereumSigner},
     providers::{layers::SignerProvider, RootProvider},
     transports::BoxTransport,
@@ -30,13 +31,13 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
 ) -> Result<StarknetSovereignContractInstance, Error> {
     // First we deploy the Starknet core contract (no explicit contructor)
-    let core_contract_address = StarknetSovereign::deploy_builder(&client).deploy().await;
+    let core_contract_address = StarknetSovereign::deploy_builder(&client).nonce(0).gas_price(U256::from(1e9)).gas(U256::from(21000)).deploy().await;
     // Once we know the Starknet core contract address (implementation address)
     // we can deploy and initialize our delegate proxy.
     // NOTE that real world proxies typically allow changing the implementation
     // address dynamically (this is basically how upgrades work). In our case,
     // for simplicity, the proxy is initialized only once during the deployment.
-    let proxy_contract_address = UnsafeProxy::deploy_builder(&client, core_contract_address.unwrap()).deploy().await;
+    let proxy_contract_address = UnsafeProxy::deploy_builder(&client, core_contract_address.unwrap()).nonce(1).gas_price(U256::from(1e9)).gas(U256::from(21000)).deploy().await;
     
     Ok(StarknetSovereign::new(
         proxy_contract_address.unwrap(),
@@ -68,14 +69,16 @@ mod tests {
         };
 
         // Initialize state & governance
-        starknet
+        let _ = starknet
             .initialize(data.into())
+            .send()
             .await
             .expect("Failed to initialize");
 
         // Register as operator
-        starknet
+        let _ = starknet
             .registerOperator(starknet.provider().get_accounts().await.unwrap()[0])
+            .send()
             .await
             .expect("Failed to register as operator");
 
