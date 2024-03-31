@@ -1,4 +1,4 @@
-// use ethers::abi::Tokenize;
+use url::Url;
 use alloy::{
     network::{Ethereum, EthereumSigner},
     node_bindings::{Anvil, AnvilInstance},
@@ -10,7 +10,8 @@ use alloy::{
     transports::{
         BoxTransport,
         TransportError
-    }
+    },
+    rpc::client::RpcClient,
 };
 
 use std::path::PathBuf;
@@ -78,10 +79,12 @@ impl EthereumSandbox {
 
         let wallet: LocalWallet = String::from(ANVIL_DEFAULT_PRIVATE_KEY).parse::<LocalWallet>().map_err(Error::PrivateKeyParse)?;
         let wallet = wallet.with_chain_id(Some(ANVIL_DEFAULT_CHAIN_ID));
-        let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil_endpoint.as_str()).await?;
+        let rpc_client = RpcClient::new_http(Url::parse(&anvil_endpoint).map_err(Error::ProviderUrlParse)?);
+        // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil_endpoint.as_str()).await?;
         let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
             .signer(EthereumSigner::from(wallet))
-            .provider(http_provider);
+            .on_client(rpc_client);
+            // .provider(http_provider);
 
         Ok(Self {
             _anvil: None,
@@ -107,10 +110,12 @@ impl EthereumSandbox {
         let anvil = Anvil::at(anvil_path).spawn();
 
         let wallet: LocalWallet = anvil.keys()[0].clone().try_into().expect("Failed to parse private key");
-        let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil.endpoint().as_str()).await?;
+        let rpc_client = RpcClient::new_http(Url::parse(&anvil.endpoint()).map_err(Error::ProviderUrlParse)?);
+        // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil.endpoint().as_str()).await?;
         let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
             .signer(EthereumSigner::from(wallet))
-            .provider(http_provider);
+            .on_client(rpc_client);
+            // .provider(http_provider);
 
         Ok(Self {
             _anvil: Some(anvil),

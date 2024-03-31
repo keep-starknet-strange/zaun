@@ -10,10 +10,10 @@ use alloy::{
     primitives::Address,
     network::{Ethereum, EthereumSigner},
     providers::{layers::SignerProvider, RootProvider},
-    transports::BoxTransport
+    transports::http::Http,
 };
 
-pub type LocalWalletSignerMiddleware = SignerProvider<Ethereum, BoxTransport, RootProvider<Ethereum, BoxTransport>, EthereumSigner>;
+pub type LocalWalletSignerMiddleware = SignerProvider<Ethereum, Http<reqwest::Client>, RootProvider<Ethereum, Http<reqwest::Client>>, EthereumSigner>;
 
 pub trait StarknetCoreContractClient {
     fn address(&self) -> Address;
