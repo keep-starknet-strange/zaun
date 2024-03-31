@@ -1,8 +1,8 @@
 use std::sync::Arc;
-
+use starknet_core_contract_client::clients::StarknetSovereignContractClient;
 use crate::{Error, LocalWalletSignerMiddleware};
 use alloy::{
-    network::{Ethereum, EthereumSigner}, providers::{layers::SignerProvider, Provider, RootProvider}, sol, transports::http::Http
+    providers::Provider, sol,
 };
 
 sol! {
@@ -19,13 +19,11 @@ sol! {
     "artifacts/UnsafeProxy.json"
 }
 
-type StarknetSovereignContractInstance = StarknetSovereign::StarknetSovereignInstance<Ethereum, Http<reqwest::Client>, Arc<SignerProvider<Ethereum, Http<reqwest::Client>, RootProvider<Ethereum, Http<reqwest::Client>>, EthereumSigner>>>;
-
 /// Deploy Starknet sovereign contract and unsafe proxy for it.
 /// Cached forge atrifacts are used for deployment, make sure they are up to date.
 pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
-) -> Result<StarknetSovereignContractInstance, Error> {
+) -> Result<StarknetSovereignContractClient, Error> {
     let base_fee = client.as_ref().get_gas_price().await?;
 
     // First we deploy the Starknet core contract (no explicit contructor)
@@ -41,7 +39,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     let estimate = proxy_contract_builder.estimate_gas().await.unwrap();
     let proxy_contract_address = proxy_contract_builder.gas_price(base_fee).gas(estimate).nonce(1).deploy().await;
 
-    Ok(StarknetSovereign::new(
+    Ok(StarknetSovereignContractClient::new(
         proxy_contract_address.unwrap(),
         client.clone(),
     ))
@@ -49,10 +47,12 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use super::deploy_starknet_sovereign_behind_unsafe_proxy;
     use crate::EthereumSandbox;
-    use alloy::{primitives::U256, providers::Provider};
-    use starknet_core_contract_client::interfaces::{CoreContractInitData, ProxyInitializeData};
+    use alloy::{network::Ethereum, primitives::U256, providers::Provider, transports::http::Http};
+    use starknet_core_contract_client::{interfaces::{CoreContractInitData, ProxyInitializeData, ProxySupport}, LocalWalletSignerMiddleware, StarknetCoreContractClient};
     use test_log::test;
 
     #[test(tokio::test)]
@@ -73,7 +73,7 @@ mod tests {
         };
 
         // Initialize state & governance
-        let initialize_builder = starknet.initialize(data.into());
+        let initialize_builder = starknet.initialize_with(data);
         let initialize_gas = initialize_builder.estimate_gas().await.unwrap();
         let _ = initialize_builder
             .nonce(2)
@@ -85,7 +85,7 @@ mod tests {
 
         // Register as operator
         let register_operator_builder = starknet
-            .registerOperator(starknet.provider().get_accounts().await.unwrap()[0]);
+            .register_operator(starknet.client().get_accounts().await.unwrap()[0]);
         let register_operator_gas = register_operator_builder.estimate_gas().await.unwrap();
         let _ = register_operator_builder
             .nonce(3)
@@ -97,7 +97,7 @@ mod tests {
 
         // Check that contract is initialized
         let program_hash = starknet
-            .programHash()
+            .program_hash()
             .call()
             .await
             .unwrap()._0;

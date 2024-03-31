@@ -2,15 +2,12 @@ use url::Url;
 use alloy::{
     network::{Ethereum, EthereumSigner},
     node_bindings::{Anvil, AnvilInstance},
-    providers::{ProviderBuilder, RootProvider},
+    providers::ProviderBuilder,
     signers::{
         wallet::{LocalWallet, WalletError},
         Signer,
     },
-    transports::{
-        BoxTransport,
-        TransportError
-    },
+    transports::TransportError,
     rpc::client::RpcClient,
 };
 
