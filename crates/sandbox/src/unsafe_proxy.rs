@@ -51,18 +51,22 @@ mod tests {
 
     use super::deploy_starknet_sovereign_behind_unsafe_proxy;
     use crate::EthereumSandbox;
-    use alloy::{network::Ethereum, primitives::U256, providers::Provider, transports::http::Http};
-    use starknet_core_contract_client::{interfaces::{CoreContractInitData, ProxyInitializeData, ProxySupport}, LocalWalletSignerMiddleware, StarknetCoreContractClient};
+    use alloy::{network::Ethereum, primitives::U256, providers::{Provider, RootProvider}, transports::http::Http};
+    use starknet_core_contract_client::{
+        clients::StarknetSovereignContractClient, interfaces::{
+            CoreContractInitData, OperatorTrait, ProxyInitializeData, ProxySupport, ProxySupportTrait, StarknetSovereignContractTrait
+        }, LocalWalletSignerMiddleware, StarknetCoreContractClient
+    };
     use test_log::test;
 
     #[test(tokio::test)]
     async fn test_starknet_sovereign_contract_initialized_in_anvil() {
-        let sandbox = EthereumSandbox::spawn(None).await;
-        let sandbox_ref = sandbox.as_ref().clone();
-        let starknet = deploy_starknet_sovereign_behind_unsafe_proxy(sandbox_ref.unwrap().client())
+        let sandbox = EthereumSandbox::spawn(None);
+        // let sandbox_ref = sandbox.as_ref().clone();
+        let starknet = deploy_starknet_sovereign_behind_unsafe_proxy(sandbox.unwrap().client())
             .await
             .expect("Failed to deploy");
-        let base_fee = sandbox_ref.unwrap().client().as_ref().get_gas_price().await.unwrap();
+        let base_fee = sandbox.unwrap().client().as_ref().get_gas_price().await.unwrap();
         let data = ProxyInitializeData::<0> {
             sub_contract_addresses: [],
             eic_address: Default::default(),
@@ -73,34 +77,22 @@ mod tests {
         };
 
         // Initialize state & governance
-        let initialize_builder = starknet.initialize_with(data);
-        let initialize_gas = initialize_builder.estimate_gas().await.unwrap();
-        let _ = initialize_builder
-            .nonce(2)
-            .gas(initialize_gas)
-            .gas_price(base_fee)
-            .send()
+        starknet
+            .initialize_with(data)
             .await
             .expect("Failed to initialize");
 
         // Register as operator
-        let register_operator_builder = starknet
-            .register_operator(starknet.client().get_accounts().await.unwrap()[0]);
-        let register_operator_gas = register_operator_builder.estimate_gas().await.unwrap();
-        let _ = register_operator_builder
-            .nonce(3)
-            .gas(register_operator_gas)
-            .gas_price(base_fee)
-            .send()
+        starknet
+            .register_operator(starknet.client().get_accounts().await.unwrap()[0])
             .await
             .expect("Failed to register as operator");
 
         // Check that contract is initialized
         let program_hash = starknet
             .program_hash()
-            .call()
             .await
-            .unwrap()._0;
+            .expect("Failed to query program hash");
         assert_eq!(program_hash, U256::from(1_u64));
 
     }

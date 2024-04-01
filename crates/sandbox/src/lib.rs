@@ -66,7 +66,7 @@ impl EthereumSandbox {
     ///     - ${ANVIL_ENDPOINT} environment variable (if set)
     ///     - http://127.0.0.1:8545 (default)
     /// Also default values for chain ID and private keys will be used.
-    pub async fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
+    pub fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
         let anvil_endpoint = anvil_endpoint.unwrap_or_else(|| {
             std::env::var("ANVIL_ENDPOINT")
                 .map(Into::into)
@@ -94,7 +94,7 @@ impl EthereumSandbox {
     ///     - `anvil_path` parameter (if specified)
     ///     - ${ANVIL_PATH} environment variable (if set)
     ///     - ~/.foundry/bin/anvil (default)
-    pub async fn spawn(anvil_path: Option<PathBuf>) -> Result<Self, Error> {
+    pub fn spawn(anvil_path: Option<PathBuf>) -> Result<Self, Error> {
         let anvil_path: PathBuf = anvil_path.unwrap_or_else(|| {
             std::env::var("ANVIL_PATH")
                 .map(Into::into)

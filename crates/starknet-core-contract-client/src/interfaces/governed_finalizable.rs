@@ -1,12 +1,14 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::Error;
+use crate::{Error, LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
-    sol,
+    sol, transports::http::Http,
 };
 
 sol!(
@@ -27,7 +29,7 @@ pub trait GovernedFinalizableTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> GovernedFinalizableTrait<P> for T
 where
-    T: AsRef<GovernedFinalizable::GovernedFinalizableInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<GovernedFinalizable::GovernedFinalizableInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn is_finalized(&self) -> Result<bool, Error<P>> {
         self

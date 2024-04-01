@@ -1,13 +1,15 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::Error;
+use crate::{Error, LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
     primitives::Address,
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
-    sol,
+    sol, transports::http::Http,
 };
 
 sol!(
@@ -36,7 +38,7 @@ pub trait OperatorTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> OperatorTrait<P> for T
 where
-    T: AsRef<Operator::OperatorInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn register_operator(
         &self,

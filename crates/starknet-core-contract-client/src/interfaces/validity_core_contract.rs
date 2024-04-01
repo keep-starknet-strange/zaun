@@ -1,13 +1,15 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::Error;
+use crate::{Error, LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
-    primitives::{U256, I256},
+    primitives::{I256, U256},
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
-    sol,
+    sol, transports::http::Http,
 };
 
 sol!(
@@ -64,7 +66,7 @@ pub trait StarknetValidityContractTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> StarknetValidityContractTrait<P> for T
 where
-    T: AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<StarknetValidityContract::StarknetValidityContractInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn set_program_hash(
         &self,

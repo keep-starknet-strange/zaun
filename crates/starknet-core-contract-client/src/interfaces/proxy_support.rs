@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::Error;
+use crate::{Error, LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
@@ -8,7 +10,7 @@ use alloy::{
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
     sol,
-    sol_types::SolValue
+    sol_types::SolValue, transports::http::Http
 };
 
 sol!(
@@ -33,7 +35,7 @@ pub trait ProxySupportTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> ProxySupportTrait<P> for T
 where
-    T: AsRef<ProxySupport::ProxySupportInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn is_frozen(&self) -> Result<bool, Error<P>> {
         self.is_frozen().await.map_err(Into::into)

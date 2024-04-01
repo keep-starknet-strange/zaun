@@ -1,13 +1,11 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::Error;
+use crate::{Error, LocalWalletSignerMiddleware};
 
 use alloy::{
-    primitives::Address,
-    network::Ethereum,
-    providers::Provider,
-    rpc::types::eth::TransactionReceipt,
-    sol,
+    network::Ethereum, primitives::Address, providers::Provider, rpc::types::eth::TransactionReceipt, sol, transports::http::Http
 };
 
 sol!(
@@ -40,7 +38,7 @@ pub trait StarknetGovernanceTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> StarknetGovernanceTrait<P> for T
 where
-    T: AsRef<StarknetGovernance::StarknetGovernanceInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<StarknetGovernance::StarknetGovernanceInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn starknet_is_governor(&self, user: Address) -> Result<bool, Error<P>> {        
         self.starknet_is_governor(user)

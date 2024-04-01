@@ -1,13 +1,15 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 
-use crate::Error;
+use crate::{Error, LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
     primitives::U256,
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
-    sol,
+    sol, transports::http::Http,
 };
 
 type MessageHash = [u8; 32];
@@ -61,7 +63,7 @@ pub trait StarknetMessagingTrait<P: Provider<Ethereum>> {
 #[async_trait]
 impl<T, P: Provider<Ethereum>> StarknetMessagingTrait<P> for T
 where
-    T: AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, T, P>> + Send + Sync,
+    T: AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>> {
         self
