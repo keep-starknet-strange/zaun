@@ -6,7 +6,7 @@ use ethers::{
     types::{TransactionReceipt, H160},
 };
 
-use crate::Error;
+use utils::errors::Error;
 
 type Address = H160;
 

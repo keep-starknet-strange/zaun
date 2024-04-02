@@ -1,19 +1,24 @@
-pub mod clients;
-mod error;
-pub mod interfaces;
-
 use std::sync::Arc;
 
-pub use error::Error;
+use clients::StarknetSovereignContractClient;
+use starknet_proxy_client::deploy::{deploy_contract_behind_unsafe_proxy, Error};
+use utils::LocalWalletSignerMiddleware;
 
-use ethers::prelude::SignerMiddleware;
-use ethers::providers::{Http, Provider};
-use ethers::signers::LocalWallet;
-use ethers::types::Address;
+pub mod clients;
+pub mod interfaces;
 
-pub type LocalWalletSignerMiddleware = SignerMiddleware<Provider<Http>, LocalWallet>;
+const STARKNET_SOVEREIGN: &str = include_str!("./artifacts/Starknet.json");
 
-pub trait StarknetContractClient {
-    fn address(&self) -> Address;
-    fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
+/// Deploy Starknet sovereign contract and unsafe proxy for it.
+/// Cached forge artifacts are used for deployment, make sure they are up to date.
+pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
+    client: Arc<LocalWalletSignerMiddleware>,
+) -> Result<StarknetSovereignContractClient, Error> {
+    // Deploy the Starknet Core contract (no explicit constructor)
+    let core_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_SOVEREIGN, ()).await?;
+
+    Ok(StarknetSovereignContractClient::new(
+        core_contract.address(),
+        client.clone(),
+    ))
 }

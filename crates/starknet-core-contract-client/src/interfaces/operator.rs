@@ -6,7 +6,7 @@ use ethers::{
     types::{Address, TransactionReceipt},
 };
 
-use crate::Error;
+use utils::errors::Error;
 
 abigen!(
     Operator,

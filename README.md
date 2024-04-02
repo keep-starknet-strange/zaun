@@ -1,44 +1,48 @@
 # Zaun
-A development environment for Starknet Solidity contracts.
 
-### Setup:
+This repository contains interfaces and functions to interact with starknet solidity contracts.
+
+## Setup
 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
 
-### Testing:
+## Testing
 
 Unit
+
 ```bash
 forge test -vv
 ```
 
 ### Devnet
 
-Start Avnvil as background process w/ Core Contracts and STARK token:
+Start Anvil as background process w/ Core Contracts and STARK token:
+
 ```bash
 ./script/sn-base-dev.sh
 ```
 
 Kill Anvil deployment:
+
 ```bash
 ./script/sn-base-kill.sh
 ```
 
-### Artifacts
+## Artifacts
 
-Zaun sandbox crate can be used as dev dependency in external projects for integration testing.  
-If any changes made to the Solidity contracts, one has to re-generate Ethers bindings (this won't be done automatically).
+Zaun sandbox crate can be used as dev dependency in external projects. If any changes made to the Solidity contracts, one has to re-generate Ethers bindings (this won't be done automatically).
 
 ```bash
 make artifacts
 ```
 
-### StarkNet Consensus Protocol Contracts
+## StarkNet Consensus Protocol Contracts
 
 PoC solidity implementation of the following Starknet Decentralized Protocol proposal:
+
 - [I - Introduction](https://community.starknet.io/t/starknet-decentralized-protocol-i-introduction/2671/1)
 - [II - Candidate for Leader Elections](https://community.starknet.io/t/starknet-decentralized-protocol-ii-candidate-for-leader-elections/4751)
 - [III - Consensus](https://community.starknet.io/t/starknet-decentralized-protocol-iii-consensus/5386)

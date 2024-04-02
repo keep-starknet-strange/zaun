@@ -4,7 +4,7 @@ use ethers::middleware::Middleware;
 use ethers::prelude::abigen;
 use ethers::types::{TransactionReceipt, I256, U256};
 
-use crate::Error;
+use utils::errors::Error;
 
 abigen!(
     StarknetValidityContract,
