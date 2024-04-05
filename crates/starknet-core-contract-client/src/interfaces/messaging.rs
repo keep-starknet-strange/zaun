@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{Error, LocalWalletSignerMiddleware};
+use crate::{LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
@@ -10,6 +10,7 @@ use alloy::{
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
     sol, transports::http::Http,
+    contract::Error
 };
 
 type MessageHash = [u8; 32];
@@ -32,47 +33,47 @@ sol!(
 );
 
 #[async_trait]
-pub trait StarknetMessagingTrait<P: Provider<Ethereum>> {
-    async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>>;
-    async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>>;
+pub trait StarknetMessagingTrait {
+    async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error>;
+    async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error>;
     async fn l1_to_l2_message_cancellations(&self, msg_hash: MessageHash)
-        -> Result<U256, Error<P>>;
+        -> Result<U256, Error>;
     async fn send_message_to_l2(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         fee: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    ) -> Result<Option<TransactionReceipt>, Error>;
     async fn start_l1_to_l2_message_cancellation(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    ) -> Result<Option<TransactionReceipt>, Error>;
     async fn cancel_l1_to_l2_message(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    ) -> Result<Option<TransactionReceipt>, Error>;
 }
 
 #[async_trait]
-impl<T, P: Provider<Ethereum>> StarknetMessagingTrait<P> for T
+impl<T> StarknetMessagingTrait for T
 where
     T: AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
-    async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>> {
+    async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error> {
         self
             .l1_to_l2_messages(msg_hash)
             .await
             .map_err(Into::into)
     }
 
-    async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<P>> {
+    async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error> {
         self
             .l2_to_l1_messages(msg_hash)
             .await
@@ -82,7 +83,7 @@ where
     async fn l1_to_l2_message_cancellations(
         &self,
         msg_hash: MessageHash,
-    ) -> Result<U256, Error<P>> {
+    ) -> Result<U256, Error> {
         self
             .l1_to_l2_message_cancellations(msg_hash)
             .await
@@ -95,7 +96,7 @@ where
         selector: U256,
         payload: Vec<U256>,
         fee: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>> {
+    ) -> Result<Option<TransactionReceipt>, Error> {
         self
             .send_message_to_l2(to_address, selector, payload, fee)
             .await
@@ -108,7 +109,7 @@ where
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>> {
+    ) -> Result<Option<TransactionReceipt>, Error> {
         self
             .start_l1_to_l2_message_cancellation(to_address, selector, payload, nonce)
             .await
@@ -121,7 +122,7 @@ where
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<P>> {
+    ) -> Result<Option<TransactionReceipt>, Error> {
         self
             .cancel_l1_to_l2_message(to_address, selector, payload, nonce)
             .await

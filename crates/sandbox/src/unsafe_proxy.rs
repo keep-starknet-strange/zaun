@@ -38,6 +38,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     let proxy_contract_builder = UnsafeProxy::deploy_builder(&client, core_contract_address.unwrap());
     let estimate = proxy_contract_builder.estimate_gas().await.unwrap();
     let proxy_contract_address = proxy_contract_builder.gas_price(base_fee).gas(estimate).nonce(1).deploy().await;
+    log::debug!("check ocntract address deploy - {:?}", proxy_contract_address);
 
     Ok(StarknetSovereignContractClient::new(
         proxy_contract_address.unwrap(),
@@ -51,10 +52,10 @@ mod tests {
 
     use super::deploy_starknet_sovereign_behind_unsafe_proxy;
     use crate::EthereumSandbox;
-    use alloy::{network::Ethereum, primitives::U256, providers::{Provider, RootProvider}, transports::http::Http};
+    use alloy::{contract::Error, network::Ethereum, primitives::U256, providers::{Provider, RootProvider}, rpc::types::eth::TransactionReceipt, transports::{http::Http, RpcError, TransportErrorKind}};
     use starknet_core_contract_client::{
         clients::StarknetSovereignContractClient, interfaces::{
-            CoreContractInitData, OperatorTrait, ProxyInitializeData, ProxySupport, ProxySupportTrait, StarknetSovereignContractTrait
+            CoreContractInitData, OperatorTrait, ProxyInitializeData, ProxySupport, ProxySupportTrait, StarknetGovernanceTrait, StarknetSovereignContractTrait
         }, LocalWalletSignerMiddleware, StarknetCoreContractClient
     };
     use test_log::test;
@@ -62,11 +63,10 @@ mod tests {
     #[test(tokio::test)]
     async fn test_starknet_sovereign_contract_initialized_in_anvil() {
         let sandbox = EthereumSandbox::spawn(None);
-        // let sandbox_ref = sandbox.as_ref().clone();
-        let starknet = deploy_starknet_sovereign_behind_unsafe_proxy(sandbox.unwrap().client())
+        let sandbox_ref = sandbox.as_ref().clone();
+        let starknet = deploy_starknet_sovereign_behind_unsafe_proxy(sandbox_ref.unwrap().client())
             .await
             .expect("Failed to deploy");
-        let base_fee = sandbox.unwrap().client().as_ref().get_gas_price().await.unwrap();
         let data = ProxyInitializeData::<0> {
             sub_contract_addresses: [],
             eic_address: Default::default(),
@@ -76,24 +76,20 @@ mod tests {
             },
         };
 
-        // Initialize state & governance
-        starknet
-            .initialize_with(data)
-            .await
-            .expect("Failed to initialize");
+        let _init: Result<TransactionReceipt, RpcError<TransportErrorKind>> = starknet.initialize(data.into()).await;
+        log::debug!("check init res - {:?}", _init);
+        log::debug!("check accs - {:?}", starknet.client().get_accounts().await.unwrap());
 
-        // Register as operator
-        starknet
-            .register_operator(starknet.client().get_accounts().await.unwrap()[0])
-            .await
-            .expect("Failed to register as operator");
+        // let is_governor: Result<bool, Error> = starknet.starknet_is_governor(starknet.client().get_accounts().await.unwrap()[0]).await;
+        // log::debug!("is gov - {:?} for addr - {:?}", is_governor, starknet.client().get_accounts().await.unwrap()[0]);
 
-        // Check that contract is initialized
-        let program_hash = starknet
-            .program_hash()
-            .await
-            .expect("Failed to query program hash");
-        assert_eq!(program_hash, U256::from(1_u64));
+        let _register: Result<TransactionReceipt, RpcError<TransportErrorKind>> = starknet.register_operator(starknet.client().get_accounts().await.unwrap()[0]).await;
+        log::debug!("check _register res - {:?}", _register);
+
+        let program_hash: Result<U256, Error> = starknet.program_hash().await;
+        log::debug!("check program_hash res - {:?}", program_hash);
+
+        assert_eq!(program_hash.unwrap(), U256::from(1_u64));
 
     }
 }

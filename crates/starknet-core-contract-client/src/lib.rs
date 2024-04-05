@@ -4,13 +4,10 @@ pub mod interfaces;
 
 use std::sync::Arc;
 
-pub use error::Error;
+// pub use error::Error;
 
 use alloy::{
-    primitives::Address,
-    network::{Ethereum, EthereumSigner},
-    providers::{layers::SignerProvider, RootProvider},
-    transports::http::Http,
+    network::{Ethereum, EthereumSigner}, primitives::Address, providers::{layers::{GasEstimatorProvider, ManagedNonceProvider, SignerProvider}, Provider, RootProvider}, transports::{http::Http, RpcError, TransportErrorKind}
 };
 
 pub type LocalWalletSignerMiddleware = SignerProvider<Ethereum, Http<reqwest::Client>, RootProvider<Ethereum, Http<reqwest::Client>>, EthereumSigner>;

@@ -1,14 +1,9 @@
 use url::Url;
 use alloy::{
-    network::{Ethereum, EthereumSigner},
-    node_bindings::{Anvil, AnvilInstance},
-    providers::ProviderBuilder,
-    signers::{
+    network::{Ethereum, EthereumSigner}, node_bindings::{Anvil, AnvilInstance}, primitives::Address, providers::{layers::{GasEstimatorLayer, NonceManagerLayer}, ProviderBuilder}, rpc::client::RpcClient, signers::{
         wallet::{LocalWallet, WalletError},
         Signer,
-    },
-    transports::TransportError,
-    rpc::client::RpcClient,
+    }, transports::TransportError
 };
 
 use std::path::PathBuf;
@@ -78,11 +73,9 @@ impl EthereumSandbox {
         let wallet = wallet.with_chain_id(Some(ANVIL_DEFAULT_CHAIN_ID));
         let rpc_client = RpcClient::new_http(Url::parse(&anvil_endpoint).map_err(Error::ProviderUrlParse)?);
         // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil_endpoint.as_str()).await?;
-        let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
+        let provider_with_signer = ProviderBuilder::new()
             .signer(EthereumSigner::from(wallet))
             .on_client(rpc_client);
-            // .provider(http_provider);
-
         Ok(Self {
             _anvil: None,
             client: Arc::new(provider_with_signer),
@@ -105,14 +98,13 @@ impl EthereumSandbox {
         // Will panic if invalid path
         // let anvil = Anvil::at(anvil_path).spawn();
         let anvil = Anvil::at(anvil_path).spawn();
-
         let wallet: LocalWallet = anvil.keys()[0].clone().try_into().expect("Failed to parse private key");
+        log::debug!("check walletaddress - {:?}", wallet.address());
         let rpc_client = RpcClient::new_http(Url::parse(&anvil.endpoint()).map_err(Error::ProviderUrlParse)?);
         // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil.endpoint().as_str()).await?;
-        let provider_with_signer = ProviderBuilder::<_, Ethereum>::new()
+        let provider_with_signer = ProviderBuilder::new()
             .signer(EthereumSigner::from(wallet))
             .on_client(rpc_client);
-            // .provider(http_provider);
 
         Ok(Self {
             _anvil: Some(anvil),

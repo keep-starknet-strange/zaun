@@ -2,15 +2,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{Error, LocalWalletSignerMiddleware};
+use crate::{LocalWalletSignerMiddleware};
 
 use alloy::{
-    network::Ethereum,
-    primitives::{Address, Bytes, I256, U256},
-    providers::Provider,
-    rpc::types::eth::TransactionReceipt,
-    sol,
-    sol_types::SolValue, transports::http::Http
+    contract::Error, network::{Ethereum, Network}, primitives::{Address, Bytes, I256, U256}, providers::{Provider, RootProvider}, rpc::types::eth::TransactionReceipt, sol, sol_types::SolValue, transports::{http::Http, RpcError, Transport, TransportErrorKind}
 };
 
 sol!(
@@ -23,36 +18,34 @@ sol!(
 );
 
 #[async_trait]
-pub trait ProxySupportTrait<P: Provider<Ethereum>> {
-    async fn is_frozen(&self) -> Result<bool, Error<P>>;
-    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<P>>;
-    async fn initialize_with<const N: usize>(
-        &self,
-        data: ProxyInitializeData<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+pub trait ProxySupportTrait
+{
+    async fn is_frozen(&self) -> Result<bool, Error>;
+    async fn initialize(&self, data: Bytes) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 }
 
 #[async_trait]
-impl<T, P: Provider<Ethereum>> ProxySupportTrait<P> for T
+impl<T> ProxySupportTrait for T
 where
     T: AsRef<ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
-    async fn is_frozen(&self) -> Result<bool, Error<P>> {
-        self.is_frozen().await.map_err(Into::into)
+    async fn is_frozen(&self) -> Result<bool, Error> {
+        Ok(self.as_ref().isFrozen().call().await?._0)
     }
 
-    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self
-            .initialize(data)
+    async fn initialize(&self, data: Bytes) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let initialize_builder = self.as_ref().initialize(data);
+        let initialize_gas = initialize_builder.estimate_gas().await.unwrap();
+        initialize_builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(initialize_gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
-    }
-
-    async fn initialize_with<const N: usize>(
-        &self,
-        data: ProxyInitializeData<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self.initialize(data.into()).await
     }
 }
 

@@ -8,7 +8,7 @@ use crate::{
     LocalWalletSignerMiddleware, StarknetCoreContractClient,
 };
 use alloy::{
-    network::Ethereum, primitives::Address, transports::http::Http,
+    network::Ethereum, primitives::Address, providers::RootProvider, transports::http::Http
 };
 /// Client to interact with a Starknet core contract running in `Sovereign` mode
 pub struct StarknetSovereignContractClient {

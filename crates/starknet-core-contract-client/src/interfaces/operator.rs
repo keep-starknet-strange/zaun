@@ -2,14 +2,14 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{Error, LocalWalletSignerMiddleware};
+use crate::{LocalWalletSignerMiddleware};
 
 use alloy::{
     network::Ethereum,
-    primitives::Address,
+    primitives::{Address, U256},
     providers::Provider,
     rpc::types::eth::TransactionReceipt,
-    sol, transports::http::Http,
+    sol, transports::{http::Http, RpcError, TransportErrorKind},
 };
 
 sol!(
@@ -24,44 +24,52 @@ sol!(
 );
 
 #[async_trait]
-pub trait OperatorTrait<P: Provider<Ethereum>> {
+pub trait OperatorTrait {
     async fn register_operator(
         &self,
         new_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn unregister_operator(
         &self,
         removed_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<P>>;
-    async fn is_operator(&self, user: Address) -> Result<bool, Error<P>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
+    async fn is_operator(&self, user: Address) -> bool;
 }
 #[async_trait]
-impl<T, P: Provider<Ethereum>> OperatorTrait<P> for T
+impl<T> OperatorTrait for T
 where
     T: AsRef<Operator::OperatorInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn register_operator(
         &self,
         new_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<P>> {
-        self
-            .register_operator(new_operator)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        log::debug!("check ocntract address - {:?}", self.as_ref().address());
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let initialize_builder = self.as_ref().registerOperator(new_operator);
+        let initialize_gas = initialize_builder.estimate_gas().await.unwrap();
+        initialize_builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(3)
+            .gas(initialize_gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
     async fn unregister_operator(
         &self,
         removed_operator: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<P>> {
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
         self
             .unregister_operator(removed_operator)
             .await
             .map_err(Into::into)
     }
-    async fn is_operator(&self, user: Address) -> Result<bool, Error<P>> {
+    async fn is_operator(&self, user: Address) -> bool {
         self
             .is_operator(user)
             .await
-            .map_err(Into::into)
     }
 }
