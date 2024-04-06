@@ -2,14 +2,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{LocalWalletSignerMiddleware};
+use crate::LocalWalletSignerMiddleware;
 
 use alloy::{
-    network::Ethereum,
-    providers::Provider,
-    rpc::types::eth::TransactionReceipt,
-    sol, transports::http::Http,
-    contract::Error
+    contract::Error, network::Ethereum, providers::Provider, rpc::types::eth::TransactionReceipt, sol, transports::{http::Http, RpcError, TransportErrorKind}
 };
 
 sol!(
@@ -24,7 +20,7 @@ sol!(
 #[async_trait]
 pub trait GovernedFinalizableTrait {
     async fn is_finalized(&self) -> Result<bool, Error>;
-    async fn finalize(&self) -> Result<Option<TransactionReceipt>, Error>;
+    async fn finalize(&self) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 }
 
 #[async_trait]
@@ -33,16 +29,22 @@ where
     T: AsRef<GovernedFinalizable::GovernedFinalizableInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn is_finalized(&self) -> Result<bool, Error> {
-        self
-            .is_finalized()
-            .await
-            .map_err(Into::into)
+        Ok(self.as_ref().isFinalized().call().await?._0)
     }
 
-    async fn finalize(&self) -> Result<Option<TransactionReceipt>, Error> {
-        self
-            .finalize()
+    async fn finalize(&self) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().finalize().from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().finalize();
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 }

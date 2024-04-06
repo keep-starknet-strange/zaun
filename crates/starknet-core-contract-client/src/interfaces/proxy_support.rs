@@ -2,10 +2,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{LocalWalletSignerMiddleware};
+use crate::LocalWalletSignerMiddleware;
 
 use alloy::{
-    contract::Error, network::{Ethereum, Network}, primitives::{Address, Bytes, I256, U256}, providers::{Provider, RootProvider}, rpc::types::eth::TransactionReceipt, sol, sol_types::SolValue, transports::{http::Http, RpcError, Transport, TransportErrorKind}
+    contract::Error, network::Ethereum, primitives::{Address, Bytes, I256, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, sol_types::SolValue, transports::{http::Http, RpcError, TransportErrorKind}
 };
 
 sol!(
@@ -35,12 +35,12 @@ where
 
     async fn initialize(&self, data: Bytes) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
         let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
-        let initialize_builder = self.as_ref().initialize(data);
-        let initialize_gas = initialize_builder.estimate_gas().await.unwrap();
-        initialize_builder
+        let builder = self.as_ref().initialize(data);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
             .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
             .nonce(2)
-            .gas(initialize_gas)
+            .gas(gas)
             .gas_price(base_fee)
             .send()
             .await.unwrap()
@@ -98,7 +98,7 @@ mod tests {
     use super::ProxyInitializeData;
 
     #[test]
-    fn test_initialize_calldata_encoding() {
+    fn test_calldata_encoding() {
         let calldata = ProxyInitializeData::<0> {
             sub_contract_addresses: [],
             eic_address: Default::default(),

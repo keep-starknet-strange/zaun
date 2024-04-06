@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{LocalWalletSignerMiddleware};
+use crate::LocalWalletSignerMiddleware;
 
 use alloy::{
     contract::Error, network::Ethereum, primitives::Address, providers::Provider, rpc::types::eth::TransactionReceipt, sol, transports::{http::Http, RpcError, TransportErrorKind}
@@ -48,33 +48,65 @@ where
         &self,
         new_governor: Address,
     ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
-        self
-            .starknet_nominate_new_governor(new_governor)
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().starknetNominateNewGovernor(new_governor);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 
     async fn starknet_remove_governor(
         &self,
         governor_for_removal: Address,
     ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
-        self
-            .starknet_remove_governor(governor_for_removal)
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().starknetRemoveGovernor(governor_for_removal);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 
     async fn starknet_accept_governance(&self) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
-        self
-            .starknet_accept_governance()
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().starknetAcceptGovernance();
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 
     async fn starknet_cancel_nomination(&self) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
-        self
-            .starknet_cancel_nomination()
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().starknetCancelNomination();
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 }

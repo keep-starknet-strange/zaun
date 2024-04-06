@@ -1,6 +1,6 @@
 use url::Url;
 use alloy::{
-    network::{Ethereum, EthereumSigner}, node_bindings::{Anvil, AnvilInstance}, primitives::Address, providers::{layers::{GasEstimatorLayer, NonceManagerLayer}, ProviderBuilder}, rpc::client::RpcClient, signers::{
+    network::EthereumSigner, node_bindings::{Anvil, AnvilInstance}, providers::ProviderBuilder, rpc::client::RpcClient, signers::{
         wallet::{LocalWallet, WalletError},
         Signer,
     }, transports::TransportError
@@ -21,7 +21,7 @@ pub mod unsafe_proxy;
 pub use starknet_core_contract_client::LocalWalletSignerMiddleware;
 
 /// Sandbox is typically used for E2E scenarios so we need to speed things up
-const POLLING_INTERVAL_MS: u64 = 10;
+// const POLLING_INTERVAL_MS: u64 = 10;
 const ANVIL_DEFAULT_ENDPOINT: &str = "http://127.0.0.1:8545";
 const ANVIL_DEFAULT_CHAIN_ID: u64 = 31337;
 const ANVIL_DEFAULT_PRIVATE_KEY: &str =
@@ -99,7 +99,6 @@ impl EthereumSandbox {
         // let anvil = Anvil::at(anvil_path).spawn();
         let anvil = Anvil::at(anvil_path).spawn();
         let wallet: LocalWallet = anvil.keys()[0].clone().try_into().expect("Failed to parse private key");
-        log::debug!("check walletaddress - {:?}", wallet.address());
         let rpc_client = RpcClient::new_http(Url::parse(&anvil.endpoint()).map_err(Error::ProviderUrlParse)?);
         // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil.endpoint().as_str()).await?;
         let provider_with_signer = ProviderBuilder::new()

@@ -2,15 +2,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use crate::{LocalWalletSignerMiddleware};
+use crate::LocalWalletSignerMiddleware;
 
 use alloy::{
-    network::Ethereum,
-    primitives::{I256, U256},
-    providers::Provider,
-    rpc::types::eth::TransactionReceipt,
-    sol, transports::http::Http,
-    contract::Error
+    contract::Error, network::Ethereum, primitives::{I256, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, transports::{http::Http, RpcError, TransportErrorKind}
 };
 
 sol!(
@@ -38,15 +33,15 @@ pub trait StarknetValidityContractTrait {
     async fn set_program_hash(
         &self,
         new_program_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn set_config_hash(
         &self,
         new_config_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn set_message_cancellation_delay(
         &self,
         delay_in_seconds: U256,
-    ) -> Result<Option<TransactionReceipt>, Error>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 
     async fn program_hash(&self) -> Result<U256, Error>;
     async fn config_hash(&self) -> Result<U256, Error>;
@@ -61,7 +56,7 @@ pub trait StarknetValidityContractTrait {
         program_output: Vec<U256>,
         onchain_data_hash: U256,
         onchain_data_size: U256,
-    ) -> Result<Option<TransactionReceipt>, Error>; 
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>; 
 }
 
 #[async_trait]
@@ -72,64 +67,82 @@ where
     async fn set_program_hash(
         &self,
         new_program_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error> {
-        self
-            .set_program_hash(new_program_hash)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().setProgramHash(new_program_hash).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().setProgramHash(new_program_hash);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 
     async fn set_config_hash(
         &self,
         new_config_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error> {
-        self
-            .set_config_hash(new_config_hash)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().setConfigHash(new_config_hash).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().setConfigHash(new_config_hash);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 
     async fn set_message_cancellation_delay(
         &self,
         delay_in_seconds: U256,
-    ) -> Result<Option<TransactionReceipt>, Error> {
-        self
-            .set_message_cancellation_delay(delay_in_seconds)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().setMessageCancellationDelay(delay_in_seconds).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().setMessageCancellationDelay(delay_in_seconds);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 
     async fn program_hash(&self) -> Result<U256, Error> {
-        self
-            .program_hash()
-            .await
-            .map_err(Into::into)
+        Ok(self.as_ref().programHash().call().await?._0)
     }
 
     async fn config_hash(&self) -> Result<U256, Error> {
-        self.config_hash().await.map_err(Into::into)
+        Ok(self.as_ref().configHash().call().await?._0)
     }
 
     async fn identify(&self) -> Result<String, Error> {
-        self.identify().await.map_err(Into::into)
+        Ok(self.as_ref().identify().call().await?._0)
     }
 
     async fn state_root(&self) -> Result<U256, Error> {
-        self.state_root().await.map_err(Into::into)
+        Ok(self.as_ref().stateRoot().call().await?._0)
     }
 
     async fn state_block_number(&self) -> Result<I256, Error> {
-        self
-            .state_block_number()
-            .await
-            .map_err(Into::into)
+        Ok(self.as_ref().stateBlockNumber().call().await?._0)
     }
 
     async fn state_block_hash(&self) -> Result<U256, Error> {
-        self
-            .state_block_hash()
-            .await
-            .map_err(Into::into)
+        Ok(self.as_ref().stateBlockHash().call().await?._0)
     }
 
     async fn update_state(
@@ -137,10 +150,19 @@ where
         program_output: Vec<U256>,
         onchain_data_hash: U256,
         onchain_data_size: U256,
-    ) -> Result<Option<TransactionReceipt>, Error> {
-        self
-            .update_state(program_output, onchain_data_hash, onchain_data_size)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().updateState(program_output.clone(), onchain_data_hash, onchain_data_size).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().updateState(program_output, onchain_data_hash, onchain_data_size);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
+            .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::into)
     }
 }
