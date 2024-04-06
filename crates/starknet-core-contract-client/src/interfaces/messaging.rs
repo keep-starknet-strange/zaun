@@ -1,90 +1,77 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
-use ethers::{
-    contract::ContractError,
-    prelude::abigen,
-    providers::Middleware,
-    types::{TransactionReceipt, U256},
+
+use crate::LocalWalletSignerMiddleware;
+
+use alloy::{
+    contract::Error, network::Ethereum, primitives::{FixedBytes, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, transports::{http::Http, RpcError, TransportErrorKind}
 };
 
-use crate::Error;
-
-type MessageHash = [u8; 32];
-
 // StarknetMessaging.sol
-abigen!(
-    StarknetMessaging,
-    r#"[
-        function l1ToL2Messages(bytes32 msgHash) external view returns (uint256)
-        function l2ToL1Messages(bytes32 msgHash) external view returns (uint256)
-        function l1ToL2MessageCancellations(bytes32 msgHash) external view returns (uint256)
+sol!(
+    #[allow(missing_docs)]
+    #[sol(rpc)]
+    interface StarknetMessaging {
+        function l1ToL2Messages(bytes32 msgHash) external view returns (uint256);
+        function l2ToL1Messages(bytes32 msgHash) external view returns (uint256);
+        function l1ToL2MessageCancellations(bytes32 msgHash) external view returns (uint256);
 
-        function sendMessageToL2(uint256 toAddress, uint256 selector, uint256[] calldata payload) external payable override returns (bytes32, uint256)
-        function consumeMessageFromL2(uint256 fromAddress, uint256[] calldata payload) external override returns (bytes32)
+        function sendMessageToL2(uint256 toAddress, uint256 selector, uint256[] calldata payload) external payable override returns (bytes32, uint256);
+        function consumeMessageFromL2(uint256 fromAddress, uint256[] calldata payload) external override returns (bytes32);
 
-        function startL1ToL2MessageCancellation(uint256 toAddress, uint256 selector, uint256[] calldata payload, uint256 nonce) external override returns (bytes32) 
-        function cancelL1ToL2Message(uint256 toAddress, uint256 selector, uint256[] calldata payload, uint256 nonce) external override returns (bytes32) 
-    ]"#,
+        function startL1ToL2MessageCancellation(uint256 toAddress, uint256 selector, uint256[] calldata payload, uint256 nonce) external override returns (bytes32);
+        function cancelL1ToL2Message(uint256 toAddress, uint256 selector, uint256[] calldata payload, uint256 nonce) external override returns (bytes32);
+    }
 );
 
 #[async_trait]
-pub trait StarknetMessagingTrait<M: Middleware> {
-    async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<M>>;
-    async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<M>>;
-    async fn l1_to_l2_message_cancellations(&self, msg_hash: MessageHash)
-        -> Result<U256, Error<M>>;
+pub trait StarknetMessagingTrait {
+    async fn l1_to_l2_messages(&self, msg_hash: FixedBytes<32>) -> Result<U256, Error>;
+    async fn l2_to_l1_messages(&self, msg_hash: FixedBytes<32>) -> Result<U256, Error>;
+    async fn l1_to_l2_message_cancellations(&self, msg_hash: FixedBytes<32>)
+        -> Result<U256, Error>;
     async fn send_message_to_l2(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         fee: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn start_l1_to_l2_message_cancellation(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn cancel_l1_to_l2_message(
         &self,
         to_address: U256,
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 }
 
 #[async_trait]
-impl<T, M: Middleware> StarknetMessagingTrait<M> for T
+impl<T> StarknetMessagingTrait for T
 where
-    T: AsRef<StarknetMessaging<M>> + Send + Sync,
+    T: AsRef<StarknetMessaging::StarknetMessagingInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
-    async fn l1_to_l2_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<M>> {
-        self.as_ref()
-            .l_1_to_l2_messages(msg_hash)
-            .call()
-            .await
-            .map_err(Into::into)
+    async fn l1_to_l2_messages(&self, msg_hash: FixedBytes<32>) -> Result<U256, Error> {
+        Ok(self.as_ref().l1ToL2Messages(msg_hash).call().await?._0)
     }
 
-    async fn l2_to_l1_messages(&self, msg_hash: MessageHash) -> Result<U256, Error<M>> {
-        self.as_ref()
-            .l_2_to_l1_messages(msg_hash)
-            .call()
-            .await
-            .map_err(Into::into)
+    async fn l2_to_l1_messages(&self, msg_hash: FixedBytes<32>) -> Result<U256, Error> {
+        Ok(self.as_ref().l2ToL1Messages(msg_hash).call().await?._0)
     }
 
     async fn l1_to_l2_message_cancellations(
         &self,
-        msg_hash: MessageHash,
-    ) -> Result<U256, Error<M>> {
-        self.as_ref()
-            .l_1_to_l2_message_cancellations(msg_hash)
-            .call()
-            .await
-            .map_err(Into::into)
+        msg_hash: FixedBytes<32>,
+    ) -> Result<U256, Error> {
+        Ok(self.as_ref().l1ToL2MessageCancellations(msg_hash).call().await?._0)
     }
 
     async fn send_message_to_l2(
@@ -93,15 +80,20 @@ where
         selector: U256,
         payload: Vec<U256>,
         fee: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .send_message_to_l2(to_address, selector, payload)
-            .value(fee) // L1 message fee must be between 0 and 1 ether
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().sendMessageToL2(to_address, selector, payload);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .value(fee)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 
     async fn start_l1_to_l2_message_cancellation(
@@ -110,14 +102,19 @@ where
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .start_l1_to_l2_message_cancellation(to_address, selector, payload, nonce)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().startL1ToL2MessageCancellation(to_address, selector, payload, nonce);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 
     async fn cancel_l1_to_l2_message(
@@ -126,13 +123,18 @@ where
         selector: U256,
         payload: Vec<U256>,
         nonce: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .cancel_l1_to_l2_message(to_address, selector, payload, nonce)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().cancelL1ToL2Message(to_address, selector, payload, nonce);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 }

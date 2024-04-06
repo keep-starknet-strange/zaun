@@ -1,150 +1,164 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
-use ethers::contract::ContractError;
-use ethers::middleware::Middleware;
-use ethers::prelude::abigen;
-use ethers::types::{TransactionReceipt, I256, U256};
 
-use crate::Error;
+use crate::LocalWalletSignerMiddleware;
 
-abigen!(
-    StarknetSovereignContract,
-    r#"[
-        function setProgramHash(uint256 newProgramHash) external notFinalized onlyGovernance
-        function setConfigHash(uint256 newConfigHash) external notFinalized onlyGovernance
-        function setMessageCancellationDelay(uint256 delayInSeconds) external notFinalized onlyGovernance
+use alloy::{
+    contract::Error, network::Ethereum, primitives::{I256, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, transports::{http::Http, RpcError, TransportErrorKind}
+};
 
-        function programHash() public view returns (uint256)
-        function configHash() public view returns (uint256)
+sol!(
+    #[allow(missing_docs)]
+    #[sol(rpc)]
+    interface StarknetSovereignContract {
+        function setProgramHash(uint256 newProgramHash) external notFinalized onlyGovernance;
+        function setConfigHash(uint256 newConfigHash) external notFinalized onlyGovernance;
+        function setMessageCancellationDelay(uint256 delayInSeconds) external notFinalized onlyGovernance;
 
-        function identify() external pure override returns (string memory)
-        function stateRoot() external view returns (uint256)
-        function stateBlockNumber() external view returns (int256)
-        function stateBlockHash() external view returns (uint256)
+        function programHash() public view returns (uint256);
+        function configHash() public view returns (uint256);
 
-        function updateState(uint256[] calldata programOutput) external onlyOperator
+        function identify() external pure override returns (string memory);
+        function stateRoot() external view returns (uint256);
+        function stateBlockNumber() external view returns (int256);
+        function stateBlockHash() external view returns (uint256);
 
-    ]"#,
+        function updateState(uint256[] calldata programOutput) external onlyOperator;
+    }
 );
 
 #[async_trait]
-pub trait StarknetSovereignContractTrait<M: Middleware> {
+pub trait StarknetSovereignContractTrait {
     async fn set_program_hash(
         &self,
         new_program_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn set_config_hash(
         &self,
         new_config_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
     async fn set_message_cancellation_delay(
         &self,
         delay_in_seconds: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 
-    async fn program_hash(&self) -> Result<U256, Error<M>>;
-    async fn config_hash(&self) -> Result<U256, Error<M>>;
+    async fn program_hash(&self) -> Result<U256, Error>;
+    async fn config_hash(&self) -> Result<U256, Error>;
 
-    async fn identify(&self) -> Result<String, Error<M>>;
-    async fn state_root(&self) -> Result<U256, Error<M>>;
-    async fn state_block_number(&self) -> Result<I256, Error<M>>;
-    async fn state_block_hash(&self) -> Result<U256, Error<M>>;
+    async fn identify(&self) -> Result<String, Error>;
+    async fn state_root(&self) -> Result<U256, Error>;
+    async fn state_block_number(&self) -> Result<I256, Error>;
+    async fn state_block_hash(&self) -> Result<U256, Error>;
     /// Update the L1 state
     async fn update_state(
         &self,
         program_output: Vec<U256>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 }
 
 #[async_trait]
-impl<T, M: Middleware> StarknetSovereignContractTrait<M> for T
+impl<T> StarknetSovereignContractTrait for T
 where
-    T: AsRef<StarknetSovereignContract<M>> + Send + Sync,
+    T: AsRef<StarknetSovereignContract::StarknetSovereignContractInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
     async fn set_program_hash(
         &self,
         new_program_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .set_program_hash(new_program_hash)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().setProgramHash(new_program_hash).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().setProgramHash(new_program_hash);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 
     async fn set_config_hash(
         &self,
         new_config_hash: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .set_config_hash(new_config_hash)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().setConfigHash(new_config_hash).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().setConfigHash(new_config_hash);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 
     async fn set_message_cancellation_delay(
         &self,
         delay_in_seconds: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .set_message_cancellation_delay(delay_in_seconds)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().setMessageCancellationDelay(delay_in_seconds).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().setMessageCancellationDelay(delay_in_seconds);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 
-    async fn program_hash(&self) -> Result<U256, Error<M>> {
-        self.as_ref()
-            .program_hash()
-            .call()
-            .await
-            .map_err(Into::into)
+    async fn program_hash(&self) -> Result<U256, Error> {
+        Ok(self.as_ref().programHash().call().await?._0)
     }
 
-    async fn config_hash(&self) -> Result<U256, Error<M>> {
-        self.as_ref().config_hash().call().await.map_err(Into::into)
+    async fn config_hash(&self) -> Result<U256, Error> {
+        Ok(self.as_ref().configHash().call().await?._0)
     }
 
-    async fn identify(&self) -> Result<String, Error<M>> {
-        self.as_ref().identify().call().await.map_err(Into::into)
+    async fn identify(&self) -> Result<String, Error> {
+        Ok(self.as_ref().identify().call().await?._0)
     }
 
-    async fn state_root(&self) -> Result<U256, Error<M>> {
-        self.as_ref().state_root().call().await.map_err(Into::into)
+    async fn state_root(&self) -> Result<U256, Error> {
+        Ok(self.as_ref().stateRoot().call().await?._0)
     }
 
-    async fn state_block_number(&self) -> Result<I256, Error<M>> {
-        self.as_ref()
-            .state_block_number()
-            .call()
-            .await
-            .map_err(Into::into)
+    async fn state_block_number(&self) -> Result<I256, Error> {
+        Ok(self.as_ref().stateBlockNumber().call().await?._0)
     }
 
-    async fn state_block_hash(&self) -> Result<U256, Error<M>> {
-        self.as_ref()
-            .state_block_hash()
-            .call()
-            .await
-            .map_err(Into::into)
+    async fn state_block_hash(&self) -> Result<U256, Error> {
+        Ok(self.as_ref().stateBlockHash().call().await?._0)
     }
 
     async fn update_state(
         &self,
         program_output: Vec<U256>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .update_state(program_output)
+    ) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let from_address = self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0];
+        let gas = self.as_ref().updateState(program_output.clone()).from(from_address).estimate_gas().await.unwrap();
+        let builder = self.as_ref().updateState(program_output);
+        builder
+            .from(from_address)
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
     }
 }

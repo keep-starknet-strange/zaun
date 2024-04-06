@@ -1,67 +1,62 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
-use ethers::{
-    abi::AbiEncode,
-    contract::{ContractError, EthAbiCodec, EthAbiType},
-    prelude::abigen,
-    providers::Middleware,
-    types::{Address, Bytes, TransactionReceipt, I256, U256},
+
+use crate::LocalWalletSignerMiddleware;
+
+use alloy::{
+    contract::Error, network::Ethereum, primitives::{Address, Bytes, I256, U256}, providers::Provider, rpc::types::eth::TransactionReceipt, sol, sol_types::SolValue, transports::{http::Http, RpcError, TransportErrorKind}
 };
 
-use crate::Error;
-
-abigen!(
-    ProxySupport,
-    r#"[
-        function isFrozen() external view virtual returns (bool)
-        function initialize(bytes calldata data) external notCalledDirectly
-    ]"#,
+sol!(
+    #[allow(missing_docs)]
+    #[sol(rpc)]
+    interface ProxySupport {
+        function isFrozen() external view virtual returns (bool);
+        function initialize(bytes calldata data) external notCalledDirectly;
+    }
 );
 
 #[async_trait]
-pub trait ProxySupportTrait<M: Middleware> {
-    async fn is_frozen(&self) -> Result<bool, Error<M>>;
-    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn initialize_with<const N: usize>(
-        &self,
-        data: ProxyInitializeData<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+pub trait ProxySupportTrait
+{
+    async fn is_frozen(&self) -> Result<bool, Error>;
+    async fn initialize(&self, data: Bytes) -> Result<TransactionReceipt, RpcError<TransportErrorKind>>;
 }
 
 #[async_trait]
-impl<T, M: Middleware> ProxySupportTrait<M> for T
+impl<T> ProxySupportTrait for T
 where
-    T: AsRef<ProxySupport<M>> + Send + Sync,
+    T: AsRef<ProxySupport::ProxySupportInstance<Ethereum, Http<reqwest::Client>, Arc<LocalWalletSignerMiddleware>>> + Send + Sync,
 {
-    async fn is_frozen(&self) -> Result<bool, Error<M>> {
-        self.as_ref().is_frozen().call().await.map_err(Into::into)
+    async fn is_frozen(&self) -> Result<bool, Error> {
+        Ok(self.as_ref().isFrozen().call().await?._0)
     }
 
-    async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .initialize(data)
+    async fn initialize(&self, data: Bytes) -> Result<TransactionReceipt, RpcError<TransportErrorKind>> {
+        let base_fee = self.as_ref().provider().as_ref().get_gas_price().await.unwrap();
+        let builder = self.as_ref().initialize(data);
+        let gas = builder.estimate_gas().await.unwrap();
+        builder
+            .from(self.as_ref().provider().as_ref().get_accounts().await.unwrap()[0])
+            .nonce(2)
+            .gas(gas)
+            .gas_price(base_fee)
             .send()
+            .await.unwrap()
+            .get_receipt()
             .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn initialize_with<const N: usize>(
-        &self,
-        data: ProxyInitializeData<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.initialize(data.into()).await
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct CoreContractState {
     pub state_root: U256,
     pub block_number: I256,
     pub block_hash: U256,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct CoreContractInitData {
     pub program_hash: U256,
     pub verifier_address: Address,
@@ -79,9 +74,14 @@ pub struct ProxyInitializeData<const N: usize> {
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     fn into(self) -> Vec<u8> {
         [
-            self.sub_contract_addresses.encode(),
-            self.eic_address.encode(),
-            self.init_data.encode(),
+            self.sub_contract_addresses.abi_encode(),
+            self.eic_address.abi_encode(),
+            self.init_data.program_hash.abi_encode(),
+            self.init_data.verifier_address.abi_encode(),
+            self.init_data.config_hash.abi_encode(),
+            self.init_data.initial_state.state_root.abi_encode(),
+            self.init_data.initial_state.block_number.abi_encode(),
+            self.init_data.initial_state.block_hash.abi_encode(),
         ]
         .concat()
     }
@@ -98,7 +98,7 @@ mod tests {
     use super::ProxyInitializeData;
 
     #[test]
-    fn test_initialize_calldata_encoding() {
+    fn test_calldata_encoding() {
         let calldata = ProxyInitializeData::<0> {
             sub_contract_addresses: [],
             eic_address: Default::default(),
