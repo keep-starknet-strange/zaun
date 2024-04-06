@@ -6,7 +6,6 @@ authors.workspace = true
 
 [dependencies]
 starknet-core-contract-client = { path = "../starknet-core-contract-client" }
-#ethers = { workspace = true }
 dirs = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
@@ -14,8 +13,6 @@ hex = { workspace = true }
 alloy = { workspace = true }
 url = { workspace = true }
 reqwest = { workspace = true }
-log = { workspace = true }
-test-log = { workspace = true }
 
 [dev-dependencies]
 tokio = { version = "1.29.1", features = ["rt", "macros", "parking_lot"] }

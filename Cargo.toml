@@ -12,7 +12,6 @@ repository = "https://github.com/keep-starknet-strange/zaun/"
 version = "0.1.0"
 
 [workspace.dependencies]
-#ethers = { git = "https://github.com/gakonst/ethers-rs", rev = "f0e5b194f09c533feb10d1a686ddb9e5946ec107" }
 log = "0.4.20"
 thiserror = "1.0.51"
 num-traits = "0.2.17"
@@ -35,7 +34,6 @@ alloy = { git = "https://github.com/alloy-rs/alloy", rev = "66fa192", features =
 ] }
 reqwest = { version = "0.12", default-features = false }
 url = "2.4.1"
-test-log = "0.2.15"
 tokio = "1"
 
 [patch.crates-io]

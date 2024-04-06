@@ -72,7 +72,6 @@ impl EthereumSandbox {
         let wallet: LocalWallet = String::from(ANVIL_DEFAULT_PRIVATE_KEY).parse::<LocalWallet>().map_err(Error::PrivateKeyParse)?;
         let wallet = wallet.with_chain_id(Some(ANVIL_DEFAULT_CHAIN_ID));
         let rpc_client = RpcClient::new_http(Url::parse(&anvil_endpoint).map_err(Error::ProviderUrlParse)?);
-        // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil_endpoint.as_str()).await?;
         let provider_with_signer = ProviderBuilder::new()
             .signer(EthereumSigner::from(wallet))
             .on_client(rpc_client);
@@ -96,11 +95,9 @@ impl EthereumSandbox {
         });
 
         // Will panic if invalid path
-        // let anvil = Anvil::at(anvil_path).spawn();
         let anvil = Anvil::at(anvil_path).spawn();
         let wallet: LocalWallet = anvil.keys()[0].clone().try_into().expect("Failed to parse private key");
         let rpc_client = RpcClient::new_http(Url::parse(&anvil.endpoint()).map_err(Error::ProviderUrlParse)?);
-        // let http_provider = RootProvider::<Ethereum, BoxTransport>::connect_builtin(anvil.endpoint().as_str()).await?;
         let provider_with_signer = ProviderBuilder::new()
             .signer(EthereumSigner::from(wallet))
             .on_client(rpc_client);
