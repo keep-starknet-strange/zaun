@@ -130,9 +130,9 @@ impl EthereumInstance {
     pub fn spawn(rpc_url: String, priv_key: String, chain_id: u64) -> Self {
 
         let provider = Provider::<Http>::try_from(rpc_url).expect("Failed to connect to the given rpc url");
-        let wallet: LocalWallet = priv_key.parse::<LocalWallet>().unwrap();
+        let wallet: LocalWallet = priv_key.parse::<LocalWallet>().expect("Error in initializing local wallet");
 
-        let client = SignerMiddleware::new(provider.clone(), wallet.with_chain_id(chain_id));
+        let client = SignerMiddleware::new(provider, wallet.with_chain_id(chain_id));
 
         Self { client: Arc::new(client) }
     }
