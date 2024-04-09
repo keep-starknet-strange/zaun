@@ -23,6 +23,8 @@ pub enum Error {
     EthersProvider(#[from] ProviderError),
     #[error("Invalid contract build artifacts: missing field `{0}`")]
     ContractBuildArtifacts(&'static str),
+    #[error("Failed to deploy the contract : {0}")]
+    DeployContract(#[from] ethereum_instance::Error)
 }
 
 const UNSAFE_PROXY: &str = include_str!("./artifacts/UnsafeProxy.json");
@@ -35,10 +37,10 @@ pub async fn deploy_contract_behind_unsafe_proxy<T: Tokenize>(
     contract_path: &str,
     constructor_args: T,
 ) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error> {
-    let contract = deploy_contract(client.clone(), contract_path, constructor_args).await.unwrap();
+    let contract = deploy_contract(client.clone(), contract_path, constructor_args).await?;
 
     let proxy_contract =
-        deploy_contract(client.clone(), UNSAFE_PROXY, contract.address()).await.unwrap();
+        deploy_contract(client.clone(), UNSAFE_PROXY, contract.address()).await?;
 
     return Ok(proxy_contract);
 }
