@@ -119,3 +119,41 @@ impl EthereumClient {
         self.signer.clone()
     }
 }
+
+
+/// Deploys new smart contract using:
+///     - Forge build artifacts (JSON file contents)
+///     - Constructor args (use () if no args expected)
+pub async fn deploy_contract<T: Tokenize>(
+    client: Arc<LocalWalletSignerMiddleware>,
+    contract_build_artifacts: &str,
+    contructor_args: T,
+) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error>
+{
+    let (abi, bytecode) = {
+        let mut artifacts: serde_json::Value = serde_json::from_str(contract_build_artifacts)?;
+        let abi_value = artifacts
+            .get_mut("abi")
+            .ok_or_else(|| Error::ContractBuildArtifacts("abi"))?
+            .take();
+        let bytecode_value = artifacts
+            .get_mut("bytecode")
+            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode"))?
+            .get_mut("object")
+            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode.object"))?
+            .take();
+
+        let abi = serde_json::from_value(abi_value)?;
+        let bytecode = Bytes::from_hex(bytecode_value.as_str().ok_or(Error::BytecodeObject)?)?;
+        (abi, bytecode)
+    };
+
+    let factory = ContractFactory::new(abi, bytecode, client.clone());
+
+    Ok(factory
+        .deploy(contructor_args)
+        .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?
+        .send()
+        .await
+        .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?)
+}

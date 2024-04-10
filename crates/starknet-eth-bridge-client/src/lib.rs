@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use clients::eth_bridge::StarknetEthBridgeContractClient;
 use starknet_proxy_client::deploy::{deploy_contract_behind_unsafe_proxy, Error};
-use utils::{LocalWalletSignerMiddleware, NoConstructorArg};
+use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 pub mod interfaces;
 pub mod clients;
 
@@ -12,7 +12,7 @@ pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>
 ) -> Result<StarknetEthBridgeContractClient, Error> {
     // Deploy the Eth Bridge contract (no explicit constructor)
-    let eth_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_ETH_BRIDGE, NoConstructorArg).await?;
+    let eth_bridge_contract = deploy_contract_behind_unsafe_proxy(client.clone(), STARKNET_ETH_BRIDGE, NO_CONSTRUCTOR_ARG).await?;
 
     Ok(StarknetEthBridgeContractClient::new(
         eth_bridge_contract.address(),

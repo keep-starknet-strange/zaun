@@ -7,7 +7,7 @@ use ethers::signers::LocalWallet;
 
 pub type LocalWalletSignerMiddleware = SignerMiddleware<Provider<Http>, LocalWallet>;
 
-pub type NoConstructorArg = ();
+pub const NO_CONSTRUCTOR_ARG:() = ();
 
 pub trait StarknetContractClient {
     fn address(&self) -> Address;
