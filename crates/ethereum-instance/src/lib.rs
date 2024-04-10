@@ -44,41 +44,42 @@ pub enum Error {
 /// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum 
 pub struct EthereumClient {
     /// If initialized keeps an Anvil instance to properly shutdown it at the end
-    _anvil: Option<AnvilInstance>,
+    client: Option<AnvilInstance>,
     /// Pre-configured local signer
     signer: Arc<LocalWalletSignerMiddleware>,
 }
 
 impl EthereumClient {
     /// Creates a new sandbox instance.
-    /// Will try to attach to already running Anvil instance using one
-    /// of the following endpoints:
-    ///     - `anvil_endpoint` parameter (if specified)
-    ///     - ${ANVIL_ENDPOINT} environment variable (if set)
-    ///     - http://127.0.0.1:8545 (default)
-    /// Also default values for chain ID and private keys will be used.
-    pub fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
-        let anvil_endpoint = anvil_endpoint.unwrap_or_else(|| {
+    /// Will try to attach to already running Anvil instance or custom rpc and private key provided to the function.
+    /// if not provided any argument it will attack to a default anvil instance with default anvil params.
+    pub fn attach(rpc_endpoint: Option<String>, priv_key: Option<String>) -> Result<Self, Error> {
+        let rpc_endpoint = rpc_endpoint.unwrap_or_else(|| {
             std::env::var("ANVIL_ENDPOINT")
                 .map(Into::into)
                 .ok()
                 .unwrap_or_else(|| ANVIL_DEFAULT_ENDPOINT.into())
         });
 
-        let provider = Provider::<Http>::try_from(anvil_endpoint)
+        let provider = Provider::<Http>::try_from(rpc_endpoint)
             .map_err(|_| Error::UrlParser)?
             .interval(Duration::from_millis(POLLING_INTERVAL_MS));
 
-        let wallet: LocalWallet = ANVIL_DEFAULT_PRIVATE_KEY
+        let priv_key  = priv_key.unwrap_or_else(|| {
+            ANVIL_DEFAULT_PRIVATE_KEY.to_owned()
+        });
+
+        let wallet: LocalWallet = priv_key
             .parse()
             .expect("Failed to parse private key");
+    
         let client = SignerMiddleware::new(
             provider.clone(),
             wallet.with_chain_id(ANVIL_DEFAULT_CHAIN_ID),
         );
 
         Ok(Self {
-            _anvil: None,
+            client: None,
             signer: Arc::new(client),
         })
     }
@@ -108,7 +109,7 @@ impl EthereumClient {
             SignerMiddleware::new(provider.clone(), wallet.with_chain_id(anvil.chain_id()));
 
         Self {
-            _anvil: Some(anvil),
+            client: Some(anvil),
             signer: Arc::new(client),
         }
     }
@@ -117,61 +118,4 @@ impl EthereumClient {
     pub fn signer(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.signer.clone()
     }
-}
-
-
-/// Wrapper For Spawning a ethereum instance using the provider
-/// Used for deploying on the main network purposes
-pub struct EthereumInstance {
-    client: Arc<LocalWalletSignerMiddleware>
-}
-
-impl EthereumInstance {
-    pub fn spawn(rpc_url: String, priv_key: String, chain_id: u64) -> Self {
-
-        let provider = Provider::<Http>::try_from(rpc_url).expect("Failed to connect to the given rpc url");
-        let wallet: LocalWallet = priv_key.parse::<LocalWallet>().expect("Error in initializing local wallet");
-
-        let client = SignerMiddleware::new(provider, wallet.with_chain_id(chain_id));
-
-        Self { client: Arc::new(client) }
-    }
-
-    pub fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
-        self.client.clone()
-    }
-}
-
-pub async fn deploy_contract<T: Tokenize>(
-    client: Arc<LocalWalletSignerMiddleware>,
-    contract_build_artifacts: &str,
-    contructor_args: T,
-) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error>
-{
-    let (abi, bytecode) = {
-        let mut artifacts: serde_json::Value = serde_json::from_str(contract_build_artifacts)?;
-        let abi_value = artifacts
-            .get_mut("abi")
-            .ok_or_else(|| Error::ContractBuildArtifacts("abi"))?
-            .take();
-        let bytecode_value = artifacts
-            .get_mut("bytecode")
-            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode"))?
-            .get_mut("object")
-            .ok_or_else(|| Error::ContractBuildArtifacts("bytecode.object"))?
-            .take();
-
-        let abi = serde_json::from_value(abi_value)?;
-        let bytecode = Bytes::from_hex(bytecode_value.as_str().ok_or(Error::BytecodeObject)?)?;
-        (abi, bytecode)
-    };
-
-    let factory = ContractFactory::new(abi, bytecode, client.clone());
-
-    Ok(factory
-        .deploy(contructor_args)
-        .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?
-        .send()
-        .await
-        .map_err(Into::<ContractError<LocalWalletSignerMiddleware>>::into)?)
 }
