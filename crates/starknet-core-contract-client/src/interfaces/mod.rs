@@ -3,7 +3,6 @@ mod governed_finalizable;
 mod messaging;
 mod messaging_events;
 mod operator;
-mod proxy_support;
 mod sovereign_core_contract;
 mod validity_core_contract;
 
@@ -16,8 +15,5 @@ pub use messaging_events::{
     StarknetMessagingEvents,
 };
 pub use operator::{Operator, OperatorTrait};
-pub use proxy_support::{
-    CoreContractInitData, CoreContractState, ProxyInitializeData, ProxySupport, ProxySupportTrait,
-};
 pub use sovereign_core_contract::{StarknetSovereignContract, StarknetSovereignContractTrait};
 pub use validity_core_contract::{StarknetValidityContract, StarknetValidityContractTrait};

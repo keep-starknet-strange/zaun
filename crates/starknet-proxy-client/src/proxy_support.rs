@@ -7,7 +7,7 @@ use ethers::{
     types::{Address, Bytes, TransactionReceipt, I256, U256},
 };
 
-use crate::Error;
+use utils::errors::Error;
 
 abigen!(
     ProxySupport,

@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
   "crates/starknet-core-contract-client",
-  "crates/sandbox",
+  "crates/ethereum-instance", "crates/starknet-eth-bridge-client", "crates/starknet-token-bridge-client", "crates/starkgate-manager-client", "crates/utils", "crates/starknet-erc20-client", "crates/starkgate-registry-client", "crates/starknet-proxy-client",
 ]
 
 [workspace.package]

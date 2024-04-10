@@ -1,26 +1,20 @@
 use ethers::abi::Tokenize;
-use ethers::contract::ContractError;
+use ethers::contract::{ContractError, ContractFactory, ContractInstance};
 use ethers::prelude::SignerMiddleware;
-use ethers::prelude::{ContractFactory, ContractInstance};
 use ethers::providers::{Http, Provider, ProviderError};
 use ethers::signers::{LocalWallet, Signer};
-use ethers::types::Bytes;
-use ethers::utils::hex::FromHex;
 use ethers::utils::{Anvil, AnvilInstance};
+use ethers::types::Bytes;
+use hex::FromHex;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
-/// Unsafe proxy is a straightforward implementation of the delegate proxy contract
-/// that is used to make Starknet core contract upgradeable.
-/// This implementation DOES NOT restrict who can invoke the core contract.
-/// For more information see https://l2beat.com/scaling/projects/starknet#contracts
-pub mod unsafe_proxy;
 
 /// Ethers library allows multiple signer backends and transports.
 /// For simplicity we use local wallet (basically private key) and
 /// HTTP transport in this crate.
-pub use starknet_core_contract_client::LocalWalletSignerMiddleware;
+pub use utils::LocalWalletSignerMiddleware;
 
 /// Sandbox is typically used for E2E scenarios so we need to speed things up
 const POLLING_INTERVAL_MS: u64 = 10;
@@ -47,45 +41,46 @@ pub enum Error {
     ContractBuildArtifacts(&'static str),
 }
 
-/// A convenient wrapper over an already running or spawned Anvil local devnet
-pub struct EthereumSandbox {
+/// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum 
+pub struct EthereumClient {
     /// If initialized keeps an Anvil instance to properly shutdown it at the end
-    _anvil: Option<AnvilInstance>,
+    client: Option<AnvilInstance>,
     /// Pre-configured local signer
-    client: Arc<LocalWalletSignerMiddleware>,
+    signer: Arc<LocalWalletSignerMiddleware>,
 }
 
-impl EthereumSandbox {
+impl EthereumClient {
     /// Creates a new sandbox instance.
-    /// Will try to attach to already running Anvil instance using one
-    /// of the following endpoints:
-    ///     - `anvil_endpoint` parameter (if specified)
-    ///     - ${ANVIL_ENDPOINT} environment variable (if set)
-    ///     - http://127.0.0.1:8545 (default)
-    /// Also default values for chain ID and private keys will be used.
-    pub fn attach(anvil_endpoint: Option<String>) -> Result<Self, Error> {
-        let anvil_endpoint = anvil_endpoint.unwrap_or_else(|| {
-            std::env::var("ANVIL_ENDPOINT")
+    /// Will try to attach to already running Anvil instance or custom rpc and private key provided to the function.
+    /// if not provided any argument it will attack to a default anvil instance with default anvil params.
+    pub fn attach(rpc_endpoint: Option<String>, priv_key: Option<String>) -> Result<Self, Error> {
+        let rpc_endpoint = rpc_endpoint.unwrap_or_else(|| {
+            std::env::var("ETH_RPC_ENDPOINT")
                 .map(Into::into)
                 .ok()
                 .unwrap_or_else(|| ANVIL_DEFAULT_ENDPOINT.into())
         });
 
-        let provider = Provider::<Http>::try_from(anvil_endpoint)
+        let provider = Provider::<Http>::try_from(rpc_endpoint)
             .map_err(|_| Error::UrlParser)?
             .interval(Duration::from_millis(POLLING_INTERVAL_MS));
 
-        let wallet: LocalWallet = ANVIL_DEFAULT_PRIVATE_KEY
+        let priv_key  = priv_key.unwrap_or_else(|| {
+            ANVIL_DEFAULT_PRIVATE_KEY.to_owned()
+        });
+
+        let wallet: LocalWallet = priv_key
             .parse()
             .expect("Failed to parse private key");
+    
         let client = SignerMiddleware::new(
             provider.clone(),
             wallet.with_chain_id(ANVIL_DEFAULT_CHAIN_ID),
         );
 
         Ok(Self {
-            _anvil: None,
-            client: Arc::new(client),
+            client: None,
+            signer: Arc::new(client),
         })
     }
 
@@ -114,16 +109,17 @@ impl EthereumSandbox {
             SignerMiddleware::new(provider.clone(), wallet.with_chain_id(anvil.chain_id()));
 
         Self {
-            _anvil: Some(anvil),
-            client: Arc::new(client),
+            client: Some(anvil),
+            signer: Arc::new(client),
         }
     }
 
     /// Returns local client configured for the running Anvil instance
-    pub fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
-        self.client.clone()
+    pub fn signer(&self) -> Arc<LocalWalletSignerMiddleware> {
+        self.signer.clone()
     }
 }
+
 
 /// Deploys new smart contract using:
 ///     - Forge build artifacts (JSON file contents)

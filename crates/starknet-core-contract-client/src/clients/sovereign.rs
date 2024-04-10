@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
-use crate::{
-    interfaces::{
-        GovernedFinalizable, Operator, ProxySupport, StarknetGovernance, StarknetMessaging,
+use crate::interfaces::{
+        GovernedFinalizable, Operator, StarknetGovernance, StarknetMessaging,
         StarknetSovereignContract,
-    },
-    LocalWalletSignerMiddleware, StarknetCoreContractClient,
-};
+    };
+use starknet_proxy_client::proxy_support::ProxySupport;
+use utils::{ LocalWalletSignerMiddleware, StarknetContractClient };
 use ethers::types::Address;
 
 /// Client to interact with a Starknet core contract running in `Sovereign` mode
@@ -65,7 +64,7 @@ impl AsRef<GovernedFinalizable<LocalWalletSignerMiddleware>> for StarknetSoverei
     }
 }
 
-impl StarknetCoreContractClient for StarknetSovereignContractClient {
+impl StarknetContractClient for StarknetSovereignContractClient {
     fn address(&self) -> Address {
         self.core_contract.address()
     }
