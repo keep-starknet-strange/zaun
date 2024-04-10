@@ -55,7 +55,7 @@ impl EthereumClient {
     /// if not provided any argument it will attack to a default anvil instance with default anvil params.
     pub fn attach(rpc_endpoint: Option<String>, priv_key: Option<String>) -> Result<Self, Error> {
         let rpc_endpoint = rpc_endpoint.unwrap_or_else(|| {
-            std::env::var("ANVIL_ENDPOINT")
+            std::env::var("ETH_RPC_ENDPOINT")
                 .map(Into::into)
                 .ok()
                 .unwrap_or_else(|| ANVIL_DEFAULT_ENDPOINT.into())
