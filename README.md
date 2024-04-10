@@ -39,6 +39,11 @@ Zaun sandbox crate can be used as dev dependency in external projects. If any ch
 make artifacts
 ```
 
+## Bridge Contracts Sources
+
+StarknetEthBridge.sol - https://etherscan.io/address/0x455603AD9ae671F6c1f0f746F24d7904cA603581#code
+StarknetTokenBridge.sol (Starkgate v2.0.1) - https://github.com/starknet-io/starkgate-contracts/blob/5a10fd263d29cd032b7229691d043520edae0737/src/solidity/StarknetTokenBridge.sol
+
 ## StarkNet Consensus Protocol Contracts
 
 PoC solidity implementation of the following Starknet Decentralized Protocol proposal:
