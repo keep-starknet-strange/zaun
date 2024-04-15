@@ -7,3 +7,6 @@
 [submodule "lib/cairo-lang"]
 	path = lib/cairo-lang
 	url = https://github.com/starkware-libs/cairo-lang
+[submodule "lib/piltover"]
+	path = lib/piltover
+	url = https://github.com/keep-starknet-strange/piltover
