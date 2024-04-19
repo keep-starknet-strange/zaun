@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
   "crates/starknet-core-contract-client",
-  "crates/ethereum-instance", "crates/starknet-eth-bridge-client", "crates/starknet-token-bridge-client", "crates/starkgate-manager-client", "crates/utils", "crates/starknet-erc20-client", "crates/starkgate-registry-client", "crates/starknet-proxy-client",
+  "crates/ethereum-instance", "crates/starknet-eth-bridge-client", "crates/starknet-token-bridge-client", "crates/starkgate-manager-client", "crates/utils", "crates/starknet-erc20-client", "crates/starkgate-registry-client", "crates/starknet-proxy-client", "crates/appchain-core-contract-client",
 ]
 
 [workspace.package]
@@ -20,6 +20,7 @@ async-trait = "0.1.74"
 dirs = "5.0.1"
 serde_json = "1.0.108"
 hex = "0.4.3"
-
+starknet = "0.10.0"
+tokio = { version = "1.29.1", features = ["full"] }
 
 
