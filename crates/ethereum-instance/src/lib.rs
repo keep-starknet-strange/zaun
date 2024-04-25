@@ -53,7 +53,7 @@ impl EthereumClient {
     /// Creates a new sandbox instance.
     /// Will try to attach to already running Anvil instance or custom rpc and private key provided to the function.
     /// if not provided any argument it will attack to a default anvil instance with default anvil params.
-    pub fn attach(rpc_endpoint: Option<String>, priv_key: Option<String>) -> Result<Self, Error> {
+    pub fn attach(rpc_endpoint: Option<String>, priv_key: Option<String>, chain_id: Option<u64>) -> Result<Self, Error> {
         let rpc_endpoint = rpc_endpoint.unwrap_or_else(|| {
             std::env::var("ETH_RPC_ENDPOINT")
                 .map(Into::into)
@@ -72,10 +72,14 @@ impl EthereumClient {
         let wallet: LocalWallet = priv_key
             .parse()
             .expect("Failed to parse private key");
-    
+
+        let chain_id = chain_id.unwrap_or_else(|| {
+            ANVIL_DEFAULT_CHAIN_ID
+        });
+
         let client = SignerMiddleware::new(
             provider.clone(),
-            wallet.with_chain_id(ANVIL_DEFAULT_CHAIN_ID),
+            wallet.with_chain_id(chain_id),
         );
 
         Ok(Self {
