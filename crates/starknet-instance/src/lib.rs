@@ -3,12 +3,12 @@ use starknet::{
         jsonrpc::{HttpTransport, JsonRpcClient},
         Url
     },
-    core::types::{TransactionReceipt, DeployTransaction},
-    signers::LocalWallet,
-    accounts::SingleOwnerAccount,
-    contract::ContractFactory,
+    //core::types::{TransactionReceipt, DeployTransaction},
+    //signers::LocalWallet,
+    //accounts::SingleOwnerAccount,
+    //contract::ContractFactory,
 };
-use tokio;
+//use tokio;
 
 // pub struct StarkNetInstance {
 //     provider: Box<dyn Provider>,
@@ -70,4 +70,5 @@ impl Client {
     pub fn get_starknet_client(&self) -> JsonRpcClient<HttpTransport> {
         JsonRpcClient::new(HttpTransport::new(self.url.clone()))
     }
-}       
+}
+

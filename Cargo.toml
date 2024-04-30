@@ -35,5 +35,5 @@ starknet-ff = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "
 starknet-signers = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
 starknet-accounts = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
 starknet-contract = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
-
+url = "2.4.1"
 
