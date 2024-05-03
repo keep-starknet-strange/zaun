@@ -1,15 +1,25 @@
 use starknet::accounts::SingleOwnerAccount;
+use starknet_ff::FieldElement;
 use std::sync::Arc;
-use crate::interfaces::AppChainCoreContractTrait;
+use crate::interfaces::Operator;
 
-// pub struct AppChainCoreContractClient {
-//     core_contract: AppChainCoreContractTrait<Arc<SingleOwnerAccount<Provider<HttpTransport>>>>,
-// }
+use common::LocalWalletSignerMiddleware;
 
-// impl AppChainCoreContractClient {
-//     pub fn new(provider: Arc<Provider<HttpTransport>>, account: Arc<SingleOwnerAccount<dyn Provider<HttpTransport>>>) -> Self {
-//         Self {
-//             core_contract: AppChainCoreContractTrait::new(provider, account),
-//         }
-//     }
-// }
+
+pub struct StarknetCoreContractClient {
+    operator: Operator<LocalWalletSignerMiddleware>,
+}
+
+impl StarknetCoreContractClient {
+    pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+        Self {
+            operator: Operator::new(address, client.clone()),
+        }
+    }
+}   
+
+impl AsRef<Operator<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
+    fn as_ref(&self) -> &Operator<LocalWalletSignerMiddleware> {
+        &self.operator
+    }
+}

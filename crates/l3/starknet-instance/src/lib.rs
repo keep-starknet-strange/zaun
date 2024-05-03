@@ -4,7 +4,7 @@ use starknet_core::types::contract::{CompiledClass, SierraClass};
 use starknet_signers::{LocalWallet, SigningKey};
 use async_trait::async_trait;
 use starknet_accounts::{
-    Account, SingleOwnerAccount
+    Account, SingleOwnerAccount, ConnectedAccount, Execution
 };
 use starknet_core::utils::get_selector_from_name;
 use starknet_ff::FieldElement;
@@ -20,7 +20,6 @@ pub const MAX_FEE_OVERRIDE: &str = "0x100000";
 
 pub type LocalWalletSignerMiddleware = SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>;
 type RpcAccount<'a> = SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>;
-pub type RpcOzAccountFactory<'a> = OpenZeppelinAccountFactory<LocalWallet, &'a JsonRpcClient<HttpTransport>>;
 pub type TransactionExecution<'a> = Execution<'a, RpcAccount<'a>>;
 
 
@@ -106,15 +105,17 @@ pub async fn deploy_contract<T>(
 }
 
 
-pub async fn invoke_contract(
-    client: LocalWalletSignerMiddleware,
+pub async fn invoke_contract<'a>(
+    client: &'a SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
+    // client: LocalWalletSignerMiddleware,
     address: FieldElement,
-    method: &str,
+    method: &'a str,
     calldata: Vec<FieldElement>,
-) -> TransactionExecution {
+) -> TransactionExecution<'a> {
     let calls = vec![Call { to: address, selector: get_selector_from_name(method).unwrap(), calldata }];
     let max_fee = FieldElement::from_hex_be(MAX_FEE_OVERRIDE).unwrap();
-    client.execute(calls).max_fee(max_fee).send()
-    .await
-    .expect("Unable to interact with contract");
+    // client.execute(calls).max_fee(max_fee).send()
+    // .await
+    // .expect("Unable to interact with contract");
+    client.execute(calls).max_fee(max_fee)
 }

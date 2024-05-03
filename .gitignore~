@@ -17,3 +17,6 @@ docs/
 script/anvil.json
 
 .idea
+.vscode
+.python-version
+Cargo.lock

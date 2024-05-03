@@ -1,16 +1,44 @@
 use async_trait::async_trait;
 use starknet_core::types::FieldElement;
 use starknet_core::types::TransactionReceipt;
-use starknet_providers::ProviderError;
+use starknet_providers::{Provider, ProviderError};
 use common::errors::Error;
-use starknet_core::types::EthAddress;
+use starknet_instance::invoke_contract;
+use starknet_core::types::StarknetError;
+use std::sync::Arc;
+
+// Operator accepts LocalWalletSignerMiddleware as argument
+pub struct Operator<M>
+where M: Provider,
+{
+    client: M,
+    address: FieldElement,
+}
+
+impl<M> Operator<M>
+where M: Provider,
+{
+    pub fn new(address: FieldElement, client: Arc<M>) -> Self {
+        Self {
+            client: client,
+            address: address,
+        }
+    }
+    pub fn register_operator(&self, new_operator: FieldElement) -> Result<Option<TransactionReceipt>, Error> {
+        invoke_contract(
+            &self.client,
+            &self.address,
+            "register_operator",
+            vec![new_operator.into()],
+        )
+    }
+}
+
 
 #[async_trait]
-pub trait OperatorTrait {
-    // Add other necessary methods
-    // register_operator - address
+pub trait OperatorTrait<M: Provider + Send> {
     async fn register_operator(
-        &self, new_operator: EthAddress
+        &self, new_operator: FieldElement
     ) -> Result<Option<TransactionReceipt>, Error>;
     // unregister_operator - address
     // is_operator - address -> Returns(bool)
@@ -21,16 +49,18 @@ pub trait OperatorTrait {
 }
 
 #[async_trait]
-impl OperatorTrait 
+impl<T, M> OperatorTrait<M> for T
+where
+    T: AsRef<Operator<M>> + Send + Sync,
+    M: Provider + Send,
 {
     async fn register_operator(
-        &self, new_operator: EthAddress
+        &self, new_operator: FieldElement
     ) -> Result<Option<TransactionReceipt>, Error> {
-        // self.as_ref()
-        //     .register_operator(new_operator)
-        //     .send()
-        //     .await
-        //     .map_err(Into::<ProviderError>::into)?
-        //     .map_err(Into::into)
+        self.as_ref()
+            .register_operator(new_operator).await
+            .map_err(Into::<StarknetError>::into)?
+            .await
+            .map_err(Into::into)
     }
 }
