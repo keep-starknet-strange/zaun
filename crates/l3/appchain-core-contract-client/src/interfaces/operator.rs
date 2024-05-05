@@ -1,45 +1,45 @@
 use async_trait::async_trait;
+use common::invoke_contract;
+use common::LocalWalletSignerMiddleware;
+use starknet_accounts::Execution;
 use starknet_core::types::FieldElement;
-use starknet_core::types::TransactionReceipt;
-use starknet_providers::{Provider, ProviderError};
-use common::errors::Error;
-use starknet_instance::invoke_contract;
 use starknet_core::types::StarknetError;
 use std::sync::Arc;
 
 // Operator accepts LocalWalletSignerMiddleware as argument
-pub struct Operator<M>
-where M: Provider,
-{
-    client: M,
+pub struct Operator {
+    client: Arc<LocalWalletSignerMiddleware>,
     address: FieldElement,
 }
 
-impl<M> Operator<M>
-where M: Provider,
-{
-    pub fn new(address: FieldElement, client: Arc<M>) -> Self {
+impl Operator {
+    pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
         Self {
             client: client,
             address: address,
         }
     }
-    pub fn register_operator(&self, new_operator: FieldElement) -> Result<Option<TransactionReceipt>, Error> {
-        invoke_contract(
+    pub async fn register_operator(
+        &self,
+        new_operator: FieldElement,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+        let execution = invoke_contract(
             &self.client,
-            &self.address,
+            self.address,
             "register_operator",
             vec![new_operator.into()],
         )
+        .await;
+        Ok(Some(execution))
     }
 }
 
-
 #[async_trait]
-pub trait OperatorTrait<M: Provider + Send> {
+pub trait OperatorTrait {
     async fn register_operator(
-        &self, new_operator: FieldElement
-    ) -> Result<Option<TransactionReceipt>, Error>;
+        &self,
+        new_operator: FieldElement,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError>;
     // unregister_operator - address
     // is_operator - address -> Returns(bool)
     // set_program_info - program_hash, config_hash
@@ -49,18 +49,17 @@ pub trait OperatorTrait<M: Provider + Send> {
 }
 
 #[async_trait]
-impl<T, M> OperatorTrait<M> for T
+impl<T> OperatorTrait for T
 where
-    T: AsRef<Operator<M>> + Send + Sync,
-    M: Provider + Send,
+    T: AsRef<Operator> + Send + Sync,
 {
     async fn register_operator(
-        &self, new_operator: FieldElement
-    ) -> Result<Option<TransactionReceipt>, Error> {
+        &self,
+        new_operator: FieldElement,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
         self.as_ref()
-            .register_operator(new_operator).await
-            .map_err(Into::<StarknetError>::into)?
+            .register_operator(new_operator)
             .await
-            .map_err(Into::into)
+            .map_err(Into::<StarknetError>::into)
     }
 }

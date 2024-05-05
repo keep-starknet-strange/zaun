@@ -1,13 +1,11 @@
-use starknet::accounts::SingleOwnerAccount;
+use crate::interfaces::Operator;
 use starknet_ff::FieldElement;
 use std::sync::Arc;
-use crate::interfaces::Operator;
 
 use common::LocalWalletSignerMiddleware;
 
-
 pub struct StarknetCoreContractClient {
-    operator: Operator<LocalWalletSignerMiddleware>,
+    operator: Operator,
 }
 
 impl StarknetCoreContractClient {
@@ -16,10 +14,10 @@ impl StarknetCoreContractClient {
             operator: Operator::new(address, client.clone()),
         }
     }
-}   
+}
 
-impl AsRef<Operator<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
-    fn as_ref(&self) -> &Operator<LocalWalletSignerMiddleware> {
+impl AsRef<Operator> for StarknetCoreContractClient {
+    fn as_ref(&self) -> &Operator {
         &self.operator
     }
 }
