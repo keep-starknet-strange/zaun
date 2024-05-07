@@ -1,5 +1,5 @@
 // use starknet_core::types::ContractErrorData;
-use starknet_core::types::StarknetError::ContractError;
+// use starknet_core::types::StarknetError::ContractError;
 use starknet_providers::ProviderError;
 use thiserror::Error;
 

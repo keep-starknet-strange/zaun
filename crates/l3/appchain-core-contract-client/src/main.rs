@@ -5,7 +5,7 @@ use starknet_core::types::contract::{CompiledClass, SierraClass};
 //use starknet::accounts::{ExecutionEncoding, Execution, Declaration, AccountDeployment, OpenZeppelinAccountFactory};
 use async_trait::async_trait;
 use starknet_accounts::{
-    Account, AccountDeployment, AccountFactory, Declaration, Execution, OpenZeppelinAccountFactory,
+    Account, AccountDeployment, Declaration, Execution, OpenZeppelinAccountFactory,
     SingleOwnerAccount,
 };
 use starknet_contract::ContractFactory;
@@ -144,6 +144,7 @@ async fn starknet_core_contract_deploy() -> Result<(), Box<dyn std::error::Error
         true,
     );
     deploy_tx.deployed_address();
+    
     // Print
     //println!("Contract deployed at address: {:?}", deploy_tx.deployed_address());
     // print url

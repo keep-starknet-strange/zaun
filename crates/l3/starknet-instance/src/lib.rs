@@ -1,16 +1,12 @@
-use async_trait::async_trait;
-use starknet_accounts::{Account, ConnectedAccount, Execution, SingleOwnerAccount};
+use starknet_accounts::{Account, Execution, SingleOwnerAccount};
 use starknet_contract::ContractFactory;
 use starknet_core::types::contract::{CompiledClass, SierraClass};
 use starknet_ff::FieldElement;
-use starknet_providers::{
-    jsonrpc::{HttpTransport, JsonRpcClient},
-    sequencer::models::L1Address,
-};
+use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_signers::{LocalWallet, SigningKey};
 use url::Url;
 
-const STARKNET_DEFAULT_URL: &str = "http://0.0.0.0:5050";
+// const STARKNET_DEFAULT_URL: &str = "http://0.0.0.0:5050";
 //const STARKNET_CHAIN_ID : FieldElement = FieldElement::from_hex_be("0x4b4154414e41").unwrap();
 pub const MAX_FEE_OVERRIDE: &str = "0x100000";
 
@@ -70,11 +66,11 @@ impl StarknetClient {
     }
 }
 
-pub async fn deploy_contract<T>(
+pub async fn deploy_contract(
     client: LocalWalletSignerMiddleware,
     contract_build_sierra: &str,
     contract_build_casm: &str,
-    constructor_args: T,
+    constructor_args: Vec<FieldElement>,
 ) -> FieldElement {
     let sierra: SierraClass = serde_json::from_reader(
         std::fs::File::open(env!("CARGO_MANIFEST_DIR").to_owned() + "/" + contract_build_sierra)
@@ -93,16 +89,14 @@ pub async fn deploy_contract<T>(
             compiled_class_hash,
         )
         .max_fee(FieldElement::from_hex_be("0x100000").unwrap());
-    let result = declare_tx.send().await.unwrap();
+    let _result = declare_tx.send().await.unwrap();
     let class_hash = sierra.class_hash().unwrap();
-    let compiled_class_hash = compiled_class_hash;
+    let _compiled_class_hash = compiled_class_hash;
 
-    println!("Contract declared at address: {:?}", result);
-    println!("Compiled Class hash : {:?}", compiled_class_hash);
     let contract_factory = ContractFactory::new(class_hash, client);
 
     let deploy_tx = &contract_factory.deploy(
-        vec![FieldElement::from_hex_be("0x100000").unwrap()],
+        constructor_args,
         FieldElement::ZERO,
         true,
     );

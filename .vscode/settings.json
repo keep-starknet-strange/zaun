@@ -1,0 +1,6 @@
+{
+  "rust-analyzer.linkedProjects": [],
+  "rust-analyzer.showUnlinkedFileNotification": false,
+  "vim.smartRelativeLine": true,
+  "vim.vimrc.enable": true
+}
