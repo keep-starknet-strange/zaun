@@ -5,6 +5,7 @@ use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_signers::{LocalWallet, SigningKey};
 use url::Url;
+use std::sync::Arc;
 
 // const STARKNET_DEFAULT_URL: &str = "http://0.0.0.0:5050";
 //const STARKNET_CHAIN_ID : FieldElement = FieldElement::from_hex_be("0x4b4154414e41").unwrap();
@@ -67,7 +68,7 @@ impl StarknetClient {
 }
 
 pub async fn deploy_contract(
-    client: LocalWalletSignerMiddleware,
+    client: Arc<LocalWalletSignerMiddleware>,
     contract_build_sierra: &str,
     contract_build_casm: &str,
     constructor_args: Vec<FieldElement>,

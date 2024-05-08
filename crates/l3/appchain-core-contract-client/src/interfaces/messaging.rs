@@ -18,26 +18,86 @@ impl Messaging {
         }
     }
 
-   // send_message_to_appchain - to_address, selector: felt252, payload: Span<felt252> -> Returns(felt252, felt252)
-    // pub async fn send_message_to_appchain(
-    //     &self,
-    //     to_address: FieldElement,
-    //     selector: FieldElement,
-    //     payload: Vec<FieldElement>,
-    // ) -> Result<(FieldElement, FieldElement), StarknetError> {
-    //     let execution = invoke_contract(
-    //         &self.client,
-    //         self.address,
-    //         "send_message_to_appchain",
-    //         vec![to_address.into(), selector.into(), payload.into()],
-    //     )
-    //     .await;
-    //     // let nonce = execution.estimate_fee(); // how to get the nonce from the execution
+    pub async fn send_message_to_appchain(
+        &self,
+        to_address: FieldElement,
+        selector: FieldElement,
+        payload: Vec<FieldElement>,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+        let mut calldata = Vec::new();
+        calldata.push(to_address);
+        calldata.push(selector);
+        calldata.extend(payload);
+        let execution = invoke_contract(
+            &self.client,
+            self.address,
+            "send_message_to_appchain",
+            calldata,
+        )
+        .await;
+        Ok(Some(execution))
+    }  
 
+    pub async fn consume_message_from_appchain(
+        &self,
+        from_address: FieldElement,
+        payload: Vec<FieldElement>,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+        let mut calldata = Vec::new();
+        calldata.push(from_address);
+        calldata.extend(payload);
+        let execution = invoke_contract(
+            &self.client,
+            self.address,
+            "consume_message_from_appchain",
+            calldata,
+        )
+        .await;
+        Ok(Some(execution))
+    }
 
-
-    // }  
-   // consume_message_from_appchain - from_address, payload: Span<felt252> -> Returns(felt252)
-   // start_message_cancellation - to_address, selector: felt252, payload: Span<felt252>, nonce: felt252 -> Returns(felt252)
-    // cancel_message - to_address, selector: felt252, payload: Span<felt252>, nonce: felt252 -> Returns(felt252)
+    pub async fn start_message_cancellation(
+        &self,
+        to_address: FieldElement,
+        selector: FieldElement,
+        payload: Vec<FieldElement>,
+        nonce: FieldElement,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+        let mut calldata = Vec::new();
+        calldata.push(to_address);
+        calldata.push(selector);
+        calldata.extend(payload);
+        calldata.push(nonce);
+        let execution = invoke_contract(
+            &self.client,
+            self.address,
+            "start_message_cancellation",
+            calldata,
+        )
+        .await;
+        Ok(Some(execution))
+    }
+    
+    pub async fn cancel_message(
+        &self,
+        to_address: FieldElement,
+        selector: FieldElement,
+        payload: Vec<FieldElement>,
+        nonce: FieldElement,
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+        let mut calldata = Vec::new();
+        calldata.push(to_address);
+        calldata.push(selector);
+        calldata.extend(payload);
+        calldata.push(nonce);
+        let execution = invoke_contract(
+            &self.client,
+            self.address,
+            "cancel_message",
+            calldata,
+        )
+        .await;
+        Ok(Some(execution))
+    }
 }
+
