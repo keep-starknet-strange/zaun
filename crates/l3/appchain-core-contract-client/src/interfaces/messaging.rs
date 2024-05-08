@@ -12,10 +12,7 @@ pub struct Messaging {
 
 impl Messaging {
     pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
-        Self {
-            client,
-            address,
-        }
+        Self { client, address }
     }
 
     pub async fn send_message_to_appchain(
@@ -36,7 +33,7 @@ impl Messaging {
         )
         .await;
         Ok(Some(execution))
-    }  
+    }
 
     pub async fn consume_message_from_appchain(
         &self,
@@ -77,7 +74,7 @@ impl Messaging {
         .await;
         Ok(Some(execution))
     }
-    
+
     pub async fn cancel_message(
         &self,
         to_address: FieldElement,
@@ -90,14 +87,8 @@ impl Messaging {
         calldata.push(selector);
         calldata.extend(payload);
         calldata.push(nonce);
-        let execution = invoke_contract(
-            &self.client,
-            self.address,
-            "cancel_message",
-            calldata,
-        )
-        .await;
+        let execution =
+            invoke_contract(&self.client, self.address, "cancel_message", calldata).await;
         Ok(Some(execution))
     }
 }
-

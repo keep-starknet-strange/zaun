@@ -1,11 +1,11 @@
 pub mod errors;
 use starknet_accounts::{Account, Call, ConnectedAccount, Execution, SingleOwnerAccount};
+use starknet_core::types::{BlockId, BlockTag, FunctionCall};
 use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_providers::Provider;
-use starknet_signers::{LocalWallet};
+use starknet_signers::LocalWallet;
 use std::sync::Arc;
-use starknet_core::types::{BlockId, BlockTag, FunctionCall};
 
 use starknet_core::utils::get_selector_from_name;
 
@@ -41,13 +41,16 @@ pub async fn call_contract(
     address: FieldElement,
     method: &str,
 ) -> Option<Vec<FieldElement>> {
-    let function_call = FunctionCall{
+    let function_call = FunctionCall {
         contract_address: address,
         entry_point_selector: get_selector_from_name(method.into()).unwrap(),
         calldata: vec![],
     };
     let provider = client.provider();
-    match provider.call(function_call, BlockId::Tag(BlockTag::Latest)).await {
+    match provider
+        .call(function_call, BlockId::Tag(BlockTag::Latest))
+        .await
+    {
         Ok(result) => Some(result),
         Err(_) => None, // You can also handle specific errors if needed
     }

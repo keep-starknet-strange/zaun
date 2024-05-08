@@ -1,6 +1,6 @@
-use crate::interfaces::operator::Operator;
-use crate::interfaces::messaging::Messaging;
 use crate::interfaces::core_contract::CoreContract;
+use crate::interfaces::messaging::Messaging;
+use crate::interfaces::operator::Operator;
 use starknet_ff::FieldElement;
 use std::sync::Arc;
 

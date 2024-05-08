@@ -12,10 +12,7 @@ pub struct CoreContract {
 
 impl CoreContract {
     pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
-        Self {
-            client,
-            address,
-        }
+        Self { client, address }
     }
 
     // update_state - program_output: Span<felt252>, onchain_data_hash: fel252, onchain_data_size: u256
@@ -29,19 +26,7 @@ impl CoreContract {
         calldata.extend(program_output);
         calldata.push(onchain_data_hash);
         calldata.push(onchain_data_size);
-        let execution = invoke_contract(
-            &self.client,
-            self.address,
-            "update_state",
-            calldata,
-        )
-        .await;
+        let execution = invoke_contract(&self.client, self.address, "update_state", calldata).await;
         Ok(Some(execution))
     }
-
-
-
-
-
-
 }

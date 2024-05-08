@@ -144,7 +144,7 @@ async fn starknet_core_contract_deploy() -> Result<(), Box<dyn std::error::Error
         true,
     );
     deploy_tx.deployed_address();
-    
+
     // Print
     //println!("Contract deployed at address: {:?}", deploy_tx.deployed_address());
     // print url

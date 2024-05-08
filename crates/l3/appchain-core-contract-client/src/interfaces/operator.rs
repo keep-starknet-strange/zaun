@@ -1,5 +1,5 @@
-use common::{call_contract, invoke_contract};
 use common::LocalWalletSignerMiddleware;
+use common::{call_contract, invoke_contract};
 use starknet_accounts::Execution;
 use starknet_core::types::FieldElement;
 use starknet_core::types::StarknetError;
@@ -12,10 +12,7 @@ pub struct Operator {
 
 impl Operator {
     pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
-        Self {
-            client,
-            address,
-        }
+        Self { client, address }
     }
 
     pub async fn register_operator(
@@ -46,9 +43,7 @@ impl Operator {
         Ok(Some(execution))
     }
 
-    pub async fn is_operator(
-        &self,
-    ) -> Result<bool, StarknetError> {
+    pub async fn is_operator(&self) -> Result<bool, StarknetError> {
         let result = call_contract(self.client.clone(), self.address, "is_operator").await;
         match result {
             Some(values) => {
@@ -57,10 +52,10 @@ impl Operator {
                 } else {
                     Err(StarknetError::ContractError)
                 }
-            },
+            }
             None => Err(StarknetError::ContractError),
         }
-    }   
+    }
 
     pub async fn set_program_info(
         &self,
@@ -77,9 +72,7 @@ impl Operator {
         Ok(Some(execution))
     }
 
-    pub async fn get_program_info(
-        &self,
-    ) -> Result<(FieldElement, FieldElement), StarknetError> {
+    pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement), StarknetError> {
         let result = call_contract(self.client.clone(), self.address, "get_program_info").await;
         match result {
             Some(values) => {
@@ -88,7 +81,7 @@ impl Operator {
                 } else {
                     Err(StarknetError::ContractError)
                 }
-            },
+            }
             None => Err(StarknetError::ContractError),
         }
     }
@@ -107,9 +100,7 @@ impl Operator {
         Ok(Some(execution))
     }
 
-    pub async fn get_facts_registry(
-        &self,
-    ) -> Result<FieldElement, StarknetError> {
+    pub async fn get_facts_registry(&self) -> Result<FieldElement, StarknetError> {
         let result = call_contract(self.client.clone(), self.address, "get_facts_registry").await;
         match result {
             Some(values) => {
@@ -118,7 +109,7 @@ impl Operator {
                 } else {
                     Err(StarknetError::ContractError)
                 }
-            },
+            }
             None => Err(StarknetError::ContractError),
         }
     }

@@ -4,8 +4,8 @@ use starknet_core::types::contract::{CompiledClass, SierraClass};
 use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_signers::{LocalWallet, SigningKey};
-use url::Url;
 use std::sync::Arc;
+use url::Url;
 
 // const STARKNET_DEFAULT_URL: &str = "http://0.0.0.0:5050";
 //const STARKNET_CHAIN_ID : FieldElement = FieldElement::from_hex_be("0x4b4154414e41").unwrap();
@@ -96,11 +96,7 @@ pub async fn deploy_contract(
 
     let contract_factory = ContractFactory::new(class_hash, client);
 
-    let deploy_tx = &contract_factory.deploy(
-        constructor_args,
-        FieldElement::ZERO,
-        true,
-    );
+    let deploy_tx = &contract_factory.deploy(constructor_args, FieldElement::ZERO, true);
 
     let deployed_address = deploy_tx.deployed_address();
     deploy_tx.send().await.expect("Unable to deploy contract");
