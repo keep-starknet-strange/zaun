@@ -15,7 +15,6 @@ impl CoreContract {
         Self { client, address }
     }
 
-    // update_state - program_output: Span<felt252>, onchain_data_hash: fel252, onchain_data_size: u256
     pub async fn update_state(
         &self,
         program_output: Vec<FieldElement>,

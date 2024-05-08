@@ -81,7 +81,6 @@ dependencies = [
  "starknet-ff 0.3.5",
  "starknet-instance",
  "starknet-providers 0.7.0",
- "starknet-proxy-client",
  "starknet-signers 0.5.0",
  "thiserror",
  "tokio",
@@ -503,16 +502,11 @@ dependencies = [
  "serde_json",
  "starknet",
  "starknet-accounts 0.6.1",
- "starknet-contract 0.6.0",
  "starknet-core 0.7.2",
- "starknet-crypto 0.6.1",
  "starknet-ff 0.3.5",
- "starknet-instance",
  "starknet-providers 0.7.0",
- "starknet-proxy-client",
  "starknet-signers 0.5.0",
  "thiserror",
- "url",
 ]
 
 [[package]]
@@ -3339,7 +3333,6 @@ name = "starknet-instance"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "dirs",
  "hex",
  "log",
  "num-traits",
@@ -3348,10 +3341,8 @@ dependencies = [
  "starknet-accounts 0.6.1",
  "starknet-contract 0.6.0",
  "starknet-core 0.7.2",
- "starknet-crypto 0.6.1",
  "starknet-ff 0.3.5",
  "starknet-providers 0.7.0",
- "starknet-proxy-client",
  "starknet-signers 0.5.0",
  "thiserror",
  "tokio",

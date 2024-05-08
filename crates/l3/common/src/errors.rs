@@ -1,5 +1,4 @@
-// use starknet_core::types::ContractErrorData;
-// use starknet_core::types::StarknetError::ContractError;
+use starknet_core::types::StarknetError;
 use starknet_providers::ProviderError;
 use thiserror::Error;
 
@@ -7,4 +6,6 @@ use thiserror::Error;
 pub enum Error {
     #[error(transparent)]
     ProviderError(#[from] ProviderError),
+    #[error(transparent)]
+    StarknetError(#[from] StarknetError),
 }

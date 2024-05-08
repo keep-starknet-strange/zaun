@@ -20,13 +20,10 @@ pub trait StarknetContractClientL3 {
 
 pub async fn invoke_contract<'a>(
     client: &'a Arc<LocalWalletSignerMiddleware>,
-    // client: LocalWalletSignerMiddleware,
     address: FieldElement,
     method: &str,
     calldata: Vec<FieldElement>,
 ) -> Execution<'a, LocalWalletSignerMiddleware> {
-    // let calls = vec![Call { to: address, selector: get_selector_from_name(method).unwrap(), calldata }];
-    // client.execute(calls)
     let call = Call {
         to: address,
         selector: get_selector_from_name(method.into()).unwrap(),
@@ -37,7 +34,6 @@ pub async fn invoke_contract<'a>(
 
 pub async fn call_contract(
     client: Arc<LocalWalletSignerMiddleware>,
-    // client: LocalWalletSignerMiddleware,
     address: FieldElement,
     method: &str,
 ) -> Option<Vec<FieldElement>> {
@@ -52,6 +48,6 @@ pub async fn call_contract(
         .await
     {
         Ok(result) => Some(result),
-        Err(_) => None, // You can also handle specific errors if needed
+        Err(_) => None,
     }
 }

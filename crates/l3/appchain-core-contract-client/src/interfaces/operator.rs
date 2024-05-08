@@ -1,8 +1,7 @@
 use common::LocalWalletSignerMiddleware;
 use common::{call_contract, invoke_contract};
 use starknet_accounts::Execution;
-use starknet_core::types::FieldElement;
-use starknet_core::types::StarknetError;
+use starknet_core::types::{FieldElement, StarknetError};
 use std::sync::Arc;
 
 pub struct Operator {
