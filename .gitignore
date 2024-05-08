@@ -15,5 +15,3 @@ docs/
 .env
 
 script/anvil.json
-
-.idea
