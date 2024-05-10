@@ -2,8 +2,10 @@ use common::invoke_contract;
 use common::LocalWalletSignerMiddleware;
 use starknet_accounts::Execution;
 use starknet_core::types::FieldElement;
-use starknet_core::types::StarknetError;
 use std::sync::Arc;
+use common::errors::Error;
+use common::TransactionExecution;
+
 
 pub struct Messaging {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -12,7 +14,10 @@ pub struct Messaging {
 
 impl Messaging {
     pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
-        Self { client, address }
+        Self {
+            client,
+            address,
+        }
     }
 
     pub async fn send_message_to_appchain(
@@ -20,7 +25,8 @@ impl Messaging {
         to_address: FieldElement,
         selector: FieldElement,
         payload: Vec<FieldElement>,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+    // ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
@@ -33,13 +39,13 @@ impl Messaging {
         )
         .await;
         Ok(Some(execution))
-    }
+    }  
 
     pub async fn consume_message_from_appchain(
         &self,
         from_address: FieldElement,
         payload: Vec<FieldElement>,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
         let mut calldata = Vec::new();
         calldata.push(from_address);
         calldata.extend(payload);
@@ -59,7 +65,7 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         nonce: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
@@ -81,14 +87,20 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         nonce: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, StarknetError> {
+    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
         calldata.extend(payload);
         calldata.push(nonce);
-        let execution =
-            invoke_contract(&self.client, self.address, "cancel_message", calldata).await;
+        let execution = invoke_contract(
+            &self.client,
+            self.address,
+            "cancel_message",
+            calldata,
+        )
+        .await;
         Ok(Some(execution))
     }
 }
+

@@ -497,11 +497,13 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "hex",
  "log",
  "num-traits",
  "serde_json",
  "starknet",
  "starknet-accounts 0.6.1",
+ "starknet-contract 0.6.0",
  "starknet-core 0.7.2",
  "starknet-ff 0.3.5",
  "starknet-providers 0.7.0",
@@ -3333,6 +3335,7 @@ name = "starknet-instance"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "common",
  "hex",
  "log",
  "num-traits",
@@ -3347,7 +3350,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "url",
- "utils",
 ]
 
 [[package]]

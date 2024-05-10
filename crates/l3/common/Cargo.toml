@@ -18,4 +18,6 @@ async-trait = { workspace = true }
 serde_json = { workspace = true }
 starknet-accounts = { workspace = true }
 starknet-signers = { workspace = true }
+starknet-contract = { workspace = true }
 starknet-ff = { workspace = true }
+hex = { workspace = true }
