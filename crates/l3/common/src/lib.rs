@@ -33,43 +33,27 @@ pub async fn invoke_contract<'a>(
     address: FieldElement,
     method: &str,
     calldata: Vec<FieldElement>,
-) -> Execution<'a, LocalWalletSignerMiddleware> {
+) -> Result<Execution<'a, LocalWalletSignerMiddleware>, Error> {
+    let selector = get_selector_from_name(method.into()).map_err(|_| Error::CustomError(format!("Invalid selector for {}", method)))?;
     let call = Call {
         to: address,
-        selector: get_selector_from_name(method.into()).unwrap(),
+        // using unwrap_or_else
+        selector,
         calldata: calldata,
     };
-    client.as_ref().execute(vec![call])
+    Ok(client.as_ref().execute(vec![call]))
 }
-
-// pub async fn call_contract(
-//     client: Arc<LocalWalletSignerMiddleware>,
-//     address: FieldElement,
-//     method: &str,
-// ) -> Option<Vec<FieldElement>> {
-//     let function_call = FunctionCall {
-//         contract_address: address,
-//         entry_point_selector: get_selector_from_name(method.into()).unwrap(),
-//         calldata: vec![],
-//     };
-//     let provider = client.provider();
-//     match provider
-//         .call(function_call, BlockId::Tag(BlockTag::Latest))
-//         .await
-//     {
-//         Ok(result) => Some(result),
-//         Err(_) => None,
-//     }
-// }
 
 pub async fn call_contract(
     client: &LocalWalletSignerMiddleware,
     address: FieldElement,
     method: &str,
 ) -> Result<Vec<FieldElement>, Error> {
+    let entry_point_selector = get_selector_from_name(method.into())
+        .map_err(|_| Error::CustomError(format!("Invalid selector for {}", method)))?;
     let function_call = FunctionCall {
         contract_address: address,
-        entry_point_selector: get_selector_from_name(method.into()).unwrap(),
+        entry_point_selector,
         calldata: vec![],
     };
     let provider = client.provider();

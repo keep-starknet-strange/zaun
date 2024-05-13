@@ -1,4 +1,4 @@
-use starknet_accounts::{Execution, SingleOwnerAccount};
+use starknet_accounts::SingleOwnerAccount;
 use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_signers::{LocalWallet, SigningKey};

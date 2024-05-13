@@ -1,11 +1,9 @@
+use common::errors::Error;
 use common::invoke_contract;
 use common::LocalWalletSignerMiddleware;
 use starknet_accounts::Execution;
 use starknet_core::types::FieldElement;
 use std::sync::Arc;
-use common::errors::Error;
-use common::TransactionExecution;
-
 
 pub struct Messaging {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -14,10 +12,7 @@ pub struct Messaging {
 
 impl Messaging {
     pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
-        Self {
-            client,
-            address,
-        }
+        Self { client, address }
     }
 
     pub async fn send_message_to_appchain(
@@ -25,38 +20,36 @@ impl Messaging {
         to_address: FieldElement,
         selector: FieldElement,
         payload: Vec<FieldElement>,
-    // ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
+        // ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
         calldata.extend(payload);
-        let execution = invoke_contract(
+        invoke_contract(
             &self.client,
             self.address,
             "send_message_to_appchain",
             calldata,
         )
-        .await;
-        Ok(Some(execution))
-    }  
+        .await
+    }
 
     pub async fn consume_message_from_appchain(
         &self,
         from_address: FieldElement,
         payload: Vec<FieldElement>,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
         let mut calldata = Vec::new();
         calldata.push(from_address);
         calldata.extend(payload);
-        let execution = invoke_contract(
+        invoke_contract(
             &self.client,
             self.address,
             "consume_message_from_appchain",
             calldata,
         )
-        .await;
-        Ok(Some(execution))
+        .await
     }
 
     pub async fn start_message_cancellation(
@@ -65,20 +58,19 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         nonce: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
         calldata.extend(payload);
         calldata.push(nonce);
-        let execution = invoke_contract(
+        invoke_contract(
             &self.client,
             self.address,
             "start_message_cancellation",
             calldata,
         )
-        .await;
-        Ok(Some(execution))
+        .await
     }
 
     pub async fn cancel_message(
@@ -87,20 +79,12 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         nonce: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
         calldata.extend(payload);
         calldata.push(nonce);
-        let execution = invoke_contract(
-            &self.client,
-            self.address,
-            "cancel_message",
-            calldata,
-        )
-        .await;
-        Ok(Some(execution))
+        invoke_contract(&self.client, self.address, "cancel_message", calldata).await
     }
 }
-

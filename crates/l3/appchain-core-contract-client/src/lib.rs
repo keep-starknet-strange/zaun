@@ -2,9 +2,9 @@ pub mod clients;
 pub mod interfaces;
 
 use clients::client::StarknetCoreContractClient;
-use common::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 use common::deploy_contract;
 use common::errors::Error;
+use common::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 
 use std::sync::Arc;
 // TODO: check for proxy contract implementation

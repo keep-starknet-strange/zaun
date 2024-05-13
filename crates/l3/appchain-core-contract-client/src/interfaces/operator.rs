@@ -1,9 +1,9 @@
+use common::errors::Error;
 use common::LocalWalletSignerMiddleware;
 use common::{call_contract, invoke_contract};
 use starknet_accounts::Execution;
 use starknet_core::types::{FieldElement, StarknetError};
 use std::sync::Arc;
-use common::errors::Error;
 
 pub struct Operator {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -18,30 +18,27 @@ impl Operator {
     pub async fn register_operator(
         &self,
         new_operator: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
-        let execution = invoke_contract(
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+        invoke_contract(
             &self.client,
             self.address,
             "register_operator",
             vec![new_operator.into()],
         )
-        .await;
-
-        Ok(Some(execution))
+        .await
     }
 
     pub async fn unregister_operator(
         &self,
         new_operator: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
-        let execution = invoke_contract(
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+        invoke_contract(
             &self.client,
             self.address,
             "unregister_operator",
             vec![new_operator.into()],
         )
-        .await;
-        Ok(Some(execution))
+        .await
     }
 
     pub async fn is_operator(&self) -> Result<bool, Error> {
@@ -56,22 +53,20 @@ impl Operator {
             }
             Err(e) => Err(e),
         }
-        }
-   
+    }
 
     pub async fn set_program_info(
         &self,
         program_hash: FieldElement,
         config_hash: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
-        let execution = invoke_contract(
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+        invoke_contract(
             &self.client,
             self.address,
             "set_program_info",
             vec![program_hash.into(), config_hash.into()],
         )
-        .await;
-        Ok(Some(execution))
+        .await
     }
 
     pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement), Error> {
@@ -81,7 +76,6 @@ impl Operator {
                 if values.len() == 2 {
                     Ok((values[0].clone(), values[1].clone()))
                 } else {
-                    // Err(StarknetError::ContractError)
                     Err(Error::StarknetError(StarknetError::ContractError))
                 }
             }
@@ -92,15 +86,14 @@ impl Operator {
     pub async fn set_facts_registry(
         &self,
         facts_registry: FieldElement,
-    ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
-        let execution = invoke_contract(
+    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+        invoke_contract(
             &self.client,
             self.address,
             "set_facts_registry",
             vec![facts_registry.into()],
         )
-        .await;
-        Ok(Some(execution))
+        .await
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement, Error> {
@@ -111,7 +104,6 @@ impl Operator {
                     Ok(value.clone())
                 } else {
                     Err(Error::StarknetError(StarknetError::ContractError))
-                    // Err(StarknetError::ContractError)
                 }
             }
             Err(e) => Err(e),
