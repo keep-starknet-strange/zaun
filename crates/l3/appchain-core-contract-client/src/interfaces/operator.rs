@@ -42,16 +42,11 @@ impl Operator {
     }
 
     pub async fn is_operator(&self) -> Result<bool> {
-        let result = call_contract(&self.client, self.address, "is_operator").await;
-        match result {
-            Ok(values) => {
-                if let Some(value) = values.first() {
-                    Ok(value.to_string() != String::from("0"))
-                } else {
-                    Err(eyre!("Contract error: expected at least one return value"))
-                }
-            }
-            Err(e) => Err(e),
+        let values = call_contract(&self.client, self.address, "is_operator").await?;
+        if let Some(value) = values.first() {
+            Ok(value.to_string() != String::from("0"))
+        } else {
+            Err(eyre!("Contract error: expected at least one return value"))
         }
     }
 
@@ -70,16 +65,11 @@ impl Operator {
     }
 
     pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement)> {
-        let result = call_contract(&self.client, self.address, "get_program_info").await;
-        match result {
-            Ok(values) => {
-                if values.len() == 2 {
-                    Ok((values[0].clone(), values[1].clone()))
-                } else {
-                    Err(eyre!("Contract error: expected exactly two return values"))
-                }
-            }
-            Err(e) => Err(e),
+        let values = call_contract(&self.client, self.address, "get_program_info").await?;
+        if values.len() == 2 {
+            Ok((values[0].clone(), values[1].clone()))
+        } else {
+            Err(eyre!("Contract error: expected exactly two return values"))
         }
     }
 
@@ -97,16 +87,11 @@ impl Operator {
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement> {
-        let result = call_contract(&self.client, self.address, "get_facts_registry").await;
-        match result {
-            Ok(values) => {
-                if let Some(value) = values.first() {
-                    Ok(value.clone())
-                } else {
-                    Err(eyre!("Contract error: expected at least one return value"))
-                }
-            }
-            Err(e) => Err(e),
+        let values = call_contract(&self.client, self.address, "get_facts_registry").await?;
+        if let Some(value) = values.first() {
+            Ok(value.clone())
+        } else {
+            Err(eyre!("Contract error: expected at least one return value"))
         }
     }
 }
