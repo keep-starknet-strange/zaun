@@ -24,3 +24,4 @@ starknet-providers = { workspace = true }
 starknet-signers = { workspace = true }
 url = { workspace = true }
 starknet-instance = { path = "../starknet-instance" }
+color-eyre = { workspace = true }

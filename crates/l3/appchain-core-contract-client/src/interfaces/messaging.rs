@@ -1,9 +1,9 @@
-use common::errors::Error;
 use common::invoke_contract;
 use common::LocalWalletSignerMiddleware;
 use starknet_accounts::Execution;
 use starknet_core::types::FieldElement;
 use std::sync::Arc;
+use color_eyre::Result;
 
 pub struct Messaging {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -21,7 +21,7 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         // ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
-    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
@@ -39,7 +39,7 @@ impl Messaging {
         &self,
         from_address: FieldElement,
         payload: Vec<FieldElement>,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
         let mut calldata = Vec::new();
         calldata.push(from_address);
         calldata.extend(payload);
@@ -58,7 +58,7 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         nonce: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);
@@ -79,7 +79,7 @@ impl Messaging {
         selector: FieldElement,
         payload: Vec<FieldElement>,
         nonce: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
         let mut calldata = Vec::new();
         calldata.push(to_address);
         calldata.push(selector);

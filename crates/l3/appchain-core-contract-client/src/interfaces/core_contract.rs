@@ -1,9 +1,9 @@
-use common::errors::Error;
 use common::invoke_contract;
 use common::LocalWalletSignerMiddleware;
 use starknet_accounts::Execution;
 use starknet_core::types::FieldElement;
 use std::sync::Arc;
+use color_eyre::Result;
 
 pub struct CoreContract {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -20,7 +20,7 @@ impl CoreContract {
         program_output: Vec<FieldElement>,
         onchain_data_hash: FieldElement,
         onchain_data_size: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>, Error> {
+    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
         let mut calldata = Vec::new();
         calldata.extend(program_output);
         calldata.push(onchain_data_hash);
