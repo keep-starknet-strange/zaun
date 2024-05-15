@@ -538,6 +538,7 @@ dependencies = [
  "starknet-providers 0.7.0",
  "starknet-signers 0.5.0",
  "thiserror",
+ "url",
 ]
 
 [[package]]

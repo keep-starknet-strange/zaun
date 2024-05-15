@@ -6,8 +6,8 @@ pub enum Error {
     BytecodeObject,
     #[error(transparent)]
     Hex(#[from] hex::FromHexError),
-    #[error("Failed to parse URL")]
-    UrlParser,
+    #[error("Failed to parse HTTP provider URL: {0}")]
+    UrlParser(#[from] url::ParseError),
     // CustomError which accepts string
     #[error("Custom error: {0}")]
     CustomError(String),

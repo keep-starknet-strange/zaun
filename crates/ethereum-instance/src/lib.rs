@@ -41,6 +41,7 @@ pub enum Error {
     ContractBuildArtifacts(&'static str),
 }
 
+// TODO: Change name to EthereumClient when refactoring 
 /// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum 
 pub struct EthereumClient {
     /// If initialized keeps an Anvil instance to properly shutdown it at the end

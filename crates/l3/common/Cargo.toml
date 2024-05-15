@@ -22,3 +22,4 @@ starknet-contract = { workspace = true }
 starknet-ff = { workspace = true }
 hex = { workspace = true }
 color-eyre = { workspace = true }
+url = { workspace = true }
