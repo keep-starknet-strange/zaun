@@ -25,12 +25,15 @@ impl StarknetClient {
             .ok_or(Error::CustomError("chain_id missing".to_string()))?
             .parse::<FieldElement>()
             .map_err(|_| Error::CustomError("Invalid chain_id format".to_string()))?;
-        let url = Url::parse(&rpc_endpoint.ok_or(Error::CustomError("rpc_endpoint missing".to_string()))?)?;
+        let url = Url::parse(&rpc_endpoint
+            .ok_or(Error::CustomError("rpc_endpoint missing".to_string()))?)?;
         let provider = JsonRpcClient::new(HttpTransport::new(url.clone()));
-        let signer_key = FieldElement::from_hex_be(&priv_key.ok_or(Error::Hex(hex::FromHexError::InvalidStringLength))?)
+        let signer_key = FieldElement::from_hex_be(&priv_key
+            .ok_or(Error::Hex(hex::FromHexError::InvalidStringLength))?)
             .map_err(|_| Error::Hex(hex::FromHexError::InvalidStringLength))?;
         let signer = LocalWallet::from(SigningKey::from_secret_scalar(signer_key));
-        let account_address = FieldElement::from_hex_be(&account_addr.ok_or(Error::Hex(hex::FromHexError::InvalidStringLength))?)
+        let account_address = FieldElement::from_hex_be(&account_addr
+            .ok_or(Error::Hex(hex::FromHexError::InvalidStringLength))?)
             .map_err(|_| Error::Hex(hex::FromHexError::InvalidStringLength))?;
 
         let account = SingleOwnerAccount::new(
