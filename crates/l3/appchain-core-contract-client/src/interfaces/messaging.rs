@@ -20,7 +20,6 @@ impl Messaging {
         to_address: FieldElement,
         selector: FieldElement,
         payload: Vec<FieldElement>,
-        // ) -> Result<Option<Execution<LocalWalletSignerMiddleware>>, Error> {
     ) -> Result<Execution<LocalWalletSignerMiddleware>> {
         let mut calldata = Vec::new();
         calldata.push(to_address);

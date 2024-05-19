@@ -16,25 +16,19 @@ pub struct StarknetClient {
 
 impl StarknetClient {
     pub fn attach(
-        rpc_endpoint: Option<String>,
-        chain_id: Option<String>,
-        priv_key: Option<String>,
-        account_addr: Option<String>,
+        rpc_endpoint: String,
+        chain_id: String,
+        priv_key: String,
+        account_addr: String,
     ) -> Result<Self, Error> {
-        let chain_id = chain_id
-            .ok_or(Error::CustomError("chain_id missing".to_string()))?
-            .parse::<FieldElement>()
-            .map_err(|_| Error::CustomError("Invalid chain_id format".to_string()))?;
-        let url = Url::parse(&rpc_endpoint
-            .ok_or(Error::CustomError("rpc_endpoint missing".to_string()))?)?;
+        let chain_id = parse_field_element(&chain_id, "Invalid chain_id format")?;
+        let url = Url::parse(&rpc_endpoint)?;
         let provider = JsonRpcClient::new(HttpTransport::new(url.clone()));
-        let signer_key = FieldElement::from_hex_be(&priv_key
-            .ok_or(Error::Hex(hex::FromHexError::InvalidStringLength))?)
-            .map_err(|_| Error::Hex(hex::FromHexError::InvalidStringLength))?;
+
+        let signer_key = parse_field_element(&priv_key, "Invalid private key format")?;
         let signer = LocalWallet::from(SigningKey::from_secret_scalar(signer_key));
-        let account_address = FieldElement::from_hex_be(&account_addr
-            .ok_or(Error::Hex(hex::FromHexError::InvalidStringLength))?)
-            .map_err(|_| Error::Hex(hex::FromHexError::InvalidStringLength))?;
+
+        let account_address = parse_field_element(&account_addr, "Invalid account address format")?;
 
         let account = SingleOwnerAccount::new(
             provider,
@@ -51,3 +45,7 @@ impl StarknetClient {
     }
 }
 
+fn parse_field_element(hex_str: &str, error_msg: &str) -> Result<FieldElement, Error> {
+    FieldElement::from_hex_be(hex_str)
+        .map_err(|_| Error::CustomError(error_msg.to_string()))
+}
