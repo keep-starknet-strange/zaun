@@ -1,9 +1,8 @@
+use color_eyre::{eyre::eyre, Result};
 use common::LocalWalletSignerMiddleware;
 use common::{call_contract, invoke_contract};
-use starknet_accounts::Execution;
-use starknet_core::types::FieldElement;
+use starknet_core::types::{FieldElement, InvokeTransactionResult};
 use std::sync::Arc;
-use color_eyre::{eyre::eyre, Result};
 
 pub struct Operator {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -17,28 +16,16 @@ impl Operator {
 
     pub async fn register_operator(
         &self,
-        new_operator: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        invoke_contract(
-            &self.client,
-            self.address,
-            "register_operator",
-            vec![new_operator.into()],
-        )
-        .await
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
+        invoke_contract(&self.client, self.address, "register_operator", calldata).await
     }
 
     pub async fn unregister_operator(
         &self,
-        new_operator: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        invoke_contract(
-            &self.client,
-            self.address,
-            "unregister_operator",
-            vec![new_operator.into()],
-        )
-        .await
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
+        invoke_contract(&self.client, self.address, "unregister_operator", calldata).await
     }
 
     pub async fn is_operator(&self) -> Result<bool> {
@@ -52,16 +39,9 @@ impl Operator {
 
     pub async fn set_program_info(
         &self,
-        program_hash: FieldElement,
-        config_hash: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        invoke_contract(
-            &self.client,
-            self.address,
-            "set_program_info",
-            vec![program_hash.into(), config_hash.into()],
-        )
-        .await
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
+        invoke_contract(&self.client, self.address, "set_program_info", calldata).await
     }
 
     pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement)> {
@@ -75,15 +55,9 @@ impl Operator {
 
     pub async fn set_facts_registry(
         &self,
-        facts_registry: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        invoke_contract(
-            &self.client,
-            self.address,
-            "set_facts_registry",
-            vec![facts_registry.into()],
-        )
-        .await
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
+        invoke_contract(&self.client, self.address, "set_facts_registry", calldata).await
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement> {

@@ -2,9 +2,9 @@ pub mod clients;
 pub mod interfaces;
 
 use clients::client::StarknetCoreContractClient;
+use color_eyre::Result;
 use common::deploy_contract;
 use common::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
-use color_eyre::Result;
 
 use std::sync::Arc;
 // TODO: check for proxy contract implementation

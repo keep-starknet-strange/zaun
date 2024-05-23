@@ -1,9 +1,9 @@
+use common::errors::Error;
 use starknet_accounts::SingleOwnerAccount;
 use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_signers::{LocalWallet, SigningKey};
 use url::Url;
-use common::errors::Error;
 
 pub type LocalWalletSignerMiddleware =
     SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>;
@@ -46,6 +46,5 @@ impl StarknetClient {
 }
 
 fn parse_field_element(hex_str: &str, error_msg: &str) -> Result<FieldElement, Error> {
-    FieldElement::from_hex_be(hex_str)
-        .map_err(|_| Error::CustomError(error_msg.to_string()))
+    FieldElement::from_hex_be(hex_str).map_err(|_| Error::CustomError(error_msg.to_string()))
 }

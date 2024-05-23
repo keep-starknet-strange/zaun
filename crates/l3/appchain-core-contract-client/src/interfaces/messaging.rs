@@ -1,9 +1,8 @@
+use color_eyre::Result;
 use common::invoke_contract;
 use common::LocalWalletSignerMiddleware;
-use starknet_accounts::Execution;
-use starknet_core::types::FieldElement;
+use starknet_core::types::{FieldElement, InvokeTransactionResult};
 use std::sync::Arc;
-use color_eyre::Result;
 
 pub struct Messaging {
     client: Arc<LocalWalletSignerMiddleware>,
@@ -17,14 +16,8 @@ impl Messaging {
 
     pub async fn send_message_to_appchain(
         &self,
-        to_address: FieldElement,
-        selector: FieldElement,
-        payload: Vec<FieldElement>,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        let mut calldata = Vec::new();
-        calldata.push(to_address);
-        calldata.push(selector);
-        calldata.extend(payload);
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
         invoke_contract(
             &self.client,
             self.address,
@@ -36,12 +29,8 @@ impl Messaging {
 
     pub async fn consume_message_from_appchain(
         &self,
-        from_address: FieldElement,
-        payload: Vec<FieldElement>,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        let mut calldata = Vec::new();
-        calldata.push(from_address);
-        calldata.extend(payload);
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
         invoke_contract(
             &self.client,
             self.address,
@@ -53,16 +42,8 @@ impl Messaging {
 
     pub async fn start_message_cancellation(
         &self,
-        to_address: FieldElement,
-        selector: FieldElement,
-        payload: Vec<FieldElement>,
-        nonce: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        let mut calldata = Vec::new();
-        calldata.push(to_address);
-        calldata.push(selector);
-        calldata.extend(payload);
-        calldata.push(nonce);
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
         invoke_contract(
             &self.client,
             self.address,
@@ -74,16 +55,8 @@ impl Messaging {
 
     pub async fn cancel_message(
         &self,
-        to_address: FieldElement,
-        selector: FieldElement,
-        payload: Vec<FieldElement>,
-        nonce: FieldElement,
-    ) -> Result<Execution<LocalWalletSignerMiddleware>> {
-        let mut calldata = Vec::new();
-        calldata.push(to_address);
-        calldata.push(selector);
-        calldata.extend(payload);
-        calldata.push(nonce);
+        calldata: Vec<FieldElement>,
+    ) -> Result<InvokeTransactionResult> {
         invoke_contract(&self.client, self.address, "cancel_message", calldata).await
     }
 }
