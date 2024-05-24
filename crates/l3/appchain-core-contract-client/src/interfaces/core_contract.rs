@@ -16,8 +16,14 @@ impl<'a> CoreContract<'a> {
 
     pub async fn update_state(
         &self,
-        calldata: Vec<FieldElement>,
+        program_output: Vec<FieldElement>,
+        onchain_data_hash: FieldElement,
+        onchain_data_size: FieldElement,
     ) -> Result<InvokeTransactionResult> {
+        let mut calldata = Vec::new();
+        calldata.extend(program_output);
+        calldata.push(onchain_data_hash);
+        calldata.push(onchain_data_size);
         invoke_contract(&self.client, self.address, "update_state", calldata).await
     }
 }

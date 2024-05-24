@@ -16,8 +16,14 @@ impl<'a> Messaging<'a> {
 
     pub async fn send_message_to_appchain(
         &self,
-        calldata: Vec<FieldElement>,
+        to_address: FieldElement,
+        selector: FieldElement,
+        payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
+        let mut calldata = Vec::new();
+        calldata.push(to_address);
+        calldata.push(selector);
+        calldata.extend(payload);
         invoke_contract(
             &self.client,
             self.address,
@@ -29,8 +35,12 @@ impl<'a> Messaging<'a> {
 
     pub async fn consume_message_from_appchain(
         &self,
-        calldata: Vec<FieldElement>,
+        from_address: FieldElement,
+        payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
+        let mut calldata = Vec::new();
+        calldata.push(from_address);
+        calldata.extend(payload);
         invoke_contract(
             &self.client,
             self.address,
@@ -42,8 +52,16 @@ impl<'a> Messaging<'a> {
 
     pub async fn start_message_cancellation(
         &self,
-        calldata: Vec<FieldElement>,
+        to_address: FieldElement,
+        selector: FieldElement,
+        nonce: FieldElement,
+        payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
+        let mut calldata = Vec::new();
+        calldata.push(to_address);
+        calldata.push(selector);
+        calldata.push(nonce);
+        calldata.extend(payload);
         invoke_contract(
             &self.client,
             self.address,
@@ -55,8 +73,16 @@ impl<'a> Messaging<'a> {
 
     pub async fn cancel_message(
         &self,
-        calldata: Vec<FieldElement>,
+        to_address: FieldElement,
+        selector: FieldElement,
+        nonce: FieldElement,
+        payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
+        let mut calldata = Vec::new();
+        calldata.push(to_address);
+        calldata.push(selector);
+        calldata.push(nonce);
+        calldata.extend(payload);
         invoke_contract(&self.client, self.address, "cancel_message", calldata).await
     }
 }

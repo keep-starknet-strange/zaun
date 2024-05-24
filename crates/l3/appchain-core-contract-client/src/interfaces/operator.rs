@@ -16,20 +16,38 @@ impl<'a> Operator<'a> {
 
     pub async fn register_operator(
         &self,
-        calldata: Vec<FieldElement>,
+        new_operator: FieldElement,
     ) -> Result<InvokeTransactionResult> {
-        invoke_contract(&self.client, self.address, "register_operator", calldata).await
+        invoke_contract(
+            &self.client,
+            self.address,
+            "register_operator",
+            vec![new_operator.into()],
+        )
+        .await
     }
 
     pub async fn unregister_operator(
         &self,
-        calldata: Vec<FieldElement>,
+        removed_operator: FieldElement,
     ) -> Result<InvokeTransactionResult> {
-        invoke_contract(&self.client, self.address, "unregister_operator", calldata).await
+        invoke_contract(
+            &self.client,
+            self.address,
+            "unregister_operator",
+            vec![removed_operator.into()],
+        )
+        .await
     }
 
-    pub async fn is_operator(&self, calldata: Vec<FieldElement>) -> Result<bool> {
-        let values = call_contract(&self.client, self.address, "is_operator", calldata).await?;
+    pub async fn is_operator(&self, operator: FieldElement) -> Result<bool> {
+        let values = call_contract(
+            &self.client,
+            self.address,
+            "is_operator",
+            vec![operator.into()],
+        )
+        .await?;
         if let Some(value) = values.first() {
             Ok(value.to_string() != String::from("0"))
         } else {
@@ -39,9 +57,16 @@ impl<'a> Operator<'a> {
 
     pub async fn set_program_info(
         &self,
-        calldata: Vec<FieldElement>,
+        program_hash: FieldElement,
+        config_hash: FieldElement,
     ) -> Result<InvokeTransactionResult> {
-        invoke_contract(&self.client, self.address, "set_program_info", calldata).await
+        invoke_contract(
+            &self.client,
+            self.address,
+            "set_program_info",
+            vec![program_hash.into(), config_hash.into()],
+        )
+        .await
     }
 
     pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement)> {
@@ -55,9 +80,15 @@ impl<'a> Operator<'a> {
 
     pub async fn set_facts_registry(
         &self,
-        calldata: Vec<FieldElement>,
+        facts_registry: FieldElement,
     ) -> Result<InvokeTransactionResult> {
-        invoke_contract(&self.client, self.address, "set_facts_registry", calldata).await
+        invoke_contract(
+            &self.client,
+            self.address,
+            "set_facts_registry",
+            vec![facts_registry.into()],
+        )
+        .await
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement> {
