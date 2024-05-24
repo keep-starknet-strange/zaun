@@ -28,12 +28,8 @@ impl<'a> Operator<'a> {
         invoke_contract(&self.client, self.address, "unregister_operator", calldata).await
     }
 
-    pub async fn is_operator(
-        &self, 
-        calldata: Vec<FieldElement>
-    ) -> Result<bool> {
-        let values = 
-            call_contract(&self.client, self.address, "is_operator", calldata).await?;
+    pub async fn is_operator(&self, calldata: Vec<FieldElement>) -> Result<bool> {
+        let values = call_contract(&self.client, self.address, "is_operator", calldata).await?;
         if let Some(value) = values.first() {
             Ok(value.to_string() != String::from("0"))
         } else {
@@ -65,7 +61,8 @@ impl<'a> Operator<'a> {
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement> {
-        let values = call_contract(&self.client, self.address, "get_facts_registry", vec![]).await?;
+        let values =
+            call_contract(&self.client, self.address, "get_facts_registry", vec![]).await?;
         if let Some(value) = values.first() {
             Ok(value.clone())
         } else {
