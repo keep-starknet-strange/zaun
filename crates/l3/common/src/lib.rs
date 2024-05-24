@@ -27,7 +27,7 @@ pub trait StarknetContractClient {
 }
 
 pub async fn invoke_contract(
-    client: &Arc<LocalWalletSignerMiddleware>,
+    client: &Arc<&LocalWalletSignerMiddleware>,
     address: FieldElement,
     method: &str,
     calldata: Vec<FieldElement>,
@@ -53,13 +53,14 @@ pub async fn call_contract(
     client: &LocalWalletSignerMiddleware,
     address: FieldElement,
     method: &str,
+    calldata: Vec<FieldElement>,
 ) -> Result<Vec<FieldElement>> {
     let entry_point_selector = get_selector_from_name(method.into())
         .map_err(|e| eyre!("Invalid selector for {}: {}", method, e))?;
     let function_call = FunctionCall {
         contract_address: address,
         entry_point_selector,
-        calldata: vec![],
+        calldata,
     };
     let provider = client.provider();
     provider
@@ -68,8 +69,8 @@ pub async fn call_contract(
         .map_err(|e| eyre!("Provider error: {}", e))
 }
 
-pub async fn deploy_contract(
-    client: Arc<LocalWalletSignerMiddleware>,
+pub async fn deploy_contract<'a>(
+    client: Arc<&'a LocalWalletSignerMiddleware>,
     path_to_sierra: &str,
     path_to_casm: &str,
     constructor_args: Vec<FieldElement>,

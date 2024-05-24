@@ -6,14 +6,14 @@ use std::sync::Arc;
 
 use common::LocalWalletSignerMiddleware;
 
-pub struct StarknetCoreContractClient {
-    operator: Operator,
-    messaging: Messaging,
-    core_contract: CoreContract,
+pub struct StarknetCoreContractClient<'a> {
+    operator: Operator<'a>,
+    messaging: Messaging<'a>,
+    core_contract: CoreContract<'a>,
 }
 
-impl StarknetCoreContractClient {
-    pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+impl<'a> StarknetCoreContractClient<'a> {
+    pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
         Self {
             operator: Operator::new(address, client.clone()),
             messaging: Messaging::new(address, client.clone()),
@@ -22,20 +22,20 @@ impl StarknetCoreContractClient {
     }
 }
 
-impl AsRef<Operator> for StarknetCoreContractClient {
-    fn as_ref(&self) -> &Operator {
+impl<'a> AsRef<Operator<'a>> for StarknetCoreContractClient<'a> {
+    fn as_ref(&self) -> &Operator<'a> {
         &self.operator
     }
 }
 
-impl AsRef<Messaging> for StarknetCoreContractClient {
-    fn as_ref(&self) -> &Messaging {
+impl<'a> AsRef<Messaging<'a>> for StarknetCoreContractClient<'a> {
+    fn as_ref(&self) -> &Messaging<'a> {
         &self.messaging
     }
 }
 
-impl AsRef<CoreContract> for StarknetCoreContractClient {
-    fn as_ref(&self) -> &CoreContract {
+impl<'a> AsRef<CoreContract<'a>> for StarknetCoreContractClient<'a> {
+    fn as_ref(&self) -> &CoreContract<'a> {
         &self.core_contract
     }
 }

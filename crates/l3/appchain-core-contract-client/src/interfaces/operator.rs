@@ -4,13 +4,13 @@ use common::{call_contract, invoke_contract};
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
 use std::sync::Arc;
 
-pub struct Operator {
-    client: Arc<LocalWalletSignerMiddleware>,
+pub struct Operator<'a> {
+    client: Arc<&'a LocalWalletSignerMiddleware>,
     address: FieldElement,
 }
 
-impl Operator {
-    pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+impl<'a> Operator<'a> {
+    pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
         Self { client, address }
     }
 
@@ -28,8 +28,12 @@ impl Operator {
         invoke_contract(&self.client, self.address, "unregister_operator", calldata).await
     }
 
-    pub async fn is_operator(&self) -> Result<bool> {
-        let values = call_contract(&self.client, self.address, "is_operator").await?;
+    pub async fn is_operator(
+        &self, 
+        calldata: Vec<FieldElement>
+    ) -> Result<bool> {
+        let values = 
+            call_contract(&self.client, self.address, "is_operator", calldata).await?;
         if let Some(value) = values.first() {
             Ok(value.to_string() != String::from("0"))
         } else {
@@ -45,7 +49,7 @@ impl Operator {
     }
 
     pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement)> {
-        let values = call_contract(&self.client, self.address, "get_program_info").await?;
+        let values = call_contract(&self.client, self.address, "get_program_info", vec![]).await?;
         if values.len() == 2 {
             Ok((values[0].clone(), values[1].clone()))
         } else {
@@ -61,7 +65,7 @@ impl Operator {
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement> {
-        let values = call_contract(&self.client, self.address, "get_facts_registry").await?;
+        let values = call_contract(&self.client, self.address, "get_facts_registry", vec![]).await?;
         if let Some(value) = values.first() {
             Ok(value.clone())
         } else {

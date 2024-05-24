@@ -4,13 +4,13 @@ use common::LocalWalletSignerMiddleware;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
 use std::sync::Arc;
 
-pub struct Messaging {
-    client: Arc<LocalWalletSignerMiddleware>,
+pub struct Messaging<'a> {
+    client: Arc<&'a LocalWalletSignerMiddleware>,
     address: FieldElement,
 }
 
-impl Messaging {
-    pub fn new(address: FieldElement, client: Arc<LocalWalletSignerMiddleware>) -> Self {
+impl<'a> Messaging<'a> {
+    pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
         Self { client, address }
     }
 

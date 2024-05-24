@@ -15,6 +15,9 @@ pub struct StarknetClient {
 }
 
 impl StarknetClient {
+    pub fn client(&self) -> &LocalWalletSignerMiddleware {
+        &self.client
+    }
     pub fn attach(
         rpc_endpoint: String,
         chain_id: String,
