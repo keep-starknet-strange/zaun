@@ -9,7 +9,7 @@ starknet = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 hex = { workspace = true }
-common = { path = "../common" }
+appchain-utils = { path = "../appchain-utils" }
 tokio = { workspace = true }
 log = { workspace = true }
 num-traits = { workspace = true }

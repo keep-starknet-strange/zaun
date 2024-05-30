@@ -66,9 +66,9 @@ dependencies = [
 name = "appchain-core-contract-client"
 version = "0.1.0"
 dependencies = [
+ "appchain-utils",
  "async-trait",
  "color-eyre",
- "common",
  "dirs",
  "hex",
  "log",
@@ -85,6 +85,27 @@ dependencies = [
  "starknet-signers 0.5.0",
  "thiserror",
  "tokio",
+ "url",
+]
+
+[[package]]
+name = "appchain-utils"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "color-eyre",
+ "hex",
+ "log",
+ "num-traits",
+ "serde_json",
+ "starknet",
+ "starknet-accounts 0.6.1",
+ "starknet-contract 0.6.0",
+ "starknet-core 0.7.2",
+ "starknet-ff 0.3.5",
+ "starknet-providers 0.7.0",
+ "starknet-signers 0.5.0",
+ "thiserror",
  "url",
 ]
 
@@ -518,27 +539,6 @@ dependencies = [
  "owo-colors",
  "tracing-core",
  "tracing-error",
-]
-
-[[package]]
-name = "common"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "color-eyre",
- "hex",
- "log",
- "num-traits",
- "serde_json",
- "starknet",
- "starknet-accounts 0.6.1",
- "starknet-contract 0.6.0",
- "starknet-core 0.7.2",
- "starknet-ff 0.3.5",
- "starknet-providers 0.7.0",
- "starknet-signers 0.5.0",
- "thiserror",
- "url",
 ]
 
 [[package]]
@@ -3379,8 +3379,8 @@ dependencies = [
 name = "starknet-instance"
 version = "0.1.0"
 dependencies = [
+ "appchain-utils",
  "async-trait",
- "common",
  "hex",
  "log",
  "num-traits",

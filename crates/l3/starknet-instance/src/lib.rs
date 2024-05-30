@@ -1,4 +1,4 @@
-use common::errors::Error;
+use appchain_utils::errors::Error;
 use starknet_accounts::SingleOwnerAccount;
 use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};

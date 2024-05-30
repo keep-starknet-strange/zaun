@@ -1,5 +1,5 @@
 [package]
-name = "common"
+name = "appchain-utils"
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true

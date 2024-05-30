@@ -1,10 +1,10 @@
 pub mod clients;
 pub mod interfaces;
 
-use clients::client::StarknetCoreContractClient;
+use clients::StarknetCoreContractClient;
 use color_eyre::Result;
-use common::deploy_contract;
-use common::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
+use appchain_utils::deploy_contract;
+use appchain_utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 
 use std::sync::Arc;
 // TODO: check for proxy contract implementation
@@ -21,6 +21,7 @@ pub async fn deploy_starknet_core_contract<'a>(
         NO_CONSTRUCTOR_ARG,
     )
     .await?;
+
     Ok(StarknetCoreContractClient::new(
         contract_address,
         client.clone(),

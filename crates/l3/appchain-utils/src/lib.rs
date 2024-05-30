@@ -27,7 +27,7 @@ pub trait StarknetContractClient {
 }
 
 pub async fn invoke_contract(
-    client: &Arc<&LocalWalletSignerMiddleware>,
+    client: &LocalWalletSignerMiddleware,
     address: FieldElement,
     method: &str,
     calldata: Vec<FieldElement>,
@@ -41,7 +41,6 @@ pub async fn invoke_contract(
     };
     let max_fee = FieldElement::from_hex_be(MAX_FEE).unwrap();
     client
-        .as_ref()
         .execute(vec![call])
         .max_fee(max_fee)
         .send()
@@ -50,7 +49,7 @@ pub async fn invoke_contract(
 }
 
 pub async fn call_contract(
-    client: &LocalWalletSignerMiddleware,
+    provider: &JsonRpcClient<HttpTransport>,
     address: FieldElement,
     method: &str,
     calldata: Vec<FieldElement>,
@@ -62,7 +61,6 @@ pub async fn call_contract(
         entry_point_selector,
         calldata,
     };
-    let provider = client.provider();
     provider
         .call(function_call, BlockId::Tag(BlockTag::Latest))
         .await

@@ -1,7 +1,12 @@
 use color_eyre::{eyre::eyre, Result};
-use common::LocalWalletSignerMiddleware;
-use common::{call_contract, invoke_contract};
+use appchain_utils::LocalWalletSignerMiddleware;
+use appchain_utils::{call_contract, invoke_contract};
+use starknet_accounts::ConnectedAccount;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
+use starknet_providers::{
+    jsonrpc::{HttpTransport, JsonRpcClient},
+    Provider,
+};
 use std::sync::Arc;
 
 pub struct Operator<'a> {
@@ -12,6 +17,10 @@ pub struct Operator<'a> {
 impl<'a> Operator<'a> {
     pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
         Self { client, address }
+    }
+
+    fn provider(&self) -> &JsonRpcClient<HttpTransport> {
+        self.client.provider()
     }
 
     pub async fn register_operator(
@@ -41,18 +50,13 @@ impl<'a> Operator<'a> {
     }
 
     pub async fn is_operator(&self, operator: FieldElement) -> Result<bool> {
-        let values = call_contract(
-            &self.client,
-            self.address,
-            "is_operator",
-            vec![operator.into()],
-        )
-        .await?;
-        if let Some(value) = values.first() {
-            Ok(value.to_string() != String::from("0"))
-        } else {
-            Err(eyre!("Contract error: expected at least one return value"))
-        }
+        let provider = self.provider();
+        let values =
+            call_contract(provider, self.address, "is_operator", vec![operator.into()]).await?;
+
+        values.first()
+            .map(|value| value.to_string() != "0")
+            .ok_or_else(|| eyre!("Contract error: expected at least one return value"))
     }
 
     pub async fn set_program_info(
@@ -70,12 +74,12 @@ impl<'a> Operator<'a> {
     }
 
     pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement)> {
-        let values = call_contract(&self.client, self.address, "get_program_info", vec![]).await?;
-        if values.len() == 2 {
-            Ok((values[0].clone(), values[1].clone()))
-        } else {
-            Err(eyre!("Contract error: expected exactly two return values"))
-        }
+        let provider = self.provider();
+        let values = call_contract(provider, self.address, "get_program_info", vec![]).await?;
+
+        values.get(0)
+            .and_then(|first| values.get(1).map(|second| (first.clone(), second.clone())))
+            .ok_or_else(|| eyre!("Contract error: expected exactly two return values"))
     }
 
     pub async fn set_facts_registry(
@@ -92,12 +96,9 @@ impl<'a> Operator<'a> {
     }
 
     pub async fn get_facts_registry(&self) -> Result<FieldElement> {
-        let values =
-            call_contract(&self.client, self.address, "get_facts_registry", vec![]).await?;
-        if let Some(value) = values.first() {
-            Ok(value.clone())
-        } else {
-            Err(eyre!("Contract error: expected at least one return value"))
-        }
+        let provider = self.provider();
+        let values = call_contract(provider, self.address, "get_facts_registry", vec![]).await?;
+
+        values.first().cloned().ok_or_else(|| eyre!("Contract error: expected at least one return value"))
     }
 }

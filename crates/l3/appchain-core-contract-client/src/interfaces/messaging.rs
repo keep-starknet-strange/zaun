@@ -1,6 +1,6 @@
 use color_eyre::Result;
-use common::invoke_contract;
-use common::LocalWalletSignerMiddleware;
+use appchain_utils::invoke_contract;
+use appchain_utils::LocalWalletSignerMiddleware;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
 use std::sync::Arc;
 
