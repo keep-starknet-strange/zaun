@@ -1,6 +1,6 @@
 pub mod errors;
 use color_eyre::{eyre::eyre, Result};
-use starknet_accounts::{Account, Call, ConnectedAccount, Execution, SingleOwnerAccount};
+use starknet_accounts::{Account, Call, Execution, SingleOwnerAccount};
 use starknet_contract::ContractFactory;
 use starknet_core::types::contract::{CompiledClass, SierraClass};
 use starknet_core::types::{BlockId, BlockTag, FunctionCall, InvokeTransactionResult};
@@ -9,7 +9,6 @@ use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 use starknet_providers::Provider;
 use starknet_signers::LocalWallet;
-use std::sync::Arc;
 
 pub type LocalWalletSignerMiddleware =
     SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>;
@@ -23,11 +22,11 @@ pub const MAX_FEE: &str = "0x1000000000000";
 
 pub trait StarknetContractClient {
     fn address(&self) -> FieldElement;
-    fn client(&self) -> LocalWalletSignerMiddleware;
+    fn signer(&self) -> LocalWalletSignerMiddleware;
 }
 
 pub async fn invoke_contract(
-    client: &LocalWalletSignerMiddleware,
+    signer: &LocalWalletSignerMiddleware,
     address: FieldElement,
     method: &str,
     calldata: Vec<FieldElement>,
@@ -40,7 +39,7 @@ pub async fn invoke_contract(
         calldata,
     };
     let max_fee = FieldElement::from_hex_be(MAX_FEE).unwrap();
-    client
+    signer
         .execute(vec![call])
         .max_fee(max_fee)
         .send()
@@ -68,7 +67,7 @@ pub async fn call_contract(
 }
 
 pub async fn deploy_contract<'a>(
-    client: Arc<&'a LocalWalletSignerMiddleware>,
+    signer: &'a LocalWalletSignerMiddleware,
     path_to_sierra: &str,
     path_to_casm: &str,
     constructor_args: Vec<FieldElement>,
@@ -82,7 +81,7 @@ pub async fn deploy_contract<'a>(
     let compiled_class_hash = casm
         .class_hash()
         .map_err(|e| eyre!("Failed to get class hash from CASM: {}", e))?;
-    let declare_tx = client.declare(
+    let declare_tx = signer.declare(
         sierra
             .clone()
             .flatten()
@@ -98,7 +97,7 @@ pub async fn deploy_contract<'a>(
         .class_hash()
         .map_err(|e| eyre!("Failed to get class hash from Sierra: {}", e))?;
 
-    let contract_factory = ContractFactory::new(class_hash, client);
+    let contract_factory = ContractFactory::new(class_hash, signer);
 
     let deploy_tx = &contract_factory.deploy(constructor_args, FieldElement::ZERO, true);
 

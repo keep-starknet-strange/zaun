@@ -2,16 +2,15 @@ use color_eyre::Result;
 use appchain_utils::invoke_contract;
 use appchain_utils::LocalWalletSignerMiddleware;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
-use std::sync::Arc;
 
 pub struct Messaging<'a> {
-    client: Arc<&'a LocalWalletSignerMiddleware>,
+    signer: &'a LocalWalletSignerMiddleware,
     address: FieldElement,
 }
 
 impl<'a> Messaging<'a> {
-    pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
-        Self { client, address }
+    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+        Self { signer, address }
     }
 
     pub async fn send_message_to_appchain(
@@ -24,8 +23,9 @@ impl<'a> Messaging<'a> {
         calldata.push(to_address);
         calldata.push(selector);
         calldata.extend(payload);
+
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "send_message_to_appchain",
             calldata,
@@ -41,8 +41,9 @@ impl<'a> Messaging<'a> {
         let mut calldata = Vec::new();
         calldata.push(from_address);
         calldata.extend(payload);
+
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "consume_message_from_appchain",
             calldata,
@@ -62,8 +63,9 @@ impl<'a> Messaging<'a> {
         calldata.push(selector);
         calldata.push(nonce);
         calldata.extend(payload);
+
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "start_message_cancellation",
             calldata,
@@ -83,6 +85,7 @@ impl<'a> Messaging<'a> {
         calldata.push(selector);
         calldata.push(nonce);
         calldata.extend(payload);
-        invoke_contract(&self.client, self.address, "cancel_message", calldata).await
+
+        invoke_contract(&self.signer, self.address, "cancel_message", calldata).await
     }
 }

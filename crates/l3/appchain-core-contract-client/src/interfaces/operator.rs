@@ -7,20 +7,19 @@ use starknet_providers::{
     jsonrpc::{HttpTransport, JsonRpcClient},
     Provider,
 };
-use std::sync::Arc;
 
 pub struct Operator<'a> {
-    client: Arc<&'a LocalWalletSignerMiddleware>,
+    signer: &'a LocalWalletSignerMiddleware,
     address: FieldElement,
 }
 
 impl<'a> Operator<'a> {
-    pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
-        Self { client, address }
+    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+        Self { signer, address }
     }
 
     fn provider(&self) -> &JsonRpcClient<HttpTransport> {
-        self.client.provider()
+        self.signer.provider()
     }
 
     pub async fn register_operator(
@@ -28,7 +27,7 @@ impl<'a> Operator<'a> {
         new_operator: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "register_operator",
             vec![new_operator.into()],
@@ -41,7 +40,7 @@ impl<'a> Operator<'a> {
         removed_operator: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "unregister_operator",
             vec![removed_operator.into()],
@@ -65,7 +64,7 @@ impl<'a> Operator<'a> {
         config_hash: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "set_program_info",
             vec![program_hash.into(), config_hash.into()],
@@ -87,7 +86,7 @@ impl<'a> Operator<'a> {
         facts_registry: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.client,
+            &self.signer,
             self.address,
             "set_facts_registry",
             vec![facts_registry.into()],

@@ -10,13 +10,13 @@ pub type LocalWalletSignerMiddleware =
 
 #[derive(Debug)]
 pub struct StarknetClient {
-    client: LocalWalletSignerMiddleware,
+    signer: LocalWalletSignerMiddleware,
     url: Url,
 }
 
 impl StarknetClient {
-    pub fn client(&self) -> &LocalWalletSignerMiddleware {
-        &self.client
+    pub fn signer(&self) -> &LocalWalletSignerMiddleware {
+        &self.signer
     }
     pub fn attach(
         rpc_endpoint: String,
@@ -42,8 +42,8 @@ impl StarknetClient {
         );
 
         Ok(Self {
-            client: account,
-            url: url,
+            signer: account,
+            url,
         })
     }
 }

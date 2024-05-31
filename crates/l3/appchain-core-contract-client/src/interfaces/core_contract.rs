@@ -2,16 +2,15 @@ use color_eyre::Result;
 use appchain_utils::invoke_contract;
 use appchain_utils::LocalWalletSignerMiddleware;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
-use std::sync::Arc;
 
 pub struct CoreContract<'a> {
-    client: Arc<&'a LocalWalletSignerMiddleware>,
+    signer: &'a LocalWalletSignerMiddleware,
     address: FieldElement,
 }
 
 impl<'a> CoreContract<'a> {
-    pub fn new(address: FieldElement, client: Arc<&'a LocalWalletSignerMiddleware>) -> Self {
-        Self { client, address }
+    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+        Self { signer, address }
     }
 
     pub async fn update_state(
@@ -24,6 +23,7 @@ impl<'a> CoreContract<'a> {
         calldata.extend(program_output);
         calldata.push(onchain_data_hash);
         calldata.push(onchain_data_size);
-        invoke_contract(&self.client, self.address, "update_state", calldata).await
+
+        invoke_contract(&self.signer, self.address, "update_state", calldata).await
     }
 }
