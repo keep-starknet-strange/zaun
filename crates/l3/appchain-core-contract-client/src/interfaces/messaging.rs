@@ -1,6 +1,6 @@
-use color_eyre::Result;
 use appchain_utils::invoke_contract;
 use appchain_utils::LocalWalletSignerMiddleware;
+use color_eyre::Result;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
 
 pub struct Messaging<'a> {
@@ -19,13 +19,13 @@ impl<'a> Messaging<'a> {
         selector: FieldElement,
         payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
-        let mut calldata = Vec::new();
+        let mut calldata = Vec::with_capacity(payload.len() + 2);
         calldata.push(to_address);
         calldata.push(selector);
         calldata.extend(payload);
 
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "send_message_to_appchain",
             calldata,
@@ -38,12 +38,12 @@ impl<'a> Messaging<'a> {
         from_address: FieldElement,
         payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
-        let mut calldata = Vec::new();
+        let mut calldata = Vec::with_capacity(payload.len() + 1);
         calldata.push(from_address);
         calldata.extend(payload);
 
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "consume_message_from_appchain",
             calldata,
@@ -58,14 +58,14 @@ impl<'a> Messaging<'a> {
         nonce: FieldElement,
         payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
-        let mut calldata = Vec::new();
+        let mut calldata = Vec::with_capacity(payload.len() + 3);
         calldata.push(to_address);
         calldata.push(selector);
         calldata.push(nonce);
         calldata.extend(payload);
 
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "start_message_cancellation",
             calldata,
@@ -80,12 +80,12 @@ impl<'a> Messaging<'a> {
         nonce: FieldElement,
         payload: Vec<FieldElement>,
     ) -> Result<InvokeTransactionResult> {
-        let mut calldata = Vec::new();
+        let mut calldata = Vec::with_capacity(payload.len() + 3);
         calldata.push(to_address);
         calldata.push(selector);
         calldata.push(nonce);
         calldata.extend(payload);
 
-        invoke_contract(&self.signer, self.address, "cancel_message", calldata).await
+        invoke_contract(self.signer, self.address, "cancel_message", calldata).await
     }
 }

@@ -11,7 +11,6 @@ pub type LocalWalletSignerMiddleware =
 #[derive(Debug)]
 pub struct StarknetClient {
     signer: LocalWalletSignerMiddleware,
-    url: Url,
 }
 
 impl StarknetClient {
@@ -26,7 +25,7 @@ impl StarknetClient {
     ) -> Result<Self, Error> {
         let chain_id = parse_field_element(&chain_id, "Invalid chain_id format")?;
         let url = Url::parse(&rpc_endpoint)?;
-        let provider = JsonRpcClient::new(HttpTransport::new(url.clone()));
+        let provider = JsonRpcClient::new(HttpTransport::new(url));
 
         let signer_key = parse_field_element(&priv_key, "Invalid private key format")?;
         let signer = LocalWallet::from(SigningKey::from_secret_scalar(signer_key));
@@ -41,10 +40,7 @@ impl StarknetClient {
             starknet_accounts::ExecutionEncoding::New,
         );
 
-        Ok(Self {
-            signer: account,
-            url,
-        })
+        Ok(Self { signer: account })
     }
 }
 

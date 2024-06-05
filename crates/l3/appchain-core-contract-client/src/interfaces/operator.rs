@@ -1,6 +1,8 @@
-use color_eyre::{eyre::eyre, Result};
+// allow unused imports
+#![allow(unused_imports)]
 use appchain_utils::LocalWalletSignerMiddleware;
 use appchain_utils::{call_contract, invoke_contract};
+use color_eyre::{eyre::eyre, Result};
 use starknet_accounts::ConnectedAccount;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
 use starknet_providers::{
@@ -27,10 +29,10 @@ impl<'a> Operator<'a> {
         new_operator: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "register_operator",
-            vec![new_operator.into()],
+            vec![new_operator],
         )
         .await
     }
@@ -40,21 +42,21 @@ impl<'a> Operator<'a> {
         removed_operator: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "unregister_operator",
-            vec![removed_operator.into()],
+            vec![removed_operator],
         )
         .await
     }
 
     pub async fn is_operator(&self, operator: FieldElement) -> Result<bool> {
         let provider = self.provider();
-        let values =
-            call_contract(provider, self.address, "is_operator", vec![operator.into()]).await?;
+        let values = call_contract(provider, self.address, "is_operator", vec![operator]).await?;
 
-        values.first()
-            .map(|value| value.to_string() != "0")
+        values
+            .first()
+            .map(|value| *value != FieldElement::ZERO)
             .ok_or_else(|| eyre!("Contract error: expected at least one return value"))
     }
 
@@ -64,10 +66,10 @@ impl<'a> Operator<'a> {
         config_hash: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "set_program_info",
-            vec![program_hash.into(), config_hash.into()],
+            vec![program_hash, config_hash],
         )
         .await
     }
@@ -76,8 +78,9 @@ impl<'a> Operator<'a> {
         let provider = self.provider();
         let values = call_contract(provider, self.address, "get_program_info", vec![]).await?;
 
-        values.get(0)
-            .and_then(|first| values.get(1).map(|second| (first.clone(), second.clone())))
+        values
+            .first()
+            .and_then(|first| values.get(1).map(|second| (*first, *second)))
             .ok_or_else(|| eyre!("Contract error: expected exactly two return values"))
     }
 
@@ -86,10 +89,10 @@ impl<'a> Operator<'a> {
         facts_registry: FieldElement,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            &self.signer,
+            self.signer,
             self.address,
             "set_facts_registry",
-            vec![facts_registry.into()],
+            vec![facts_registry],
         )
         .await
     }
@@ -98,6 +101,9 @@ impl<'a> Operator<'a> {
         let provider = self.provider();
         let values = call_contract(provider, self.address, "get_facts_registry", vec![]).await?;
 
-        values.first().cloned().ok_or_else(|| eyre!("Contract error: expected at least one return value"))
+        values
+            .first()
+            .cloned()
+            .ok_or_else(|| eyre!("Contract error: expected at least one return value"))
     }
 }
