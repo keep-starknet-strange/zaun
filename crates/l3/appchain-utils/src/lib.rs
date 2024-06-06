@@ -20,6 +20,7 @@ pub type TransactionExecution<'a> = Execution<'a, RpcAccount<'a>>;
 
 pub const NO_CONSTRUCTOR_ARG: Vec<FieldElement> = Vec::new();
 
+// Montgomery representation for value 0x1000000000000
 pub const MAX_FEE: FieldElement = FieldElement::from_mont([
     18437736874454810625,
     18446744073709551615,
@@ -45,7 +46,6 @@ pub async fn invoke_contract(
         selector,
         calldata,
     };
-    // let max_fee = FieldElement::from_hex_be(MAX_FEE).unwrap();
     signer
         .execute(vec![call])
         .max_fee(MAX_FEE)

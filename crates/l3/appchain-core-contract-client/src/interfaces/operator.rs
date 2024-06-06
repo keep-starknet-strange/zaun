@@ -1,14 +1,10 @@
 // allow unused imports
-#![allow(unused_imports)]
 use appchain_utils::LocalWalletSignerMiddleware;
 use appchain_utils::{call_contract, invoke_contract};
 use color_eyre::{eyre::eyre, Result};
 use starknet_accounts::ConnectedAccount;
 use starknet_core::types::{FieldElement, InvokeTransactionResult};
-use starknet_providers::{
-    jsonrpc::{HttpTransport, JsonRpcClient},
-    Provider,
-};
+use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 
 pub struct Operator<'a> {
     signer: &'a LocalWalletSignerMiddleware,
