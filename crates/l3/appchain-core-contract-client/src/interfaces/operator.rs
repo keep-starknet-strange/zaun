@@ -1,4 +1,3 @@
-// allow unused imports
 use appchain_utils::LocalWalletSignerMiddleware;
 use appchain_utils::{call_contract, invoke_contract};
 use color_eyre::{eyre::eyre, Result};
