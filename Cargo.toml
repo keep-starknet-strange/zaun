@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/starknet-core-contract-client",
-  "crates/ethereum-instance", "crates/starknet-eth-bridge-client", "crates/starknet-token-bridge-client", "crates/starkgate-manager-client", "crates/utils", "crates/starknet-erc20-client", "crates/starkgate-registry-client", "crates/starknet-proxy-client",
+  "crates/l2/starknet-core-contract-client",
+  "crates/l2/ethereum-instance", "crates/l2/starknet-eth-bridge-client", "crates/l2/starknet-token-bridge-client", "crates/l2/starkgate-manager-client", "crates/l2/utils", "crates/l2/starknet-erc20-client", "crates/l2/starkgate-registry-client", "crates/l2/starknet-proxy-client", "crates/l3/appchain-core-contract-client",  "crates/l3/starknet-instance", "crates/l3/appchain-utils"
 ]
 
 [workspace.package]
@@ -20,6 +20,21 @@ async-trait = "0.1.74"
 dirs = "5.0.1"
 serde_json = "1.0.108"
 hex = "0.4.3"
-
-
+starknet = "0.10.0"
+tokio = { version = "1.29.1", features = ["full"] }
+starknet-crypto = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false, features = [
+  "std",
+] }
+starknet-core = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false, features = [
+  "std",
+] }
+starknet-providers = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
+starknet-ff = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false, features = [
+  "std",
+] }
+starknet-signers = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
+starknet-accounts = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
+starknet-contract = { git = "https://github.com/xJonathanLEI/starknet-rs.git", rev = "64ebc36", default-features = false }
+url = "2.4.1"
+color-eyre = "0.6.2"
 

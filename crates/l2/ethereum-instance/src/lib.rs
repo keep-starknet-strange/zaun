@@ -41,7 +41,7 @@ pub enum Error {
     ContractBuildArtifacts(&'static str),
 }
 
-/// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum 
+/// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum
 pub struct EthereumClient {
     /// If initialized keeps an Anvil instance to properly shutdown it at the end
     client: Option<AnvilInstance>,
