@@ -1,5 +1,5 @@
 [package]
-name = "appchain-client"
+name = "core-contract-client"
 edition.workspace = true
 version.workspace = true
 authors.workspace = true

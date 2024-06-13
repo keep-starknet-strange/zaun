@@ -1,7 +1,6 @@
 use crate::interfaces::core_contract::CoreContract;
 use crate::interfaces::messaging::Messaging;
 use crate::interfaces::operator::Operator;
-use crate::interfaces::verifier_contract::VerifierContract;
 use appchain_utils::LocalWalletSignerMiddleware;
 use starknet_ff::FieldElement;
 
@@ -9,7 +8,6 @@ pub struct StarknetCoreContractClient<'a> {
     operator: Operator<'a>,
     messaging: Messaging<'a>,
     core_contract: CoreContract<'a>,
-    verifier_contract: VerifierContract<'a>,
 }
 
 impl<'a> StarknetCoreContractClient<'a> {
@@ -18,7 +16,6 @@ impl<'a> StarknetCoreContractClient<'a> {
             operator: Operator::new(address, signer),
             messaging: Messaging::new(address, signer),
             core_contract: CoreContract::new(address, signer),
-            verifier_contract: VerifierContract::new(address, signer),
         }
     }
 }
@@ -38,11 +35,5 @@ impl<'a> AsRef<Messaging<'a>> for StarknetCoreContractClient<'a> {
 impl<'a> AsRef<CoreContract<'a>> for StarknetCoreContractClient<'a> {
     fn as_ref(&self) -> &CoreContract<'a> {
         &self.core_contract
-    }
-}
-
-impl<'a> AsRef<VerifierContract<'a>> for StarknetCoreContractClient<'a> {
-    fn as_ref(&self) -> &VerifierContract<'a> {
-        &self.verifier_contract
     }
 }
