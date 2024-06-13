@@ -1,9 +1,8 @@
 use crate::interfaces::core_contract::CoreContract;
 use crate::interfaces::messaging::Messaging;
 use crate::interfaces::operator::Operator;
-use starknet_ff::FieldElement;
-
 use appchain_utils::LocalWalletSignerMiddleware;
+use starknet_ff::FieldElement;
 
 pub struct StarknetCoreContractClient<'a> {
     operator: Operator<'a>,

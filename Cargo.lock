@@ -63,32 +63,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "appchain-core-contract-client"
-version = "0.1.0"
-dependencies = [
- "appchain-utils",
- "async-trait",
- "color-eyre",
- "dirs",
- "hex",
- "log",
- "num-traits",
- "serde_json",
- "starknet",
- "starknet-accounts 0.6.1",
- "starknet-contract 0.6.0",
- "starknet-core 0.7.2",
- "starknet-crypto 0.6.1",
- "starknet-ff 0.3.5",
- "starknet-instance",
- "starknet-providers 0.7.0",
- "starknet-signers 0.5.0",
- "thiserror",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "appchain-utils"
 version = "0.1.0"
 dependencies = [
@@ -565,6 +539,32 @@ name = "constant_time_eq"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
+
+[[package]]
+name = "core-contract-client"
+version = "0.1.0"
+dependencies = [
+ "appchain-utils",
+ "async-trait",
+ "color-eyre",
+ "dirs",
+ "hex",
+ "log",
+ "num-traits",
+ "serde_json",
+ "starknet",
+ "starknet-accounts 0.6.1",
+ "starknet-contract 0.6.0",
+ "starknet-core 0.7.2",
+ "starknet-crypto 0.6.1",
+ "starknet-ff 0.3.5",
+ "starknet-instance",
+ "starknet-providers 0.7.0",
+ "starknet-signers 0.5.0",
+ "thiserror",
+ "tokio",
+ "url",
+]
 
 [[package]]
 name = "core-foundation"
@@ -4049,6 +4049,28 @@ name = "valuable"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
+
+[[package]]
+name = "verifier-contract-client"
+version = "0.1.0"
+dependencies = [
+ "appchain-utils",
+ "async-trait",
+ "color-eyre",
+ "dirs",
+ "hex",
+ "log",
+ "num-traits",
+ "serde_json",
+ "starknet",
+ "starknet-accounts 0.6.1",
+ "starknet-core 0.7.2",
+ "starknet-ff 0.3.5",
+ "starknet-providers 0.7.0",
+ "thiserror",
+ "tokio",
+ "url",
+]
 
 [[package]]
 name = "version_check"
