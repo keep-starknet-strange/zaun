@@ -63,7 +63,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "appchain-core-contract-client"
+name = "appchain-client"
 version = "0.1.0"
 dependencies = [
  "appchain-utils",

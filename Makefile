@@ -11,4 +11,4 @@ artifacts:
 	forge build
 	cp out/UnsafeProxy.sol/UnsafeProxy.json crates/starknet-proxy-client/src/artifacts/
 	cp out/StarknetSovereign.sol/Starknet.json crates/starknet-core-contract-client/src/artifacts/
-	(cd lib/piltover && scarb build && cp target/dev/* ../../crates/l3/appchain-core-contract-client/artifacts)
+	(cd lib/piltover && scarb build && cp target/dev/* ../../crates/l3/appchain-client/artifacts)
