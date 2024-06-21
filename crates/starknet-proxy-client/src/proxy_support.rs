@@ -6,6 +6,7 @@ use ethers::{
     providers::Middleware,
     types::{Address, Bytes, TransactionReceipt, I256, U256},
 };
+use ethers::core::k256::pkcs8::der::Encode;
 
 use utils::errors::Error;
 
@@ -14,6 +15,8 @@ abigen!(
     r#"[
         function isFrozen() external view virtual returns (bool)
         function initialize(bytes calldata data) external notCalledDirectly
+        function upgradeTo(address newImplementation, bytes calldata data, bool finalize) external payable onlyGovernance notFinalized notFrozen
+        function addImplementation(address newImplementation, bytes calldata data, bool finalize) external onlyGovernance
     ]"#,
 );
 
@@ -22,6 +25,14 @@ pub trait ProxySupportTrait<M: Middleware> {
     async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
+        &self,
+        data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn upgrade_to<const N: usize>(
+        &self,
+        data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn add_implementation<const N: usize>(
         &self,
         data: ProxyInitializeData<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
@@ -52,6 +63,20 @@ where
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.initialize(data.into()).await
     }
+
+    async fn upgrade_to<const N: usize>(
+        &self,
+        data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.upgrade_to(data.into()).await
+    }
+
+    async fn add_implementation<const N: usize>(
+        &self,
+        data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.add_implementation(data.into()).await
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
@@ -74,6 +99,28 @@ pub struct ProxyInitializeData<const N: usize> {
     pub sub_contract_addresses: [Address; N],
     pub eic_address: Address,
     pub init_data: CoreContractInitData,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ProxyInitializeDataUpgradeTo<const N: usize> {
+    pub implementation_address: Address,
+    pub sub_contract_addresses: [Address; N],
+    pub eic_address: Address,
+    pub init_data: CoreContractInitData,
+    pub bool_finalize: bool
+}
+
+impl<const N: usize> Into<Vec<u8>> for ProxyInitializeDataUpgradeTo<N> {
+    fn into(self) -> Vec<u8> {
+        [
+            self.implementation_address.encode(),
+            self.sub_contract_addresses.encode(),
+            self.eic_address.encode(),
+            self.init_data.encode(),
+            self.bool_finalize.encode()
+        ]
+            .concat()
+    }
 }
 
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {

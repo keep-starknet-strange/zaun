@@ -3,9 +3,9 @@ use ethers::abi::{Token, Tokenize};
 use ethers::contract::ContractError;
 use ethers::prelude::ContractInstance;
 use ethers::providers::ProviderError;
+use ethers::types::U256;
 use ethers::utils::hex::{self};
 use std::sync::Arc;
-use ethers::types::U256;
 use utils::LocalWalletSignerMiddleware;
 
 #[derive(Debug, thiserror::Error)]
@@ -57,7 +57,10 @@ pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
 
     log::debug!("ℹ️  Contract deployed : {:?}", contract.address().clone());
 
-    let proxy_contract = deploy_contract(client.clone(), SAFE_PROXY, Token::Uint(U256::from(0))).await?;
+    let proxy_contract =
+        deploy_contract(client.clone(), SAFE_PROXY, Token::Uint(U256::from(0))).await?;
+
+    log::debug!("ℹ️  Proxy for contract [{:?}] deployed : {:?}", contract.address().clone(), proxy_contract.address());
 
     return Ok(proxy_contract);
 }

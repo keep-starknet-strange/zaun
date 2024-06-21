@@ -6,10 +6,10 @@ use ethers::signers::{LocalWallet, Signer};
 use ethers::types::Bytes;
 use ethers::utils::{Anvil, AnvilInstance};
 use hex::FromHex;
+use log::log;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
-use log::log;
 
 /// Ethers library allows multiple signer backends and transports.
 /// For simplicity we use local wallet (basically private key) and

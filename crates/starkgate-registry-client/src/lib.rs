@@ -16,6 +16,20 @@ pub async fn deploy_starkgate_registry_behind_unsafe_proxy(
 ) -> Result<StarkgateRegistryContractClient, Error> {
     // Deploy the Starkgate Registry contract (no explicit constructor)
     let registry_contract =
+        deploy_contract_behind_unsafe_proxy(client.clone(), STARKGATE_REGISTRY, NO_CONSTRUCTOR_ARG)
+            .await?;
+
+    Ok(StarkgateRegistryContractClient::new(
+        registry_contract.address(),
+        client.clone(),
+    ))
+}
+
+pub async fn deploy_starkgate_registry_behind_safe_proxy(
+    client: Arc<LocalWalletSignerMiddleware>,
+) -> Result<StarkgateRegistryContractClient, Error> {
+    // Deploy the Starkgate Registry contract (no explicit constructor)
+    let registry_contract =
         deploy_contract_behind_safe_proxy(client.clone(), STARKGATE_REGISTRY, NO_CONSTRUCTOR_ARG)
             .await?;
 
