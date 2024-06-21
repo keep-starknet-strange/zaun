@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use ethers::core::k256::pkcs8::der::Encode;
 use ethers::{
     abi::AbiEncode,
     contract::{ContractError, EthAbiCodec, EthAbiType},
@@ -30,11 +29,11 @@ pub trait ProxySupportTrait<M: Middleware> {
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn upgrade_to<const N: usize>(
         &self,
-        data: ProxyInitializeData<N>,
+        data: ProxyInitializeDataUpgradeTo<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn add_implementation<const N: usize>(
         &self,
-        data: ProxyInitializeData<N>,
+        data: ProxyInitializeDataUpgradeTo<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
@@ -66,14 +65,14 @@ where
 
     async fn upgrade_to<const N: usize>(
         &self,
-        data: ProxyInitializeData<N>,
+        data: ProxyInitializeDataUpgradeTo<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.upgrade_to(data.into()).await
     }
 
     async fn add_implementation<const N: usize>(
         &self,
-        data: ProxyInitializeData<N>,
+        data: ProxyInitializeDataUpgradeTo<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.add_implementation(data.into()).await
     }

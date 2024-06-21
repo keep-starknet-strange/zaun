@@ -6,7 +6,6 @@ use ethers::signers::{LocalWallet, Signer};
 use ethers::types::Bytes;
 use ethers::utils::{Anvil, AnvilInstance};
 use hex::FromHex;
-use log::log;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -42,6 +41,7 @@ pub enum Error {
 }
 
 /// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum
+#[allow(dead_code)]
 pub struct EthereumClient {
     /// If initialized keeps an Anvil instance to properly shutdown it at the end
     client: Option<AnvilInstance>,
