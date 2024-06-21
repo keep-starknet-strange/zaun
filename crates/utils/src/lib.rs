@@ -1,13 +1,13 @@
 pub mod errors;
-use std::sync::Arc;
-use ethers::types::Address;
 use ethers::prelude::SignerMiddleware;
 use ethers::providers::{Http, Provider};
 use ethers::signers::LocalWallet;
+use ethers::types::Address;
+use std::sync::Arc;
 
 pub type LocalWalletSignerMiddleware = SignerMiddleware<Provider<Http>, LocalWallet>;
 
-pub const NO_CONSTRUCTOR_ARG:() = ();
+pub const NO_CONSTRUCTOR_ARG: () = ();
 
 pub trait StarknetContractClient {
     fn address(&self) -> Address;

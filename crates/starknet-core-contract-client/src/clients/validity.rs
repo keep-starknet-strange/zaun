@@ -6,7 +6,6 @@ use crate::interfaces::{Operator, StarknetMessaging, StarknetValidityContract};
 use starknet_proxy_client::proxy_support::ProxySupport;
 use utils::LocalWalletSignerMiddleware;
 
-
 /// Client to interact with a Starknet core contract running in `Validity` mode
 pub struct StarknetValidityContractClient {
     core_contract: StarknetValidityContract<LocalWalletSignerMiddleware>,

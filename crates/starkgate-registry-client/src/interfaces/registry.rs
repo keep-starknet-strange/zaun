@@ -25,7 +25,11 @@ abigen!(
 
 #[async_trait]
 pub trait StarkgateRegistryTrait<M: Middleware> {
-    async fn enlist_token(&self, token: Address, bridge: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn enlist_token(
+        &self,
+        token: Address,
+        bridge: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn block_token(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn self_remove(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn identify(&self) -> Result<String, Error<M>>;
@@ -37,7 +41,11 @@ impl<T, M: Middleware> StarkgateRegistryTrait<M> for T
 where
     T: AsRef<StarkgateRegistry<M>> + Send + Sync,
 {
-    async fn enlist_token(&self, token: Address, bridge: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn enlist_token(
+        &self,
+        token: Address,
+        bridge: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .enlist_token(token, bridge)
             .send()
@@ -68,11 +76,7 @@ where
     }
 
     async fn identify(&self) -> Result<String, Error<M>> {
-        self.as_ref()
-            .identify()
-            .call()
-            .await
-            .map_err(Into::into)
+        self.as_ref().identify().call().await.map_err(Into::into)
     }
 
     async fn get_bridge(&self, token: Address) -> Result<Address, Error<M>> {
