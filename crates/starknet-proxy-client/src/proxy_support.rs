@@ -35,6 +35,14 @@ pub trait ProxySupportTrait<M: Middleware> {
         &self,
         data: ProxyInitializeDataUpgradeTo<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn upgrade_to_bytes<const N: usize>(
+        &self,
+        data: ProxyInitializeDataUpgradeToBytes,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn add_implementation_bytes<const N: usize>(
+        &self,
+        data: ProxyInitializeDataUpgradeToBytes,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -70,9 +78,23 @@ where
         self.upgrade_to(data.into()).await
     }
 
+    async fn upgrade_to_bytes<const N: usize>(
+        &self,
+        data: ProxyInitializeDataUpgradeToBytes,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.upgrade_to(data.into()).await
+    }
+
     async fn add_implementation<const N: usize>(
         &self,
         data: ProxyInitializeDataUpgradeTo<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.add_implementation(data.into()).await
+    }
+
+    async fn add_implementation_bytes<const N: usize>(
+        &self,
+        data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.add_implementation(data.into()).await
     }
@@ -106,6 +128,13 @@ pub struct ProxyInitializeDataUpgradeTo<const N: usize> {
     pub sub_contract_addresses: [Address; N],
     pub eic_address: Address,
     pub init_data: CoreContractInitData,
+    pub bool_finalize: bool,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ProxyInitializeDataUpgradeToBytes {
+    pub implementation_address: Address,
+    pub calldata: Bytes,
     pub bool_finalize: bool,
 }
 
