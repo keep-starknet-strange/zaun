@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use ethers::core::k256::pkcs8::der::Encode;
 use ethers::{
     abi::AbiEncode,
     contract::{ContractError, EthAbiCodec, EthAbiType},
@@ -6,7 +7,6 @@ use ethers::{
     providers::Middleware,
     types::{Address, Bytes, TransactionReceipt, I256, U256},
 };
-use ethers::core::k256::pkcs8::der::Encode;
 
 use utils::errors::Error;
 
@@ -107,7 +107,7 @@ pub struct ProxyInitializeDataUpgradeTo<const N: usize> {
     pub sub_contract_addresses: [Address; N],
     pub eic_address: Address,
     pub init_data: CoreContractInitData,
-    pub bool_finalize: bool
+    pub bool_finalize: bool,
 }
 
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeDataUpgradeTo<N> {
@@ -117,9 +117,9 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeDataUpgradeTo<N> {
             self.sub_contract_addresses.encode(),
             self.eic_address.encode(),
             self.init_data.encode(),
-            self.bool_finalize.encode()
+            self.bool_finalize.encode(),
         ]
-            .concat()
+        .concat()
     }
 }
 
