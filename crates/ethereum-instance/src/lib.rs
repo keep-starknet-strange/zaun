@@ -131,27 +131,31 @@ pub async fn deploy_contract<T: Tokenize>(
     let (abi, bytecode) = {
         let mut artifacts: serde_json::Value = serde_json::from_str(contract_build_artifacts)?;
 
-        log::info!(">>>> deploy_contract : artifacts built");
+        log::info!("🌊 >>>> deploy_contract : artifacts built");
 
         let abi_value = artifacts
             .get_mut("abi")
             .ok_or_else(|| Error::ContractBuildArtifacts("abi"))?
             .take();
-        log::info!(">>>> deploy_contract : abi built");
+        log::info!("🌊 >>>> deploy_contract : abi built");
         let bytecode_value = artifacts
             .get_mut("bytecode")
             .ok_or_else(|| Error::ContractBuildArtifacts("bytecode"))?
             .get_mut("object")
             .ok_or_else(|| Error::ContractBuildArtifacts("bytecode.object"))?
             .take();
-        log::info!(">>>> deploy_contract : bytecode built");
+        log::info!("🌊 >>>> deploy_contract : bytecode built");
 
         let abi = serde_json::from_value(abi_value)?;
+        log::info!("🌊 >>>> deploy_contract : abi decoded");
         let bytecode = Bytes::from_hex(bytecode_value.as_str().ok_or(Error::BytecodeObject)?)?;
+        log::info!("🌊 >>>> deploy_contract : bytecode decoded");
         (abi, bytecode)
     };
 
     let factory = ContractFactory::new(abi, bytecode, client.clone());
+
+    log::info!("🌊 >>>> deploy_contract : factory setup done");
 
     Ok(factory
         .deploy(contructor_args)

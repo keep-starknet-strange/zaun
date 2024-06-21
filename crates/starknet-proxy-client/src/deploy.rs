@@ -54,7 +54,7 @@ pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
 {
     let contract = deploy_contract(client.clone(), contract_path, constructor_args).await?;
 
-    log::info!("ℹ️ Contract deployed : {:?}", contract.address().clone());
+    log::info!("ℹ️  Contract deployed : {:?}", contract.address().clone());
 
     let proxy_contract = deploy_contract(client.clone(), SAFE_PROXY, contract.address()).await?;
 
