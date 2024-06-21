@@ -35,11 +35,11 @@ pub trait ProxySupportTrait<M: Middleware> {
         &self,
         data: ProxyInitializeDataUpgradeTo<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn upgrade_to_bytes<const N: usize>(
+    async fn upgrade_to_bytes(
         &self,
         data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn add_implementation_bytes<const N: usize>(
+    async fn add_implementation_bytes(
         &self,
         data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
@@ -78,11 +78,11 @@ where
         self.upgrade_to(data.into()).await
     }
 
-    async fn upgrade_to_bytes<const N: usize>(
+    async fn upgrade_to_bytes(
         &self,
         data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.upgrade_to(data.into()).await
+        self.upgrade_to_bytes(data.into()).await
     }
 
     async fn add_implementation<const N: usize>(
@@ -92,11 +92,11 @@ where
         self.add_implementation(data.into()).await
     }
 
-    async fn add_implementation_bytes<const N: usize>(
+    async fn add_implementation_bytes(
         &self,
         data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.add_implementation(data.into()).await
+        self.add_implementation_bytes(data.into()).await
     }
 }
 
@@ -159,6 +159,17 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
             self.init_data.encode(),
         ]
         .concat()
+    }
+}
+
+impl Into<Vec<u8>> for ProxyInitializeDataUpgradeToBytes {
+    fn into(self) -> Vec<u8> {
+        [
+            self.implementation_address.encode(),
+            self.calldata.encode(),
+            self.bool_finalize.encode(),
+        ]
+            .concat()
     }
 }
 
