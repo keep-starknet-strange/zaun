@@ -24,7 +24,7 @@ pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     Ok(StarknetEthBridgeContractClient::new(
         eth_bridge_contract.address(),
         client.clone(),
-        eth_bridge_contract.address()
+        eth_bridge_contract.address(),
     ))
 }
 
@@ -39,6 +39,6 @@ pub async fn deploy_starknet_eth_bridge_behind_safe_proxy(
     Ok(StarknetEthBridgeContractClient::new(
         eth_bridge_contract.address(),
         client.clone(),
-        eth_bridge_contract_implementation.address()
+        eth_bridge_contract_implementation.address(),
     ))
 }

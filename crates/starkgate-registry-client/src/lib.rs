@@ -22,7 +22,7 @@ pub async fn deploy_starkgate_registry_behind_unsafe_proxy(
     Ok(StarkgateRegistryContractClient::new(
         registry_contract.address(),
         client.clone(),
-        registry_contract.address()
+        registry_contract.address(),
     ))
 }
 
@@ -37,6 +37,6 @@ pub async fn deploy_starkgate_registry_behind_safe_proxy(
     Ok(StarkgateRegistryContractClient::new(
         registry_contract.address(),
         client.clone(),
-        registry_contract_implementation.address()
+        registry_contract_implementation.address(),
     ))
 }

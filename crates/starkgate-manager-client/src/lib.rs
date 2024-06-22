@@ -21,7 +21,7 @@ pub async fn deploy_starkgate_manager_behind_unsafe_proxy(
     Ok(StarkgateManagerContractClient::new(
         manager_contract.address(),
         client.clone(),
-        manager_contract.address()
+        manager_contract.address(),
     ))
 }
 

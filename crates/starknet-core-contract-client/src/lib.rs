@@ -24,7 +24,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     Ok(StarknetSovereignContractClient::new(
         core_contract.address(),
         client.clone(),
-        core_contract.address()
+        core_contract.address(),
     ))
 }
 
@@ -39,6 +39,6 @@ pub async fn deploy_starknet_sovereign_behind_safe_proxy(
     Ok(StarknetSovereignContractClient::new(
         core_contract.address(),
         client.clone(),
-        core_contract_implementation.address()
+        core_contract_implementation.address(),
     ))
 }
