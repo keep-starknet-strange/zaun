@@ -27,13 +27,11 @@ pub trait ProxySupportTrait<M: Middleware> {
         &self,
         data: ProxyInitializeData<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn upgrade_to<const N: usize>(
-        &self,
-        data: ProxyInitializeDataUpgradeTo<N>,
+    async fn upgrade_to(
+        &self, data: Bytes, implementation_address: Address, finalized: bool
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn add_implementation<const N: usize>(
-        &self,
-        data: ProxyInitializeDataUpgradeTo<N>,
+    async fn add_implementation(
+        &self, data: Bytes, implementation_address: Address, finalized: bool
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn upgrade_to_bytes(
         &self,
@@ -71,32 +69,38 @@ where
         self.initialize(data.into()).await
     }
 
-    async fn upgrade_to<const N: usize>(
-        &self,
-        data: ProxyInitializeDataUpgradeTo<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.upgrade_to(data.into()).await
+    async fn upgrade_to(&self, data: Bytes, implementation_address: Address, finalized: bool) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .upgrade_to(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn add_implementation(&self, data: Bytes, implementation_address: Address, finalized: bool) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .add_implementation(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
     }
 
     async fn upgrade_to_bytes(
         &self,
         data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.upgrade_to_bytes(data.into()).await
-    }
-
-    async fn add_implementation<const N: usize>(
-        &self,
-        data: ProxyInitializeDataUpgradeTo<N>,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.add_implementation(data.into()).await
+        self.upgrade_to(data.calldata, data.implementation_address, data.bool_finalize).await
     }
 
     async fn add_implementation_bytes(
         &self,
         data: ProxyInitializeDataUpgradeToBytes,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.add_implementation_bytes(data.into()).await
+        self.add_implementation(data.calldata, data.implementation_address, data.bool_finalize).await
     }
 }
 
@@ -123,32 +127,10 @@ pub struct ProxyInitializeData<const N: usize> {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ProxyInitializeDataUpgradeTo<const N: usize> {
-    pub implementation_address: Address,
-    pub sub_contract_addresses: [Address; N],
-    pub eic_address: Address,
-    pub init_data: CoreContractInitData,
-    pub bool_finalize: bool,
-}
-
-#[derive(Debug, Clone, PartialEq)]
 pub struct ProxyInitializeDataUpgradeToBytes {
     pub implementation_address: Address,
     pub calldata: Bytes,
     pub bool_finalize: bool,
-}
-
-impl<const N: usize> Into<Vec<u8>> for ProxyInitializeDataUpgradeTo<N> {
-    fn into(self) -> Vec<u8> {
-        [
-            self.implementation_address.encode(),
-            self.sub_contract_addresses.encode(),
-            self.eic_address.encode(),
-            self.init_data.encode(),
-            self.bool_finalize.encode(),
-        ]
-        .concat()
-    }
 }
 
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
@@ -159,17 +141,6 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
             self.init_data.encode(),
         ]
         .concat()
-    }
-}
-
-impl Into<Vec<u8>> for ProxyInitializeDataUpgradeToBytes {
-    fn into(self) -> Vec<u8> {
-        [
-            self.implementation_address.encode(),
-            self.calldata.encode(),
-            self.bool_finalize.encode(),
-        ]
-            .concat()
     }
 }
 
