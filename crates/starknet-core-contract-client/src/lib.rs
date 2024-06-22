@@ -24,6 +24,7 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     Ok(StarknetSovereignContractClient::new(
         core_contract.address(),
         client.clone(),
+        core_contract.address()
     ))
 }
 
@@ -31,12 +32,13 @@ pub async fn deploy_starknet_sovereign_behind_safe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
 ) -> Result<StarknetSovereignContractClient, Error> {
     // Deploy the Starknet Core contract (no explicit constructor)
-    let core_contract =
+    let (core_contract, core_contract_implementation) =
         deploy_contract_behind_safe_proxy(client.clone(), STARKNET_SOVEREIGN, NO_CONSTRUCTOR_ARG)
             .await?;
 
     Ok(StarknetSovereignContractClient::new(
         core_contract.address(),
         client.clone(),
+        core_contract_implementation.address()
     ))
 }

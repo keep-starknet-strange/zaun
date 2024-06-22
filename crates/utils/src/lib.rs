@@ -11,5 +11,6 @@ pub const NO_CONSTRUCTOR_ARG: () = ();
 
 pub trait StarknetContractClient {
     fn address(&self) -> Address;
+    fn implementation_address(&self) -> Address;
     fn client(&self) -> Arc<LocalWalletSignerMiddleware>;
 }

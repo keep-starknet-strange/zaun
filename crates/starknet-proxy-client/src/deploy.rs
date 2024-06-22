@@ -51,8 +51,13 @@ pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
     client: Arc<LocalWalletSignerMiddleware>,
     contract_path: &str,
     constructor_args: T,
-) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error>
-{
+) -> Result<
+    (
+        ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>,
+        ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>,
+    ),
+    Error,
+> {
     let contract = deploy_contract(client.clone(), contract_path, constructor_args).await?;
 
     log::debug!("ℹ️  Contract deployed : {:?}", contract.address().clone());
@@ -66,5 +71,5 @@ pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
         proxy_contract.address()
     );
 
-    return Ok(proxy_contract);
+    return Ok((proxy_contract, contract));
 }

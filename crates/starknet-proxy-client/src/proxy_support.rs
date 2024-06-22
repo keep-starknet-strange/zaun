@@ -28,18 +28,16 @@ pub trait ProxySupportTrait<M: Middleware> {
         data: ProxyInitializeData<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn upgrade_to(
-        &self, data: Bytes, implementation_address: Address, finalized: bool
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn add_implementation(
-        &self, data: Bytes, implementation_address: Address, finalized: bool
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn upgrade_to_bytes(
         &self,
-        data: ProxyInitializeDataUpgradeToBytes,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn add_implementation_bytes(
-        &self,
-        data: ProxyInitializeDataUpgradeToBytes,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
@@ -69,7 +67,12 @@ where
         self.initialize(data.into()).await
     }
 
-    async fn upgrade_to(&self, data: Bytes, implementation_address: Address, finalized: bool) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn upgrade_to(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .upgrade_to(implementation_address, data, finalized)
             .send()
@@ -79,7 +82,12 @@ where
             .map_err(Into::into)
     }
 
-    async fn add_implementation(&self, data: Bytes, implementation_address: Address, finalized: bool) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn add_implementation(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .add_implementation(implementation_address, data, finalized)
             .send()
@@ -87,20 +95,6 @@ where
             .map_err(Into::<ContractError<M>>::into)?
             .await
             .map_err(Into::into)
-    }
-
-    async fn upgrade_to_bytes(
-        &self,
-        data: ProxyInitializeDataUpgradeToBytes,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.upgrade_to(data.calldata, data.implementation_address, data.bool_finalize).await
-    }
-
-    async fn add_implementation_bytes(
-        &self,
-        data: ProxyInitializeDataUpgradeToBytes,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.add_implementation(data.calldata, data.implementation_address, data.bool_finalize).await
     }
 }
 
@@ -152,7 +146,7 @@ impl Into<Vec<u8>> for CoreContractInitData {
             self.config_hash.encode(),
             self.initial_state.into(),
         ]
-            .concat()
+        .concat()
     }
 }
 
@@ -163,7 +157,7 @@ impl Into<Vec<u8>> for CoreContractState {
             self.block_number.encode(),
             self.block_hash.encode(),
         ]
-            .concat()
+        .concat()
     }
 }
 

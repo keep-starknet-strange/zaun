@@ -28,6 +28,10 @@ impl StarknetContractClient for ERC20ContractClient {
         self.erc20_token.address()
     }
 
+    fn implementation_address(&self) -> Address {
+        self.erc20_token.address()
+    }
+
     fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.erc20_token.client()
     }
