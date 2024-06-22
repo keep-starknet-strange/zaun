@@ -144,6 +144,29 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     }
 }
 
+impl Into<Vec<u8>> for CoreContractInitData {
+    fn into(self) -> Vec<u8> {
+        [
+            self.program_hash.encode(),
+            self.verifier_address.encode(),
+            self.config_hash.encode(),
+            self.initial_state.into(),
+        ]
+            .concat()
+    }
+}
+
+impl Into<Vec<u8>> for CoreContractState {
+    fn into(self) -> Vec<u8> {
+        [
+            self.state_root.encode(),
+            self.block_number.encode(),
+            self.block_hash.encode(),
+        ]
+            .concat()
+    }
+}
+
 impl<const N: usize> Into<Bytes> for ProxyInitializeData<N> {
     fn into(self) -> Bytes {
         Into::<Vec<u8>>::into(self).into()
