@@ -120,13 +120,6 @@ pub struct ProxyInitializeData<const N: usize> {
     pub init_data: CoreContractInitData,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct ProxyInitializeDataUpgradeToBytes {
-    pub implementation_address: Address,
-    pub calldata: Bytes,
-    pub bool_finalize: bool,
-}
-
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     fn into(self) -> Vec<u8> {
         [
