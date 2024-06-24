@@ -28,8 +28,8 @@ pub enum Error {
     DeployContract(#[from] ethereum_instance::Error),
 }
 
-const UNSAFE_PROXY: &str = include_str!("./artifacts/UnsafeProxy.json");
-const SAFE_PROXY: &str = include_str!("./artifacts/Proxy.json");
+const UNSAFE_PROXY: &str = include_str!("artifacts/UnsafeProxy.json");
+const SAFE_PROXY: &str = include_str!("artifacts/Proxy.json");
 
 /// Deploys new unsafe proxy contract:
 ///     - Implementation can be set only once at initialization

@@ -9,7 +9,7 @@ use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 pub mod clients;
 pub mod interfaces;
 
-const STARKNET_SOVEREIGN: &str = include_str!("./artifacts/Starknet.json");
+const STARKNET_SOVEREIGN: &str = include_str!("artifacts/Starknet.json");
 
 /// Deploy Starknet sovereign contract and unsafe proxy for it.
 /// Cached forge artifacts are used for deployment, make sure they are up to date.

@@ -8,7 +8,7 @@ use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 pub mod clients;
 pub mod interfaces;
 
-const STARKNET_ETH_BRIDGE: &str = include_str!("./artifacts/StarknetLegacyBridge.json");
+const STARKNET_ETH_BRIDGE: &str = include_str!("artifacts/StarknetLegacyBridge.json");
 
 pub async fn deploy_starknet_eth_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,

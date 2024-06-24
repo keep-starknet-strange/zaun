@@ -8,7 +8,7 @@ use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 pub mod clients;
 pub mod interfaces;
 
-const DAI_ERC20_TOKEN: &str = include_str!("./artifacts/ERC20Token.json");
+const DAI_ERC20_TOKEN: &str = include_str!("artifacts/ERC20Token.json");
 
 pub async fn deploy_dai_erc20_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,

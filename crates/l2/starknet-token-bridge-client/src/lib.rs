@@ -9,7 +9,7 @@ use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 pub mod clients;
 pub mod interfaces;
 
-const STARKNET_TOKEN_BRIDGE: &str = include_str!("./artifacts/StarknetTokenBridge.json");
+const STARKNET_TOKEN_BRIDGE: &str = include_str!("artifacts/StarknetTokenBridge.json");
 
 pub async fn deploy_starknet_token_bridge_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
