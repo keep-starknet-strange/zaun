@@ -1,0 +1,23 @@
+[package]
+name = "starknet-instance"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+starknet = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+hex = { workspace = true }
+appchain-utils = { path = "../appchain-utils" }
+tokio = { workspace = true }
+log = { workspace = true }
+num-traits = { workspace = true }
+async-trait = { workspace = true }
+starknet-accounts = { workspace = true }
+starknet-contract = { workspace = true }
+starknet-core = { workspace = true }
+starknet-ff = { workspace = true }
+starknet-providers = { workspace = true }
+starknet-signers = { workspace = true }
+url = { workspace = true }
