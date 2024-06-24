@@ -80,7 +80,7 @@ where
 
         match txn {
             Ok(receipt) => {
-                if let Some(_) = receipt {
+                if receipt.is_some() {
                     return Ok(true);
                 }
                 Ok(false)

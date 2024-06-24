@@ -44,7 +44,7 @@ pub async fn deploy_contract_behind_unsafe_proxy<T: Tokenize>(
 
     let proxy_contract = deploy_contract(client.clone(), UNSAFE_PROXY, contract.address()).await?;
 
-    return Ok(proxy_contract);
+    Ok(proxy_contract)
 }
 
 pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
@@ -71,5 +71,5 @@ pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
         proxy_contract.address()
     );
 
-    return Ok((proxy_contract, contract));
+    Ok((proxy_contract, contract))
 }

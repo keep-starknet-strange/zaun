@@ -120,6 +120,7 @@ pub struct ProxyInitializeData<const N: usize> {
     pub init_data: CoreContractInitData,
 }
 
+#[allow(clippy::from_over_into)]
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     fn into(self) -> Vec<u8> {
         [
@@ -131,6 +132,7 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for CoreContractInitData {
     fn into(self) -> Vec<u8> {
         [
@@ -143,6 +145,7 @@ impl Into<Vec<u8>> for CoreContractInitData {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Vec<u8>> for CoreContractState {
     fn into(self) -> Vec<u8> {
         [
@@ -154,6 +157,7 @@ impl Into<Vec<u8>> for CoreContractState {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl<const N: usize> Into<Bytes> for ProxyInitializeData<N> {
     fn into(self) -> Bytes {
         Into::<Vec<u8>>::into(self).into()

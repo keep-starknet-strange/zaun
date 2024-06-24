@@ -73,7 +73,7 @@ impl EthereumClient {
 
         let wallet: LocalWallet = priv_key.parse().expect("Failed to parse private key");
 
-        let chain_id = chain_id.unwrap_or_else(|| ANVIL_DEFAULT_CHAIN_ID);
+        let chain_id = chain_id.unwrap_or(ANVIL_DEFAULT_CHAIN_ID);
 
         let client = SignerMiddleware::new(provider.clone(), wallet.with_chain_id(chain_id));
 
