@@ -14,6 +14,8 @@ abigen!(
     r#"[
         function isFrozen() external view virtual returns (bool)
         function initialize(bytes calldata data) external notCalledDirectly
+        function upgradeTo(address newImplementation, bytes calldata data, bool finalize) external payable onlyGovernance notFinalized notFrozen
+        function addImplementation(address newImplementation, bytes calldata data, bool finalize) external onlyGovernance
     ]"#,
 );
 
@@ -24,6 +26,18 @@ pub trait ProxySupportTrait<M: Middleware> {
     async fn initialize_with<const N: usize>(
         &self,
         data: ProxyInitializeData<N>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn upgrade_to(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn add_implementation(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
@@ -51,6 +65,36 @@ where
         data: ProxyInitializeData<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.initialize(data.into()).await
+    }
+
+    async fn upgrade_to(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .upgrade_to(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn add_implementation(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .add_implementation(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
     }
 }
 
@@ -82,6 +126,29 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
             self.sub_contract_addresses.encode(),
             self.eic_address.encode(),
             self.init_data.encode(),
+        ]
+        .concat()
+    }
+}
+
+impl Into<Vec<u8>> for CoreContractInitData {
+    fn into(self) -> Vec<u8> {
+        [
+            self.program_hash.encode(),
+            self.verifier_address.encode(),
+            self.config_hash.encode(),
+            self.initial_state.into(),
+        ]
+        .concat()
+    }
+}
+
+impl Into<Vec<u8>> for CoreContractState {
+    fn into(self) -> Vec<u8> {
+        [
+            self.state_root.encode(),
+            self.block_number.encode(),
+            self.block_hash.encode(),
         ]
         .concat()
     }

@@ -754,6 +754,7 @@ dependencies = [
  "dirs",
  "ethers",
  "hex",
+ "log",
  "serde_json",
  "thiserror",
  "tokio",

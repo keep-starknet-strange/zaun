@@ -11,6 +11,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 hex = { workspace = true }
 utils = { path = "../utils" }
+log = "0.4.20"
 
 [dev-dependencies]
 tokio = { version = "1.29.1", features = ["rt", "macros", "parking_lot"] }

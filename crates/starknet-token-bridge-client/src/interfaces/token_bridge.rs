@@ -3,7 +3,7 @@ use ethers::{
     contract::ContractError,
     prelude::abigen,
     providers::Middleware,
-    types::{TransactionReceipt, U256, H160},
+    types::{TransactionReceipt, H160, U256},
 };
 
 use utils::errors::Error;
@@ -42,21 +42,69 @@ abigen!(
 
 #[async_trait]
 pub trait StarknetTokenBridgeTrait<M: Middleware> {
-    async fn deposit(&self, token: Address, amount: U256, l2_recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn withdraw(&self, token: Address, amount: U256, recipient: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn set_l2_token_bridge(&self, l2_token_bridge: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn deposit(
+        &self,
+        token: Address,
+        amount: U256,
+        l2_recipient: U256,
+        fee: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn withdraw(
+        &self,
+        token: Address,
+        amount: U256,
+        recipient: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn set_l2_token_bridge(
+        &self,
+        l2_token_bridge: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 
-    async fn enable_withdrawal_limit(&self, address: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn disable_withdrawal_limit(&self, address: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn set_max_total_balance(&self, token: Address, max_total_balance: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_app_governor(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_app_role_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_governance_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_operator(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_security_admin(&self, account: Address) ->  Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_security_agent(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_token_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_upgrade_governor(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn enable_withdrawal_limit(
+        &self,
+        address: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn disable_withdrawal_limit(
+        &self,
+        address: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn set_max_total_balance(
+        &self,
+        token: Address,
+        max_total_balance: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_app_governor(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_app_role_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_governance_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_operator(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_security_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_security_agent(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_token_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn register_upgrade_governor(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
 
     async fn identify(&self) -> Result<String, Error<M>>;
     async fn estimate_deposit_fee_wei(&self) -> Result<U256, Error<M>>;
@@ -69,10 +117,16 @@ pub trait StarknetTokenBridgeTrait<M: Middleware> {
 
 #[async_trait]
 impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
-    where
-        T: AsRef<StarknetTokenBridge<M>> + Send + Sync,
+where
+    T: AsRef<StarknetTokenBridge<M>> + Send + Sync,
 {
-    async fn deposit(&self, token: Address, amount: U256, l2_recipient: U256, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn deposit(
+        &self,
+        token: Address,
+        amount: U256,
+        l2_recipient: U256,
+        fee: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .deposit(token, amount, l2_recipient)
             .value(fee)
@@ -83,7 +137,12 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn withdraw(&self, token: Address, amount: U256, recipient: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn withdraw(
+        &self,
+        token: Address,
+        amount: U256,
+        recipient: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .withdraw(token, amount, recipient)
             .send()
@@ -93,7 +152,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn set_l2_token_bridge(&self, l2_token_bridge: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn set_l2_token_bridge(
+        &self,
+        l2_token_bridge: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .set_l2_token_bridge(l2_token_bridge)
             .send()
@@ -103,7 +165,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn enable_withdrawal_limit(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn enable_withdrawal_limit(
+        &self,
+        token: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .enable_withdrawal_limit(token)
             .send()
@@ -113,7 +178,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn disable_withdrawal_limit(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn disable_withdrawal_limit(
+        &self,
+        token: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .disable_withdrawal_limit(token)
             .send()
@@ -123,7 +191,11 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn set_max_total_balance(&self, token: Address, max_total_balance: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn set_max_total_balance(
+        &self,
+        token: Address,
+        max_total_balance: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .set_max_total_balance(token, max_total_balance)
             .send()
@@ -133,7 +205,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_app_governor(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_app_governor(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_app_governor(account)
             .send()
@@ -143,7 +218,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_app_role_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_app_role_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_app_role_admin(account)
             .send()
@@ -153,7 +231,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_governance_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_governance_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_governance_admin(account)
             .send()
@@ -163,7 +244,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_operator(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_operator(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_operator(account)
             .send()
@@ -173,7 +257,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_security_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_security_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_security_admin(account)
             .send()
@@ -183,7 +270,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_security_agent(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_security_agent(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_security_agent(account)
             .send()
@@ -193,7 +283,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_token_admin(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_token_admin(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_token_admin(account)
             .send()
@@ -203,7 +296,10 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
             .map_err(Into::into)
     }
 
-    async fn register_upgrade_governor(&self, account: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn register_upgrade_governor(
+        &self,
+        account: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .register_upgrade_governor(account)
             .send()
@@ -214,11 +310,7 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
     }
 
     async fn identify(&self) -> Result<String, Error<M>> {
-        self.as_ref()
-            .identify()
-            .call()
-            .await
-            .map_err(Into::into)
+        self.as_ref().identify().call().await.map_err(Into::into)
     }
 
     async fn estimate_deposit_fee_wei(&self) -> Result<U256, Error<M>> {
@@ -262,13 +354,6 @@ impl<T, M: Middleware> StarknetTokenBridgeTrait<M> for T
     }
 
     async fn max_deposit(&self) -> Result<U256, Error<M>> {
-        self.as_ref()
-            .max_deposit()
-            .call()
-            .await
-            .map_err(Into::into)
+        self.as_ref().max_deposit().call().await.map_err(Into::into)
     }
 }
-
-
-
