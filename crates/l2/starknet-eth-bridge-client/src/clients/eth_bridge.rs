@@ -10,7 +10,7 @@ use ethers::types::Address;
 pub struct StarknetEthBridgeContractClient {
     eth_bridge: StarknetEthBridge<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
-    eth_bridge_implementation: StarknetEthBridge<LocalWalletSignerMiddleware>,
+    eth_bridge_implementation: Address,
 }
 
 impl StarknetEthBridgeContractClient {
@@ -22,10 +22,7 @@ impl StarknetEthBridgeContractClient {
         Self {
             eth_bridge: StarknetEthBridge::new(address, client.clone()),
             proxy_support: ProxySupport::new(address, client.clone()),
-            eth_bridge_implementation: StarknetEthBridge::new(
-                implementation_address,
-                client.clone(),
-            ),
+            eth_bridge_implementation: implementation_address,
         }
     }
 }
@@ -47,7 +44,7 @@ impl StarknetContractClient for StarknetEthBridgeContractClient {
         self.eth_bridge.address()
     }
     fn implementation_address(&self) -> Address {
-        self.eth_bridge_implementation.address()
+        self.eth_bridge_implementation
     }
     fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.eth_bridge.client()

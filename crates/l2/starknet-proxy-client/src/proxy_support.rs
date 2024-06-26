@@ -16,6 +16,9 @@ abigen!(
         function initialize(bytes calldata data) external notCalledDirectly
         function upgradeTo(address newImplementation, bytes calldata data, bool finalize) external payable onlyGovernance notFinalized notFrozen
         function addImplementation(address newImplementation, bytes calldata data, bool finalize) external onlyGovernance
+        function proxyNominateNewGovernor(address newGovernor) external
+        function proxyRemoveGovernor(address governorForRemoval) external
+        function proxyAcceptGovernance() external
     ]"#,
 );
 
@@ -39,6 +42,15 @@ pub trait ProxySupportTrait<M: Middleware> {
         implementation_address: Address,
         finalized: bool,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn proxy_nominate_new_governor(
+        &self,
+        new_governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn proxy_remove_governance(
+        &self,
+        governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -90,6 +102,42 @@ where
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .add_implementation(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn proxy_nominate_new_governor(
+        &self,
+        new_governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .proxy_nominate_new_governor(new_governor)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn proxy_remove_governance(
+        &self,
+        governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .proxy_remove_governor(governor)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .proxy_accept_governance()
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

@@ -9,7 +9,7 @@ use ethers::types::Address;
 pub struct StarkgateManagerContractClient {
     manager: StarkgateManager<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
-    manager_implementation: StarkgateManager<LocalWalletSignerMiddleware>,
+    manager_implementation: Address,
 }
 
 impl StarkgateManagerContractClient {
@@ -21,7 +21,7 @@ impl StarkgateManagerContractClient {
         Self {
             manager: StarkgateManager::new(address, client.clone()),
             proxy_support: ProxySupport::new(address, client.clone()),
-            manager_implementation: StarkgateManager::new(implementation_address, client.clone()),
+            manager_implementation: implementation_address,
         }
     }
 }
@@ -43,7 +43,7 @@ impl StarknetContractClient for StarkgateManagerContractClient {
         self.manager.address()
     }
     fn implementation_address(&self) -> Address {
-        self.manager_implementation.address()
+        self.manager_implementation
     }
     fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.manager.client()

@@ -2,6 +2,14 @@
 
 This repository contains interfaces and functions to interact with starknet solidity contracts.
 
+One can use two options for deploying the implementation contract :
+
+- `deploy_contract_behind_unsafe_proxy` : This will deploy the contract behind a minimal proxy
+  and can be used for dev purposes.
+
+- `deploy_contract_behind_safe_proxy` : This will deploy the contract behind a safe audited
+  proxy and setting the implementation and upgrades
+
 ## Setup
 
 ```bash

@@ -15,7 +15,7 @@ pub struct StarknetSovereignContractClient {
     proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
     governance: StarknetGovernance<LocalWalletSignerMiddleware>,
     governed_finalizable: GovernedFinalizable<LocalWalletSignerMiddleware>,
-    core_contract_implementation: StarknetSovereignContract<LocalWalletSignerMiddleware>,
+    core_contract_implementation: Address,
 }
 
 impl StarknetSovereignContractClient {
@@ -31,10 +31,7 @@ impl StarknetSovereignContractClient {
             proxy_support: ProxySupport::new(address, client.clone()),
             governance: StarknetGovernance::new(address, client.clone()),
             governed_finalizable: GovernedFinalizable::new(address, client.clone()),
-            core_contract_implementation: StarknetSovereignContract::new(
-                implementation_address,
-                client.clone(),
-            ),
+            core_contract_implementation: implementation_address,
         }
     }
 }
@@ -77,7 +74,7 @@ impl StarknetContractClient for StarknetSovereignContractClient {
         self.core_contract.address()
     }
     fn implementation_address(&self) -> Address {
-        self.core_contract_implementation.address()
+        self.core_contract_implementation
     }
     fn client(&self) -> Arc<LocalWalletSignerMiddleware> {
         self.core_contract.client()

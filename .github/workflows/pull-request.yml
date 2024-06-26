@@ -19,5 +19,5 @@ jobs:
 
   linters_cargo:
     name: Run Cargo linters
-    uses: ./.github/workflows/linters-cargo.yml
+    uses: ./.github/workflows/cargo-linters.yml
     needs: rust_build

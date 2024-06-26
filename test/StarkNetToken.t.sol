@@ -51,7 +51,7 @@ contract StarkNetTokenTest is Test {
         token.grantRole(MINTER_ROLE, bob);
         assertTrue(token.hasRole(MINTER_ROLE, bob));
         assertFalse(token.hasRole(MINTER_ROLE, mary));
-        
+
         vm.prank(bob);
         token.mint(mary, SUPPLY);
         assertEq(token.totalSupply(), SUPPLY);
