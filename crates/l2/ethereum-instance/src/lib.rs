@@ -3,13 +3,12 @@ use ethers::contract::{ContractError, ContractFactory, ContractInstance};
 use ethers::prelude::SignerMiddleware;
 use ethers::providers::{Http, Provider, ProviderError};
 use ethers::signers::{LocalWallet, Signer};
-use ethers::utils::{Anvil, AnvilInstance};
 use ethers::types::Bytes;
+use ethers::utils::{Anvil, AnvilInstance};
 use hex::FromHex;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
-
 
 /// Ethers library allows multiple signer backends and transports.
 /// For simplicity we use local wallet (basically private key) and
@@ -42,6 +41,7 @@ pub enum Error {
 }
 
 /// A convenient wrapper over an already running or spawned Anvil local devnet or ethereum
+#[allow(dead_code)]
 pub struct EthereumClient {
     /// If initialized keeps an Anvil instance to properly shutdown it at the end
     client: Option<AnvilInstance>,
@@ -53,7 +53,11 @@ impl EthereumClient {
     /// Creates a new sandbox instance.
     /// Will try to attach to already running Anvil instance or custom rpc and private key provided to the function.
     /// if not provided any argument it will attack to a default anvil instance with default anvil params.
-    pub fn attach(rpc_endpoint: Option<String>, priv_key: Option<String>) -> Result<Self, Error> {
+    pub fn attach(
+        rpc_endpoint: Option<String>,
+        priv_key: Option<String>,
+        chain_id: Option<u64>,
+    ) -> Result<Self, Error> {
         let rpc_endpoint = rpc_endpoint.unwrap_or_else(|| {
             std::env::var("ETH_RPC_ENDPOINT")
                 .map(Into::into)
@@ -65,18 +69,13 @@ impl EthereumClient {
             .map_err(|_| Error::UrlParser)?
             .interval(Duration::from_millis(POLLING_INTERVAL_MS));
 
-        let priv_key  = priv_key.unwrap_or_else(|| {
-            ANVIL_DEFAULT_PRIVATE_KEY.to_owned()
-        });
+        let priv_key = priv_key.unwrap_or_else(|| ANVIL_DEFAULT_PRIVATE_KEY.to_owned());
 
-        let wallet: LocalWallet = priv_key
-            .parse()
-            .expect("Failed to parse private key");
-    
-        let client = SignerMiddleware::new(
-            provider.clone(),
-            wallet.with_chain_id(ANVIL_DEFAULT_CHAIN_ID),
-        );
+        let wallet: LocalWallet = priv_key.parse().expect("Failed to parse private key");
+
+        let chain_id = chain_id.unwrap_or(ANVIL_DEFAULT_CHAIN_ID);
+
+        let client = SignerMiddleware::new(provider.clone(), wallet.with_chain_id(chain_id));
 
         Ok(Self {
             client: None,
@@ -120,7 +119,6 @@ impl EthereumClient {
     }
 }
 
-
 /// Deploys new smart contract using:
 ///     - Forge build artifacts (JSON file contents)
 ///     - Constructor args (use () if no args expected)
@@ -132,6 +130,7 @@ pub async fn deploy_contract<T: Tokenize>(
 {
     let (abi, bytecode) = {
         let mut artifacts: serde_json::Value = serde_json::from_str(contract_build_artifacts)?;
+
         let abi_value = artifacts
             .get_mut("abi")
             .ok_or_else(|| Error::ContractBuildArtifacts("abi"))?

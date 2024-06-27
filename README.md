@@ -2,6 +2,12 @@
 
 This repository contains interfaces and functions to interact with starknet solidity contracts.
 
+One can use two options for deploying the implementation contract :
+
+- `deploy_contract_behind_unsafe_proxy` : This will deploy the contract behind a minimal proxy and can be used for dev purposes.
+
+- `deploy_contract_behind_safe_proxy` : This will deploy the contract behind a safe audited proxy and setting the implementation and upgrades
+
 ## Setup
 
 ```bash
@@ -41,8 +47,8 @@ make artifacts
 
 ## Bridge Contracts Sources
 
-StarknetEthBridge.sol - https://etherscan.io/address/0x455603AD9ae671F6c1f0f746F24d7904cA603581#code
-StarknetTokenBridge.sol (Starkgate v2.0.1) - https://github.com/starknet-io/starkgate-contracts/blob/5a10fd263d29cd032b7229691d043520edae0737/src/solidity/StarknetTokenBridge.sol
+StarknetEthBridge.sol - <https://etherscan.io/address/0x455603AD9ae671F6c1f0f746F24d7904cA603581#code>
+StarknetTokenBridge.sol (Starkgate v2.0.1) - <https://github.com/starknet-io/starkgate-contracts/blob/5a10fd263d29cd032b7229691d043520edae0737/src/solidity/StarknetTokenBridge.sol>
 
 ## StarkNet Consensus Protocol Contracts
 

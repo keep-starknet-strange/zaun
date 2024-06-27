@@ -14,6 +14,11 @@ abigen!(
     r#"[
         function isFrozen() external view virtual returns (bool)
         function initialize(bytes calldata data) external notCalledDirectly
+        function upgradeTo(address newImplementation, bytes calldata data, bool finalize) external payable onlyGovernance notFinalized notFrozen
+        function addImplementation(address newImplementation, bytes calldata data, bool finalize) external onlyGovernance
+        function proxyNominateNewGovernor(address newGovernor) external
+        function proxyRemoveGovernor(address governorForRemoval) external
+        function proxyAcceptGovernance() external
     ]"#,
 );
 
@@ -25,6 +30,27 @@ pub trait ProxySupportTrait<M: Middleware> {
         &self,
         data: ProxyInitializeData<N>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn upgrade_to(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn add_implementation(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn proxy_nominate_new_governor(
+        &self,
+        new_governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn proxy_remove_governance(
+        &self,
+        governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
 #[async_trait]
@@ -52,6 +78,72 @@ where
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.initialize(data.into()).await
     }
+
+    async fn upgrade_to(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .upgrade_to(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn add_implementation(
+        &self,
+        data: Bytes,
+        implementation_address: Address,
+        finalized: bool,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .add_implementation(implementation_address, data, finalized)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn proxy_nominate_new_governor(
+        &self,
+        new_governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .proxy_nominate_new_governor(new_governor)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn proxy_remove_governance(
+        &self,
+        governor: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .proxy_remove_governor(governor)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .proxy_accept_governance()
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
@@ -76,6 +168,7 @@ pub struct ProxyInitializeData<const N: usize> {
     pub init_data: CoreContractInitData,
 }
 
+#[allow(clippy::from_over_into)]
 impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     fn into(self) -> Vec<u8> {
         [
@@ -87,6 +180,32 @@ impl<const N: usize> Into<Vec<u8>> for ProxyInitializeData<N> {
     }
 }
 
+#[allow(clippy::from_over_into)]
+impl Into<Vec<u8>> for CoreContractInitData {
+    fn into(self) -> Vec<u8> {
+        [
+            self.program_hash.encode(),
+            self.verifier_address.encode(),
+            self.config_hash.encode(),
+            self.initial_state.into(),
+        ]
+        .concat()
+    }
+}
+
+#[allow(clippy::from_over_into)]
+impl Into<Vec<u8>> for CoreContractState {
+    fn into(self) -> Vec<u8> {
+        [
+            self.state_root.encode(),
+            self.block_number.encode(),
+            self.block_hash.encode(),
+        ]
+        .concat()
+    }
+}
+
+#[allow(clippy::from_over_into)]
 impl<const N: usize> Into<Bytes> for ProxyInitializeData<N> {
     fn into(self) -> Bytes {
         Into::<Vec<u8>>::into(self).into()

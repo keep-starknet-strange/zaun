@@ -1,11 +1,11 @@
 use async_trait::async_trait;
+use ethers::contract::ContractError;
+use ethers::prelude::TransactionReceipt;
 use ethers::{
     prelude::abigen,
     providers::Middleware,
     types::{Address, U256},
 };
-use ethers::contract::ContractError;
-use ethers::prelude::TransactionReceipt;
 
 use utils::errors::Error;
 
@@ -33,23 +33,15 @@ pub trait ERC20TokenTrait<M: Middleware> {
 
 #[async_trait]
 impl<T, M: Middleware> ERC20TokenTrait<M> for T
-    where
-        T: AsRef<ERC20Token<M>> + Send + Sync,
+where
+    T: AsRef<ERC20Token<M>> + Send + Sync,
 {
     async fn name(&self) -> Result<String, Error<M>> {
-        self.as_ref()
-            .name()
-            .call()
-            .await
-            .map_err(Into::into)
+        self.as_ref().name().call().await.map_err(Into::into)
     }
 
     async fn symbol(&self) -> Result<String, Error<M>> {
-        self.as_ref()
-            .symbol()
-            .call()
-            .await
-            .map_err(Into::into)
+        self.as_ref().symbol().call().await.map_err(Into::into)
     }
 
     async fn total_supply(&self) -> Result<U256, Error<M>> {
@@ -77,7 +69,8 @@ impl<T, M: Middleware> ERC20TokenTrait<M> for T
     }
 
     async fn approve(&self, address: Address, value: U256) -> Result<bool, Error<M>> {
-        let txn: Result<Option<TransactionReceipt>, Error<M>> = self.as_ref()
+        let txn: Result<Option<TransactionReceipt>, Error<M>> = self
+            .as_ref()
             .approve(address, value)
             .send()
             .await
@@ -87,12 +80,12 @@ impl<T, M: Middleware> ERC20TokenTrait<M> for T
 
         match txn {
             Ok(receipt) => {
-                if let Some(_) = receipt {
-                    return Ok(true)
+                if receipt.is_some() {
+                    return Ok(true);
                 }
                 Ok(false)
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
 }

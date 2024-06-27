@@ -26,10 +26,21 @@ abigen!(
 
 #[async_trait]
 pub trait StarkgateManagerTrait<M: Middleware> {
-    async fn add_existing_bridge(&self, token: Address, bridge: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn deactivate_token(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn add_existing_bridge(
+        &self,
+        token: Address,
+        bridge: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn deactivate_token(
+        &self,
+        token: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn block_token(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn enroll_token_bridge(&self, token: Address, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>>;
+    async fn enroll_token_bridge(
+        &self,
+        token: Address,
+        fee: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn get_registry(&self) -> Result<Address, Error<M>>;
     async fn identify(&self) -> Result<String, Error<M>>;
 }
@@ -39,7 +50,11 @@ impl<T, M: Middleware> StarkgateManagerTrait<M> for T
 where
     T: AsRef<StarkgateManager<M>> + Send + Sync,
 {
-    async fn add_existing_bridge(&self, token: Address, bridge: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn add_existing_bridge(
+        &self,
+        token: Address,
+        bridge: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .add_existing_bridge(token, bridge)
             .send()
@@ -49,7 +64,10 @@ where
             .map_err(Into::into)
     }
 
-    async fn deactivate_token(&self, token: Address) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn deactivate_token(
+        &self,
+        token: Address,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .deactivate_token(token)
             .send()
@@ -69,7 +87,11 @@ where
             .map_err(Into::into)
     }
 
-    async fn enroll_token_bridge(&self, token: Address, fee: U256) -> Result<Option<TransactionReceipt>, Error<M>> {
+    async fn enroll_token_bridge(
+        &self,
+        token: Address,
+        fee: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .enroll_token_bridge(token)
             .value(fee)
@@ -89,10 +111,6 @@ where
     }
 
     async fn identify(&self) -> Result<String, Error<M>> {
-        self.as_ref()
-            .identify()
-            .call()
-            .await
-            .map_err(Into::into)
+        self.as_ref().identify().call().await.map_err(Into::into)
     }
 }

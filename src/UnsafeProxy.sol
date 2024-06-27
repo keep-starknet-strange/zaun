@@ -7,7 +7,7 @@
 //! Since it's a delegate proxy - it holds the state, thus you need to use
 //! the proxy address everywhere instead if the actual core contract address.
 //!
-//! This implementation IS FOR TESTING PURPOSES ONLY 
+//! This implementation IS FOR TESTING PURPOSES ONLY
 //! and MUST NOT BE USED IN PRODUCTION.
 
 pragma solidity ^0.8.12;

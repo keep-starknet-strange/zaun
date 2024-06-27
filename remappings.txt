@@ -2,3 +2,4 @@ starknet-token/=lib/starknet-token/src/starkware/isd/
 starknet-cc/=lib/cairo-lang/src/starkware/starknet/solidity/
 starkware/isd/=lib/starknet-token/src/starkware/isd/
 starkware/solidity/=lib/cairo-lang/src/starkware/solidity/
+starkware/starknet/solidity/=lib/cairo-lang/src/starkware/starknet/solidity/

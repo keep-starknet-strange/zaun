@@ -8,11 +8,11 @@ version.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = { workspace = true }
+ethereum-instance = { path = "../ethereum-instance" }
 ethers = { workspace = true }
 log = { workspace = true }
-thiserror = { workspace = true }
 num-traits = { workspace = true }
-async-trait = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }
 utils = { path = "../utils" }
-ethereum-instance = { path = "../ethereum-instance" }

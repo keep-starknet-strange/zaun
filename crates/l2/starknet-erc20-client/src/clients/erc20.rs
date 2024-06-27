@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use utils::{ LocalWalletSignerMiddleware, StarknetContractClient };
 use crate::interfaces::erc20::ERC20Token;
+use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
 
@@ -25,6 +25,10 @@ impl AsRef<ERC20Token<LocalWalletSignerMiddleware>> for ERC20ContractClient {
 
 impl StarknetContractClient for ERC20ContractClient {
     fn address(&self) -> Address {
+        self.erc20_token.address()
+    }
+
+    fn implementation_address(&self) -> Address {
         self.erc20_token.address()
     }
 
