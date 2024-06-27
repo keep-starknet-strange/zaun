@@ -11,7 +11,7 @@ pub mod interfaces;
 
 const STARKNET_SOVEREIGN: &str = include_str!("artifacts/Starknet.json");
 
-/// Deploy Starknet sovereign contract and unsafe proxy for it.
+/// Deploy Starknet contract and unsafe proxy for it.
 /// Cached forge artifacts are used for deployment, make sure they are up to date.
 pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
@@ -28,6 +28,8 @@ pub async fn deploy_starknet_sovereign_behind_unsafe_proxy(
     ))
 }
 
+/// Deploy Starknet contract and safe proxy for it.
+/// Implementation of starknet contract is added which is used in prod by starknet
 pub async fn deploy_starknet_sovereign_behind_safe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,
 ) -> Result<StarknetSovereignContractClient, Error> {
