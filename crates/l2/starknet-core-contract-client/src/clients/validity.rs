@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use ethers::abi::Address;
+use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport;
 
 use crate::interfaces::{
     GovernedFinalizable, Operator, StarknetGovernance, StarknetMessaging, StarknetValidityContract,
 };
-use starknet_proxy_client::proxy_support::ProxySupport;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 /// Client to interact with a Starknet core contract running in `Validity` mode

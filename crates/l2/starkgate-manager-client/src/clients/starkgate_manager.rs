@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
 use crate::interfaces::manager::StarkgateManager;
-use starknet_proxy_client::proxy_support::ProxySupport;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
+use starknet_proxy_client::clients::proxy_5_0_0::ProxySupportLatest;
 
 pub struct StarkgateManagerContractClient {
     manager: StarkgateManager<LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupportLatest<LocalWalletSignerMiddleware>,
     manager_implementation: Address,
 }
 
@@ -20,7 +20,7 @@ impl StarkgateManagerContractClient {
     ) -> Self {
         Self {
             manager: StarkgateManager::new(address, client.clone()),
-            proxy_support: ProxySupport::new(address, client.clone()),
+            proxy_support: ProxySupportLatest::new(address, client.clone()),
             manager_implementation: implementation_address,
         }
     }
@@ -32,8 +32,8 @@ impl AsRef<StarkgateManager<LocalWalletSignerMiddleware>> for StarkgateManagerCo
     }
 }
 
-impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarkgateManagerContractClient {
-    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupportLatest<LocalWalletSignerMiddleware>> for StarkgateManagerContractClient {
+    fn as_ref(&self) -> &ProxySupportLatest<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }

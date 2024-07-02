@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use crate::interfaces::eth_bridge::StarknetEthBridge;
-use starknet_proxy_client::proxy_support::ProxySupport;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
+use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport;
 
 /// Client to interact with a Starknet Eth Bridge
 pub struct StarknetEthBridgeContractClient {
