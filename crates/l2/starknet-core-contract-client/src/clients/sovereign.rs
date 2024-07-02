@@ -4,7 +4,7 @@ use crate::interfaces::{
     GovernedFinalizable, Operator, StarknetGovernance, StarknetMessaging, StarknetSovereignContract,
 };
 use ethers::types::Address;
-use starknet_proxy_client::proxy_support::ProxySupport;
+use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 /// Client to interact with a Starknet core contract running in `Sovereign` mode

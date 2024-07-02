@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use crate::interfaces::manager::StarkgateManager;
-use starknet_proxy_client::proxy_support::ProxySupport;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
+use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport;
 
 pub struct StarkgateManagerContractClient {
     manager: StarkgateManager<LocalWalletSignerMiddleware>,

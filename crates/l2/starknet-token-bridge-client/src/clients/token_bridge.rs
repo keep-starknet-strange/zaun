@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
 use crate::interfaces::token_bridge::StarknetTokenBridge;
-use starknet_proxy_client::proxy_support::ProxySupport;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
+use starknet_proxy_client::clients::proxy_5_0_0::ProxySupportLatest;
 
 /// Client to interact with a Token Bridge (ERC20)
 pub struct StarknetTokenBridgeContractClient {
     token_bridge: StarknetTokenBridge<LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupportLatest<LocalWalletSignerMiddleware>,
     token_bridge_implementation: Address,
 }
 
@@ -21,7 +21,7 @@ impl StarknetTokenBridgeContractClient {
     ) -> Self {
         Self {
             token_bridge: StarknetTokenBridge::new(address, client.clone()),
-            proxy_support: ProxySupport::new(address, client.clone()),
+            proxy_support: ProxySupportLatest::new(address, client.clone()),
             token_bridge_implementation: implementation_address,
         }
     }
@@ -33,8 +33,8 @@ impl AsRef<StarknetTokenBridge<LocalWalletSignerMiddleware>> for StarknetTokenBr
     }
 }
 
-impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
-    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupportLatest<LocalWalletSignerMiddleware>> for StarknetTokenBridgeContractClient {
+    fn as_ref(&self) -> &ProxySupportLatest<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }
