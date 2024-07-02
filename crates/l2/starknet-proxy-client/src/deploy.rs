@@ -57,7 +57,7 @@ pub async fn deploy_contract_behind_unsafe_proxy<T: Tokenize>(
 /// - `deploy_contract_behind_safe_proxy_3_0_2` :
 ///     This function will deploy the contract behind the proxy that is being used by chains such as paradex and kakarot.
 /// - `deploy_contract_behind_safe_proxy_5_0_0` :
-///     This function will deploy the contract behind the latest versio nof the starknet proxy currently used in the token bridge : `0xF5b6Ee2CAEb6769659f6C091D209DfdCaF3F69Eb`
+///     This function will deploy the contract behind the latest version of the starknet proxy currently used in the token bridge : `0xF5b6Ee2CAEb6769659f6C091D209DfdCaF3F69Eb`
 /// ---------------------------------------------------------
 
 pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
