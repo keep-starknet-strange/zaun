@@ -35,7 +35,7 @@ pub async fn deploy_starkgate_manager_behind_safe_proxy(
         client.clone(),
         STARKGATE_MANAGER,
         NO_CONSTRUCTOR_ARG,
-        ProxyVersion::SafeProxyLatest,
+        ProxyVersion::SafeProxy5_0_0,
     )
     .await?;
 

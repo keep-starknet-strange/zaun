@@ -36,9 +36,9 @@ pub enum ProxyVersion {
     /// deploys unsafe proxy.
     UnsafeProxy,
     /// deploys safe proxy (starknet proxy version 3.0.2)
-    SafeProxy,
+    SafeProxy3_0_2,
     /// deploys safe proxy (starknet proxy version 5.0.0)
-    SafeProxyLatest,
+    SafeProxy5_0_0,
 }
 
 pub async fn deploy_contract_behind_proxy<T: Tokenize>(
@@ -58,8 +58,8 @@ pub async fn deploy_contract_behind_proxy<T: Tokenize>(
     log::debug!("ℹ️  Contract deployed : {:?}", contract.address().clone());
 
     let type_of_proxy = match proxy_type {
-        ProxyVersion::SafeProxy => SAFE_PROXY_3_0_2,
-        ProxyVersion::SafeProxyLatest => SAFE_PROXY_5_0_0,
+        ProxyVersion::SafeProxy3_0_2 => SAFE_PROXY_3_0_2,
+        ProxyVersion::SafeProxy5_0_0 => SAFE_PROXY_5_0_0,
         ProxyVersion::UnsafeProxy => UNSAFE_PROXY,
     };
 

@@ -37,7 +37,7 @@ pub async fn deploy_starknet_token_bridge_behind_safe_proxy(
             client.clone(),
             STARKNET_TOKEN_BRIDGE,
             NO_CONSTRUCTOR_ARG,
-            ProxyVersion::SafeProxyLatest,
+            ProxyVersion::SafeProxy5_0_0,
         )
         .await?;
 

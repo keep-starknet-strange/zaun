@@ -42,7 +42,7 @@ pub async fn deploy_starknet_sovereign_behind_safe_proxy(
         client.clone(),
         STARKNET_SOVEREIGN,
         NO_CONSTRUCTOR_ARG,
-        ProxyVersion::SafeProxy,
+        ProxyVersion::SafeProxy3_0_2,
     )
     .await?;
 
@@ -84,7 +84,7 @@ pub async fn deploy_starknet_validity_behind_safe_proxy(
         client.clone(),
         STARKNET,
         NO_CONSTRUCTOR_ARG,
-        ProxyVersion::SafeProxy,
+        ProxyVersion::SafeProxy3_0_2,
     )
     .await?;
 

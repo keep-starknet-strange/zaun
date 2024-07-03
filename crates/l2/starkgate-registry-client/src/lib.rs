@@ -36,7 +36,7 @@ pub async fn deploy_starkgate_registry_behind_safe_proxy(
         client.clone(),
         STARKGATE_REGISTRY,
         NO_CONSTRUCTOR_ARG,
-        ProxyVersion::SafeProxyLatest,
+        ProxyVersion::SafeProxy5_0_0,
     )
     .await?;
 
