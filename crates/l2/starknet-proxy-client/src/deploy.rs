@@ -5,6 +5,7 @@ use ethers::prelude::ContractInstance;
 use ethers::providers::ProviderError;
 use ethers::types::U256;
 use ethers::utils::hex::{self};
+use std::cmp::PartialEq;
 use std::sync::Arc;
 use utils::LocalWalletSignerMiddleware;
 
@@ -32,6 +33,7 @@ const UNSAFE_PROXY: &str = include_str!("artifacts/UnsafeProxy.json");
 const SAFE_PROXY_3_0_2: &str = include_str!("artifacts/Proxy_3_0_2.json");
 const SAFE_PROXY_5_0_0: &str = include_str!("artifacts/Proxy_5_0_0.json");
 
+#[derive(PartialEq)]
 pub enum ProxyVersion {
     /// deploys unsafe proxy.
     UnsafeProxy,
@@ -63,8 +65,12 @@ pub async fn deploy_contract_behind_proxy<T: Tokenize>(
         ProxyVersion::UnsafeProxy => UNSAFE_PROXY,
     };
 
-    let proxy_contract =
-        deploy_contract(client.clone(), proxy_code, Token::Uint(U256::from(0))).await?;
+    let proxy_contract = match proxy_type {
+        ProxyVersion::UnsafeProxy => {
+            deploy_contract(client.clone(), proxy_code, contract.address()).await?
+        }
+        _ => deploy_contract(client.clone(), proxy_code, Token::Uint(U256::from(0))).await?,
+    };
 
     log::debug!(
         "ℹ️  Proxy for contract [{:?}] deployed : {:?}",
