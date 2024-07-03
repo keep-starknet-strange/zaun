@@ -57,14 +57,14 @@ pub async fn deploy_contract_behind_proxy<T: Tokenize>(
 
     log::debug!("ℹ️  Contract deployed : {:?}", contract.address().clone());
 
-    let type_of_proxy = match proxy_type {
+    let proxy_code = match proxy_type {
         ProxyVersion::SafeProxy3_0_2 => SAFE_PROXY_3_0_2,
         ProxyVersion::SafeProxy5_0_0 => SAFE_PROXY_5_0_0,
         ProxyVersion::UnsafeProxy => UNSAFE_PROXY,
     };
 
     let proxy_contract =
-        deploy_contract(client.clone(), type_of_proxy, Token::Uint(U256::from(0))).await?;
+        deploy_contract(client.clone(), proxy_code, Token::Uint(U256::from(0))).await?;
 
     log::debug!(
         "ℹ️  Proxy for contract [{:?}] deployed : {:?}",

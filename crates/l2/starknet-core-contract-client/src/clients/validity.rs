@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use ethers::abi::Address;
-use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport;
+use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport3_0_2;
 
 use crate::interfaces::{
     GovernedFinalizable, Operator, StarknetGovernance, StarknetMessaging, StarknetValidityContract,
@@ -13,7 +13,7 @@ pub struct StarknetValidityContractClient {
     core_contract: StarknetValidityContract<LocalWalletSignerMiddleware>,
     messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
     operator: Operator<LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport3_0_2<LocalWalletSignerMiddleware>,
     governance: StarknetGovernance<LocalWalletSignerMiddleware>,
     governed_finalizable: GovernedFinalizable<LocalWalletSignerMiddleware>,
     core_contract_implementation: ethers::addressbook::Address,
@@ -29,7 +29,7 @@ impl StarknetValidityContractClient {
             core_contract: StarknetValidityContract::new(address, client.clone()),
             messaging: StarknetMessaging::new(address, client.clone()),
             operator: Operator::new(address, client.clone()),
-            proxy_support: ProxySupport::new(address, client.clone()),
+            proxy_support: ProxySupport3_0_2::new(address, client.clone()),
             governance: StarknetGovernance::new(address, client.clone()),
             governed_finalizable: GovernedFinalizable::new(address, client.clone()),
             core_contract_implementation: implementation_address,
@@ -49,8 +49,8 @@ impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetValidityC
         &self.messaging
     }
 }
-impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
-    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupport3_0_2<LocalWalletSignerMiddleware>> for StarknetValidityContractClient {
+    fn as_ref(&self) -> &ProxySupport3_0_2<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }

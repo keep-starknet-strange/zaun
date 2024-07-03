@@ -4,11 +4,11 @@ use crate::interfaces::registry::StarkgateRegistry;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
-use starknet_proxy_client::clients::proxy_5_0_0::ProxySupportLatest;
+use starknet_proxy_client::clients::proxy_5_0_0::ProxySupport5_0_0;
 
 pub struct StarkgateRegistryContractClient {
     registry: StarkgateRegistry<LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupportLatest<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport5_0_0<LocalWalletSignerMiddleware>,
     registry_implementation: Address,
 }
 
@@ -20,7 +20,7 @@ impl StarkgateRegistryContractClient {
     ) -> Self {
         Self {
             registry: StarkgateRegistry::new(address, client.clone()),
-            proxy_support: ProxySupportLatest::new(address, client.clone()),
+            proxy_support: ProxySupport5_0_0::new(address, client.clone()),
             registry_implementation: implementation_address,
         }
     }
@@ -31,8 +31,8 @@ impl AsRef<StarkgateRegistry<LocalWalletSignerMiddleware>> for StarkgateRegistry
     }
 }
 
-impl AsRef<ProxySupportLatest<LocalWalletSignerMiddleware>> for StarkgateRegistryContractClient {
-    fn as_ref(&self) -> &ProxySupportLatest<LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupport5_0_0<LocalWalletSignerMiddleware>> for StarkgateRegistryContractClient {
+    fn as_ref(&self) -> &ProxySupport5_0_0<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }

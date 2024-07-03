@@ -1,4 +1,4 @@
-use crate::clients::proxy::{ProxyInitializeData, ProxySupportTrait};
+use crate::interfaces::proxy::{ProxyInitializeData, ProxySupportTrait};
 use async_trait::async_trait;
 use ethers::addressbook::Address;
 use ethers::contract::{abigen, ContractError};
@@ -7,7 +7,7 @@ use ethers::prelude::{Bytes, TransactionReceipt};
 use utils::errors::Error;
 
 abigen!(
-    ProxySupport,
+    ProxySupport3_0_2,
     r#"[
         function isFrozen() external view virtual returns (bool)
         function initialize(bytes calldata data) external notCalledDirectly
@@ -22,7 +22,7 @@ abigen!(
 #[async_trait]
 impl<T, M: Middleware> ProxySupportTrait<M> for T
 where
-    T: AsRef<ProxySupport<M>> + Send + Sync,
+    T: AsRef<ProxySupport3_0_2<M>> + Send + Sync,
 {
     async fn is_frozen(&self) -> Result<bool, Error<M>> {
         self.as_ref().is_frozen().call().await.map_err(Into::into)
