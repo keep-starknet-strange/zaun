@@ -29,28 +29,23 @@ pub enum Error {
 }
 
 const UNSAFE_PROXY: &str = include_str!("artifacts/UnsafeProxy.json");
-const SAFE_PROXY: &str = include_str!("artifacts/Proxy.json");
+const SAFE_PROXY_3_0_2: &str = include_str!("artifacts/Proxy_3_0_2.json");
+const SAFE_PROXY_5_0_0: &str = include_str!("artifacts/Proxy_5_0_0.json");
 
-/// Deploys new unsafe proxy contract:
-///     - Implementation can be set only once at initialization
-///     - Traditional (Safe) proxies can be upgraded multiple times
-pub async fn deploy_contract_behind_unsafe_proxy<T: Tokenize>(
-    client: Arc<LocalWalletSignerMiddleware>,
-    contract_path: &str,
-    constructor_args: T,
-) -> Result<ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>, Error>
-{
-    let contract = deploy_contract(client.clone(), contract_path, constructor_args).await?;
-
-    let proxy_contract = deploy_contract(client.clone(), UNSAFE_PROXY, contract.address()).await?;
-
-    Ok(proxy_contract)
+pub enum ProxyVersion {
+    /// deploys unsafe proxy.
+    UnsafeProxy,
+    /// deploys safe proxy (starknet proxy version 3.0.2)
+    SafeProxy3_0_2,
+    /// deploys safe proxy (starknet proxy version 5.0.0)
+    SafeProxy5_0_0,
 }
 
-pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
+pub async fn deploy_contract_behind_proxy<T: Tokenize>(
     client: Arc<LocalWalletSignerMiddleware>,
     contract_path: &str,
     constructor_args: T,
+    proxy_type: ProxyVersion,
 ) -> Result<
     (
         ContractInstance<Arc<LocalWalletSignerMiddleware>, LocalWalletSignerMiddleware>,
@@ -62,8 +57,14 @@ pub async fn deploy_contract_behind_safe_proxy<T: Tokenize>(
 
     log::debug!("ℹ️  Contract deployed : {:?}", contract.address().clone());
 
+    let proxy_code = match proxy_type {
+        ProxyVersion::SafeProxy3_0_2 => SAFE_PROXY_3_0_2,
+        ProxyVersion::SafeProxy5_0_0 => SAFE_PROXY_5_0_0,
+        ProxyVersion::UnsafeProxy => UNSAFE_PROXY,
+    };
+
     let proxy_contract =
-        deploy_contract(client.clone(), SAFE_PROXY, Token::Uint(U256::from(0))).await?;
+        deploy_contract(client.clone(), proxy_code, Token::Uint(U256::from(0))).await?;
 
     log::debug!(
         "ℹ️  Proxy for contract [{:?}] deployed : {:?}",

@@ -4,7 +4,7 @@ use crate::interfaces::{
     GovernedFinalizable, Operator, StarknetGovernance, StarknetMessaging, StarknetSovereignContract,
 };
 use ethers::types::Address;
-use starknet_proxy_client::proxy_support::ProxySupport;
+use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport3_0_2;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 /// Client to interact with a Starknet core contract running in `Sovereign` mode
@@ -12,7 +12,7 @@ pub struct StarknetSovereignContractClient {
     core_contract: StarknetSovereignContract<LocalWalletSignerMiddleware>,
     messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
     operator: Operator<LocalWalletSignerMiddleware>,
-    proxy_support: ProxySupport<LocalWalletSignerMiddleware>,
+    proxy_support: ProxySupport3_0_2<LocalWalletSignerMiddleware>,
     governance: StarknetGovernance<LocalWalletSignerMiddleware>,
     governed_finalizable: GovernedFinalizable<LocalWalletSignerMiddleware>,
     core_contract_implementation: Address,
@@ -28,7 +28,7 @@ impl StarknetSovereignContractClient {
             core_contract: StarknetSovereignContract::new(address, client.clone()),
             messaging: StarknetMessaging::new(address, client.clone()),
             operator: Operator::new(address, client.clone()),
-            proxy_support: ProxySupport::new(address, client.clone()),
+            proxy_support: ProxySupport3_0_2::new(address, client.clone()),
             governance: StarknetGovernance::new(address, client.clone()),
             governed_finalizable: GovernedFinalizable::new(address, client.clone()),
             core_contract_implementation: implementation_address,
@@ -48,8 +48,8 @@ impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetSovereign
         &self.messaging
     }
 }
-impl AsRef<ProxySupport<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
-    fn as_ref(&self) -> &ProxySupport<LocalWalletSignerMiddleware> {
+impl AsRef<ProxySupport3_0_2<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+    fn as_ref(&self) -> &ProxySupport3_0_2<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }
