@@ -17,11 +17,11 @@ abigen!(
         function proxyRemoveGovernor(address governorForRemoval) external
         function proxyAcceptGovernance() external
 
-        function register_app_governor(address account) external
+        function registerAppGovernor(address account) external
         function registerAppRoleAdmin(address account) external
         function registerGovernanceAdmin(address account) external
         function registerOperator(address account) external
-        function register_security_admin(address account) external
+        function registerSecurityAdmin(address account) external
         function registerSecurityAgent(address account) external
         function registerTokenAdmin(address account) external
         function registerUpgradeGovernor(address account) external
