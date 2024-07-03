@@ -1,4 +1,4 @@
-use crate::interfaces::proxy::{ProxyInitializeData, ProxySupportTrait};
+use crate::interfaces::proxy::{ProxyInitializeData, ProxySupport3_0_2Trait};
 use async_trait::async_trait;
 use ethers::addressbook::Address;
 use ethers::contract::{abigen, ContractError};
@@ -20,7 +20,7 @@ abigen!(
 );
 
 #[async_trait]
-impl<T, M: Middleware> ProxySupportTrait<M> for T
+impl<T, M: Middleware> ProxySupport3_0_2Trait<M> for T
 where
     T: AsRef<ProxySupport3_0_2<M>> + Send + Sync,
 {

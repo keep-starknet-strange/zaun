@@ -7,7 +7,7 @@ use ethers::prelude::{Bytes, TransactionReceipt, I256, U256};
 use utils::errors::Error;
 
 #[async_trait]
-pub trait ProxySupportTrait<M: Middleware> {
+pub trait ProxySupport3_0_2Trait<M: Middleware> {
     async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
@@ -38,7 +38,7 @@ pub trait ProxySupportTrait<M: Middleware> {
 }
 
 #[async_trait]
-pub trait ProxySupportLatestTrait<M: Middleware> {
+pub trait ProxySupport5_0_0Trait<M: Middleware> {
     async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
