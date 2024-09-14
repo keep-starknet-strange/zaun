@@ -1,7 +1,7 @@
 use crate::interfaces::core_contract::CoreContract;
 use crate::interfaces::messaging::Messaging;
 use crate::interfaces::operator::Operator;
-use starknet_ff::FieldElement;
+use starknet_core::types::Felt;
 
 use appchain_utils::LocalWalletSignerMiddleware;
 
@@ -12,7 +12,7 @@ pub struct StarknetCoreContractClient<'a> {
 }
 
 impl<'a> StarknetCoreContractClient<'a> {
-    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+    pub fn new(address: Felt, signer: &'a LocalWalletSignerMiddleware) -> Self {
         Self {
             operator: Operator::new(address, signer),
             messaging: Messaging::new(address, signer),

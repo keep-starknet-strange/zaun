@@ -1,23 +1,23 @@
 use appchain_utils::invoke_contract;
 use appchain_utils::LocalWalletSignerMiddleware;
 use color_eyre::Result;
-use starknet_core::types::{FieldElement, InvokeTransactionResult};
+use starknet_core::types::{Felt, InvokeTransactionResult};
 
 pub struct Messaging<'a> {
     signer: &'a LocalWalletSignerMiddleware,
-    address: FieldElement,
+    address: Felt,
 }
 
 impl<'a> Messaging<'a> {
-    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+    pub fn new(address: Felt, signer: &'a LocalWalletSignerMiddleware) -> Self {
         Self { signer, address }
     }
 
     pub async fn send_message_to_appchain(
         &self,
-        to_address: FieldElement,
-        selector: FieldElement,
-        payload: Vec<FieldElement>,
+        to_address: Felt,
+        selector: Felt,
+        payload: Vec<Felt>,
     ) -> Result<InvokeTransactionResult> {
         let mut calldata = Vec::with_capacity(payload.len() + 2);
         calldata.push(to_address);
@@ -35,8 +35,8 @@ impl<'a> Messaging<'a> {
 
     pub async fn consume_message_from_appchain(
         &self,
-        from_address: FieldElement,
-        payload: Vec<FieldElement>,
+        from_address: Felt,
+        payload: Vec<Felt>,
     ) -> Result<InvokeTransactionResult> {
         let mut calldata = Vec::with_capacity(payload.len() + 1);
         calldata.push(from_address);
@@ -53,10 +53,10 @@ impl<'a> Messaging<'a> {
 
     pub async fn start_message_cancellation(
         &self,
-        to_address: FieldElement,
-        selector: FieldElement,
-        nonce: FieldElement,
-        payload: Vec<FieldElement>,
+        to_address: Felt,
+        selector: Felt,
+        nonce: Felt,
+        payload: Vec<Felt>,
     ) -> Result<InvokeTransactionResult> {
         let mut calldata = Vec::with_capacity(payload.len() + 3);
         calldata.push(to_address);
@@ -75,10 +75,10 @@ impl<'a> Messaging<'a> {
 
     pub async fn cancel_message(
         &self,
-        to_address: FieldElement,
-        selector: FieldElement,
-        nonce: FieldElement,
-        payload: Vec<FieldElement>,
+        to_address: Felt,
+        selector: Felt,
+        nonce: Felt,
+        payload: Vec<Felt>,
     ) -> Result<InvokeTransactionResult> {
         let mut calldata = Vec::with_capacity(payload.len() + 3);
         calldata.push(to_address);

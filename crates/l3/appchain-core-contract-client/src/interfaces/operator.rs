@@ -2,16 +2,16 @@ use appchain_utils::LocalWalletSignerMiddleware;
 use appchain_utils::{call_contract, invoke_contract};
 use color_eyre::{eyre::eyre, Result};
 use starknet_accounts::ConnectedAccount;
-use starknet_core::types::{FieldElement, InvokeTransactionResult};
+use starknet_core::types::{Felt, InvokeTransactionResult};
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 
 pub struct Operator<'a> {
     signer: &'a LocalWalletSignerMiddleware,
-    address: FieldElement,
+    address: Felt,
 }
 
 impl<'a> Operator<'a> {
-    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+    pub fn new(address: Felt, signer: &'a LocalWalletSignerMiddleware) -> Self {
         Self { signer, address }
     }
 
@@ -19,10 +19,7 @@ impl<'a> Operator<'a> {
         self.signer.provider()
     }
 
-    pub async fn register_operator(
-        &self,
-        new_operator: FieldElement,
-    ) -> Result<InvokeTransactionResult> {
+    pub async fn register_operator(&self, new_operator: Felt) -> Result<InvokeTransactionResult> {
         invoke_contract(
             self.signer,
             self.address,
@@ -34,7 +31,7 @@ impl<'a> Operator<'a> {
 
     pub async fn unregister_operator(
         &self,
-        removed_operator: FieldElement,
+        removed_operator: Felt,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
             self.signer,
@@ -45,20 +42,20 @@ impl<'a> Operator<'a> {
         .await
     }
 
-    pub async fn is_operator(&self, operator: FieldElement) -> Result<bool> {
+    pub async fn is_operator(&self, operator: Felt) -> Result<bool> {
         let provider = self.provider();
         let values = call_contract(provider, self.address, "is_operator", vec![operator]).await?;
 
         values
             .first()
-            .map(|value| *value != FieldElement::ZERO)
+            .map(|value| *value != Felt::ZERO)
             .ok_or_else(|| eyre!("Contract error: expected at least one return value"))
     }
 
     pub async fn set_program_info(
         &self,
-        program_hash: FieldElement,
-        config_hash: FieldElement,
+        program_hash: Felt,
+        config_hash: Felt,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
             self.signer,
@@ -69,7 +66,7 @@ impl<'a> Operator<'a> {
         .await
     }
 
-    pub async fn get_program_info(&self) -> Result<(FieldElement, FieldElement)> {
+    pub async fn get_program_info(&self) -> Result<(Felt, Felt)> {
         let provider = self.provider();
         let values = call_contract(provider, self.address, "get_program_info", vec![]).await?;
 
@@ -81,7 +78,7 @@ impl<'a> Operator<'a> {
 
     pub async fn set_facts_registry(
         &self,
-        facts_registry: FieldElement,
+        facts_registry: Felt,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
             self.signer,
@@ -92,7 +89,7 @@ impl<'a> Operator<'a> {
         .await
     }
 
-    pub async fn get_facts_registry(&self) -> Result<FieldElement> {
+    pub async fn get_facts_registry(&self) -> Result<Felt> {
         let provider = self.provider();
         let values = call_contract(provider, self.address, "get_facts_registry", vec![]).await?;
 
