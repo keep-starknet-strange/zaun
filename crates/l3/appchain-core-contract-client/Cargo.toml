@@ -18,4 +18,3 @@ starknet-accounts = { workspace = true }
 starknet-core = { workspace = true }
 starknet-ff = { workspace = true }
 starknet-providers = { workspace = true }
-
