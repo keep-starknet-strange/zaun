@@ -27,13 +27,13 @@ impl AsRef<Operator> for StarknetCoreContractClient {
     }
 }
 
-impl<'a> AsRef<Messaging> for StarknetCoreContractClient {
+impl AsRef<Messaging> for StarknetCoreContractClient {
     fn as_ref(&self) -> &Messaging {
         &self.messaging
     }
 }
 
-impl<'a> AsRef<CoreContract> for StarknetCoreContractClient {
+impl AsRef<CoreContract> for StarknetCoreContractClient {
     fn as_ref(&self) -> &CoreContract {
         &self.core_contract
     }
