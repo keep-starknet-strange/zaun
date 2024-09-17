@@ -15,7 +15,7 @@ use starknet_signers::LocalWallet;
 use std::path::Path;
 
 pub type LocalWalletSignerMiddleware =
-    SingleOwnerAccount<Arc<JsonRpcClient<HttpTransport>>, LocalWallet>;
+    Arc<SingleOwnerAccount<Arc<JsonRpcClient<HttpTransport>>, LocalWallet>>;
 
 type RpcAccount<'a> = SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>;
 pub type TransactionExecution<'a> = ExecutionV1<'a, RpcAccount<'a>>;
