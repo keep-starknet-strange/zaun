@@ -3,13 +3,13 @@ use appchain_utils::LocalWalletSignerMiddleware;
 use color_eyre::Result;
 use starknet_core::types::{Felt, InvokeTransactionResult};
 
-pub struct CoreContract<'a> {
-    signer: &'a LocalWalletSignerMiddleware,
+pub struct CoreContract {
+    signer: LocalWalletSignerMiddleware,
     address: Felt,
 }
 
-impl<'a> CoreContract<'a> {
-    pub fn new(address: Felt, signer: &'a LocalWalletSignerMiddleware) -> Self {
+impl CoreContract {
+    pub fn new(address: Felt, signer: LocalWalletSignerMiddleware) -> Self {
         Self { signer, address }
     }
 
@@ -24,6 +24,6 @@ impl<'a> CoreContract<'a> {
         calldata.push(onchain_data_hash);
         calldata.push(onchain_data_size);
 
-        invoke_contract(self.signer, self.address, "update_state", calldata).await
+        invoke_contract(&self.signer, self.address, "update_state", calldata).await
     }
 }

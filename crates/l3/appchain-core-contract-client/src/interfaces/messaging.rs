@@ -3,13 +3,13 @@ use appchain_utils::LocalWalletSignerMiddleware;
 use color_eyre::Result;
 use starknet_core::types::{Felt, InvokeTransactionResult};
 
-pub struct Messaging<'a> {
-    signer: &'a LocalWalletSignerMiddleware,
+pub struct Messaging {
+    signer: LocalWalletSignerMiddleware,
     address: Felt,
 }
 
-impl<'a> Messaging<'a> {
-    pub fn new(address: Felt, signer: &'a LocalWalletSignerMiddleware) -> Self {
+impl Messaging {
+    pub fn new(address: Felt, signer: LocalWalletSignerMiddleware) -> Self {
         Self { signer, address }
     }
 
@@ -25,7 +25,7 @@ impl<'a> Messaging<'a> {
         calldata.extend(payload);
 
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "send_message_to_appchain",
             calldata,
@@ -43,7 +43,7 @@ impl<'a> Messaging<'a> {
         calldata.extend(payload);
 
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "consume_message_from_appchain",
             calldata,
@@ -65,7 +65,7 @@ impl<'a> Messaging<'a> {
         calldata.extend(payload);
 
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "start_message_cancellation",
             calldata,
@@ -86,6 +86,6 @@ impl<'a> Messaging<'a> {
         calldata.push(nonce);
         calldata.extend(payload);
 
-        invoke_contract(self.signer, self.address, "cancel_message", calldata).await
+        invoke_contract(&self.signer, self.address, "cancel_message", calldata).await
     }
 }
