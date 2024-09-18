@@ -5,13 +5,13 @@ use starknet_accounts::ConnectedAccount;
 use starknet_core::types::{Felt, InvokeTransactionResult};
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
 
-pub struct Operator<'a> {
-    signer: &'a LocalWalletSignerMiddleware,
+pub struct Operator {
+    signer: LocalWalletSignerMiddleware,
     address: Felt,
 }
 
-impl<'a> Operator<'a> {
-    pub fn new(address: Felt, signer: &'a LocalWalletSignerMiddleware) -> Self {
+impl Operator {
+    pub fn new(address: Felt, signer: LocalWalletSignerMiddleware) -> Self {
         Self { signer, address }
     }
 
@@ -21,7 +21,7 @@ impl<'a> Operator<'a> {
 
     pub async fn register_operator(&self, new_operator: Felt) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "register_operator",
             vec![new_operator],
@@ -34,7 +34,7 @@ impl<'a> Operator<'a> {
         removed_operator: Felt,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "unregister_operator",
             vec![removed_operator],
@@ -58,7 +58,7 @@ impl<'a> Operator<'a> {
         config_hash: Felt,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "set_program_info",
             vec![program_hash, config_hash],
@@ -81,7 +81,7 @@ impl<'a> Operator<'a> {
         facts_registry: Felt,
     ) -> Result<InvokeTransactionResult> {
         invoke_contract(
-            self.signer,
+            &self.signer,
             self.address,
             "set_facts_registry",
             vec![facts_registry],
