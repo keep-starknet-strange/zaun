@@ -45,7 +45,6 @@ pub async fn invoke_contract(
     };
     signer
         .execute_v1(vec![call])
-        .max_fee(MAX_FEE)
         .send()
         .await
         .map_err(|e| eyre!("Failed to send transaction: {}", e))
