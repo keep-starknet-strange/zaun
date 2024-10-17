@@ -1,10 +1,12 @@
 pub mod errors;
 
+use std::sync::Arc;
+
 use color_eyre::{eyre::eyre, Result};
-use starknet_accounts::{Account, Call, Execution, SingleOwnerAccount};
+use starknet_accounts::{Account, Call, ExecutionV1, SingleOwnerAccount};
 use starknet_contract::ContractFactory;
 use starknet_core::types::contract::{CompiledClass, SierraClass};
-use starknet_core::types::{BlockId, BlockTag, FunctionCall, InvokeTransactionResult};
+use starknet_core::types::{BlockId, BlockTag, Felt, FunctionCall, InvokeTransactionResult};
 use starknet_core::utils::get_selector_from_name;
 use starknet_ff::FieldElement;
 use starknet_providers::jsonrpc::{HttpTransport, JsonRpcClient};
@@ -13,20 +15,15 @@ use starknet_signers::LocalWallet;
 use std::path::Path;
 
 pub type LocalWalletSignerMiddleware =
-    SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>;
+    Arc<SingleOwnerAccount<Arc<JsonRpcClient<HttpTransport>>, LocalWallet>>;
 
 type RpcAccount<'a> = SingleOwnerAccount<&'a JsonRpcClient<HttpTransport>, LocalWallet>;
-pub type TransactionExecution<'a> = Execution<'a, RpcAccount<'a>>;
+pub type TransactionExecution<'a> = ExecutionV1<'a, RpcAccount<'a>>;
 
-pub const NO_CONSTRUCTOR_ARG: Vec<FieldElement> = Vec::new();
+pub const NO_CONSTRUCTOR_ARG: Vec<Felt> = Vec::new();
 
 // Montgomery representation for value 0x1000000000000
-pub const MAX_FEE: FieldElement = FieldElement::from_mont([
-    18437736874454810625,
-    18446744073709551615,
-    18446744073709551615,
-    423338364972826640,
-]);
+pub const MAX_FEE: Felt = Felt::from_hex_unchecked("0x1000000000");
 
 pub trait StarknetContractClient {
     fn address(&self) -> FieldElement;
@@ -35,9 +32,9 @@ pub trait StarknetContractClient {
 
 pub async fn invoke_contract(
     signer: &LocalWalletSignerMiddleware,
-    address: FieldElement,
+    address: Felt,
     method: &str,
-    calldata: Vec<FieldElement>,
+    calldata: Vec<Felt>,
 ) -> Result<InvokeTransactionResult> {
     let selector = get_selector_from_name(method)
         .map_err(|e| eyre!("Invalid selector for {}: {}", method, e))?;
@@ -47,7 +44,7 @@ pub async fn invoke_contract(
         calldata,
     };
     signer
-        .execute(vec![call])
+        .execute_v1(vec![call])
         .max_fee(MAX_FEE)
         .send()
         .await
@@ -56,10 +53,10 @@ pub async fn invoke_contract(
 
 pub async fn call_contract(
     provider: &JsonRpcClient<HttpTransport>,
-    address: FieldElement,
+    address: Felt,
     method: &str,
-    calldata: Vec<FieldElement>,
-) -> Result<Vec<FieldElement>> {
+    calldata: Vec<Felt>,
+) -> Result<Vec<Felt>> {
     let entry_point_selector = get_selector_from_name(method)
         .map_err(|e| eyre!("Invalid selector for {}: {}", method, e))?;
     let function_call = FunctionCall {
@@ -77,8 +74,8 @@ pub async fn deploy_contract<'a>(
     signer: &'a LocalWalletSignerMiddleware,
     path_to_sierra: &Path,
     path_to_casm: &Path,
-    constructor_args: Vec<FieldElement>,
-) -> Result<FieldElement> {
+    constructor_args: Vec<Felt>,
+) -> Result<Felt> {
     let sierra: SierraClass = {
         let sierra_file = std::fs::File::open(path_to_sierra)
             .map_err(|e| eyre!("Failed to open Sierra file: {}", e))?;
@@ -92,7 +89,7 @@ pub async fn deploy_contract<'a>(
     let compiled_class_hash = casm
         .class_hash()
         .map_err(|e| eyre!("Failed to get class hash from CASM: {}", e))?;
-    let declare_tx = signer.declare(
+    let declare_tx = signer.declare_v2(
         sierra
             .clone()
             .flatten()
@@ -110,7 +107,7 @@ pub async fn deploy_contract<'a>(
 
     let contract_factory = ContractFactory::new(class_hash, signer);
 
-    let deploy_tx = contract_factory.deploy(constructor_args, FieldElement::ZERO, true);
+    let deploy_tx = contract_factory.deploy_v1(constructor_args, Felt::ZERO, true);
 
     let deployed_address = deploy_tx.deployed_address();
     deploy_tx

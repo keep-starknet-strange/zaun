@@ -15,13 +15,6 @@ num-traits = { workspace = true }
 serde_json = { workspace = true }
 starknet = { workspace = true }
 starknet-accounts = { workspace = true }
-starknet-contract = { workspace = true }
 starknet-core = { workspace = true }
-starknet-crypto = { workspace = true }
 starknet-ff = { workspace = true }
-starknet-instance = { path = "../starknet-instance" }
 starknet-providers = { workspace = true }
-starknet-signers = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
-url = { workspace = true }

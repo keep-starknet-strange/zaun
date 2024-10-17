@@ -21,11 +21,11 @@ abigen!(
         function disableWithdrawalLimit(address token) external onlySecurityAdmin
         function setMaxTotalBalance(address token, uint256 maxTotalBalance_) external onlyAppGovernor
 
-        function registerAppGovernor(address account) external
+        function register_app_governor(address account) external
         function registerAppRoleAdmin(address account) external
         function registerGovernanceAdmin(address account) external
         function registerOperator(address account) external
-        function registerSecurityAdmin(address account) external
+        function register_security_admin(address account) external
         function registerSecurityAgent(address account) external
         function registerTokenAdmin(address account) external
         function registerUpgradeGovernor(address account) external
@@ -72,38 +72,6 @@ pub trait StarknetTokenBridgeTrait<M: Middleware> {
         &self,
         token: Address,
         max_total_balance: U256,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_app_governor(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_app_role_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_governance_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_operator(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_security_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_security_agent(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_token_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn register_upgrade_governor(
-        &self,
-        account: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
 
     async fn identify(&self) -> Result<String, Error<M>>;
@@ -198,110 +166,6 @@ where
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .set_max_total_balance(token, max_total_balance)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_app_governor(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_app_governor(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_app_role_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_app_role_admin(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_governance_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_governance_admin(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_operator(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_operator(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_security_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_security_admin(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_security_agent(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_security_agent(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_token_admin(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_token_admin(account)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn register_upgrade_governor(
-        &self,
-        account: Address,
-    ) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .register_upgrade_governor(account)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

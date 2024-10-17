@@ -1,40 +1,40 @@
 use crate::interfaces::core_contract::CoreContract;
 use crate::interfaces::messaging::Messaging;
 use crate::interfaces::operator::Operator;
-use starknet_ff::FieldElement;
+use starknet_core::types::Felt;
 
 use appchain_utils::LocalWalletSignerMiddleware;
 
-pub struct StarknetCoreContractClient<'a> {
-    operator: Operator<'a>,
-    messaging: Messaging<'a>,
-    core_contract: CoreContract<'a>,
+pub struct StarknetCoreContractClient {
+    operator: Operator,
+    messaging: Messaging,
+    core_contract: CoreContract,
 }
 
-impl<'a> StarknetCoreContractClient<'a> {
-    pub fn new(address: FieldElement, signer: &'a LocalWalletSignerMiddleware) -> Self {
+impl StarknetCoreContractClient {
+    pub fn new(address: Felt, signer: LocalWalletSignerMiddleware) -> Self {
         Self {
-            operator: Operator::new(address, signer),
-            messaging: Messaging::new(address, signer),
+            operator: Operator::new(address, signer.clone()),
+            messaging: Messaging::new(address, signer.clone()),
             core_contract: CoreContract::new(address, signer),
         }
     }
 }
 
-impl<'a> AsRef<Operator<'a>> for StarknetCoreContractClient<'a> {
-    fn as_ref(&self) -> &Operator<'a> {
+impl AsRef<Operator> for StarknetCoreContractClient {
+    fn as_ref(&self) -> &Operator {
         &self.operator
     }
 }
 
-impl<'a> AsRef<Messaging<'a>> for StarknetCoreContractClient<'a> {
-    fn as_ref(&self) -> &Messaging<'a> {
+impl AsRef<Messaging> for StarknetCoreContractClient {
+    fn as_ref(&self) -> &Messaging {
         &self.messaging
     }
 }
 
-impl<'a> AsRef<CoreContract<'a>> for StarknetCoreContractClient<'a> {
-    fn as_ref(&self) -> &CoreContract<'a> {
+impl AsRef<CoreContract> for StarknetCoreContractClient {
+    fn as_ref(&self) -> &CoreContract {
         &self.core_contract
     }
 }
