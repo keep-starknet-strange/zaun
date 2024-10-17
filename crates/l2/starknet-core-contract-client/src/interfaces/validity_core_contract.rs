@@ -2,29 +2,11 @@ use async_trait::async_trait;
 use ethers::contract::ContractError;
 use ethers::middleware::Middleware;
 use ethers::prelude::abigen;
-use ethers::types::{TransactionReceipt, I256, U256};
+use ethers::types::{Bytes, TransactionReceipt, I256, U256};
 
 use utils::errors::Error;
 
-abigen!(
-    StarknetValidityContract,
-    r#"[
-        function setProgramHash(uint256 newProgramHash) external notFinalized onlyGovernance
-        function setConfigHash(uint256 newConfigHash) external notFinalized onlyGovernance
-        function setMessageCancellationDelay(uint256 delayInSeconds) external notFinalized onlyGovernance
-
-        function programHash() public view returns (uint256)
-        function configHash() public view returns (uint256)
-
-        function identify() external pure override returns (string memory)
-        function stateRoot() external view returns (uint256)
-        function stateBlockNumber() external view returns (int256)
-        function stateBlockHash() external view returns (uint256)
-
-        function updateState(uint256[] calldata programOutput, uint256 onchainDataHash, uint256 onchainDataSize) external onlyOperator
-
-    ]"#,
-);
+abigen!(StarknetValidityContract, "./src/artifacts/Starknet.json",);
 
 #[async_trait]
 pub trait StarknetValidityContractTrait<M: Middleware> {
@@ -48,12 +30,18 @@ pub trait StarknetValidityContractTrait<M: Middleware> {
     async fn state_root(&self) -> Result<U256, Error<M>>;
     async fn state_block_number(&self) -> Result<I256, Error<M>>;
     async fn state_block_hash(&self) -> Result<U256, Error<M>>;
-    /// Update the L1 state
+    /// Update the L1 state using calldata
     async fn update_state(
         &self,
         program_output: Vec<U256>,
         onchain_data_hash: U256,
         onchain_data_size: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
+    /// Update the L1 state using blob and kzg
+    async fn update_state_kzg_da(
+        &self,
+        program_output: Vec<U256>,
+        kzg_hashes: Vec<Bytes>,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
 }
 
@@ -145,6 +133,20 @@ where
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .update_state(program_output, onchain_data_hash, onchain_data_size)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn update_state_kzg_da(
+        &self,
+        program_output: Vec<U256>,
+        kzg_hashes: Vec<Bytes>,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .update_state_kzg_da(program_output, kzg_hashes)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
