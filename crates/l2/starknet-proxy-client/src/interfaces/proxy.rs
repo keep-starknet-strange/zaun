@@ -140,6 +140,7 @@ impl Into<Vec<u8>> for CoreContractInitData {
     fn into(self) -> Vec<u8> {
         [
             self.program_hash.encode(),
+            self.aggregate_program_hash.encode(),
             self.verifier_address.encode(),
             self.config_hash.encode(),
             self.initial_state.into(),
