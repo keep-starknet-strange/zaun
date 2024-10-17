@@ -110,6 +110,7 @@ pub struct CoreContractState {
 #[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
 pub struct CoreContractInitData {
     pub program_hash: U256,
+    pub aggregate_program_hash: U256,
     pub verifier_address: Address,
     pub config_hash: U256,
     pub initial_state: CoreContractState,
