@@ -1,5 +1,5 @@
-mod sovereign;
-mod validity;
+mod core_contract;
+mod core_contract_override;
 
-pub use sovereign::*;
-pub use validity::*;
+pub use core_contract::*;
+pub use core_contract_override::*;

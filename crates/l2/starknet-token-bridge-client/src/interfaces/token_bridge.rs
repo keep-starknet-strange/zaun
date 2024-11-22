@@ -12,32 +12,7 @@ type Address = H160;
 
 abigen!(
     StarknetTokenBridge,
-    r#"[
-        function deposit(address token, uint256 amount, uint256 l2Recipient) external payable onlyServicingToken
-        function withdraw(address token, uint256 amount, address recipient) public
-
-        function setL2TokenBridge(uint256 l2TokenBridge_) external onlyAppGovernor
-        function enableWithdrawalLimit(address token) external onlySecurityAgent
-        function disableWithdrawalLimit(address token) external onlySecurityAdmin
-        function setMaxTotalBalance(address token, uint256 maxTotalBalance_) external onlyAppGovernor
-
-        function register_app_governor(address account) external
-        function registerAppRoleAdmin(address account) external
-        function registerGovernanceAdmin(address account) external
-        function registerOperator(address account) external
-        function register_security_admin(address account) external
-        function registerSecurityAgent(address account) external
-        function registerTokenAdmin(address account) external
-        function registerUpgradeGovernor(address account) external
-
-        function identify() external pure virtual returns (string memory)
-        function estimateDepositFeeWei() external view returns (uint256)
-        function estimateEnrollmentFeeWei() external view returns (uint256)
-        function isServicingToken(address token) public view returns (bool)
-        function getRemainingIntradayAllowance(address token) external view returns (uint256)
-        function getMaxTotalBalance(address token) public view returns (uint256)
-        function maxDeposit() external pure returns (uint256)
-    ]"#,
+    "../../../artifacts/starkgate-contracts/StarknetTokenBridge.json",
 );
 
 #[async_trait]
@@ -53,7 +28,6 @@ pub trait StarknetTokenBridgeTrait<M: Middleware> {
         &self,
         token: Address,
         amount: U256,
-        recipient: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_l2_token_bridge(
         &self,
@@ -109,10 +83,9 @@ where
         &self,
         token: Address,
         amount: U256,
-        recipient: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .withdraw(token, amount, recipient)
+            .withdraw(token, amount)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

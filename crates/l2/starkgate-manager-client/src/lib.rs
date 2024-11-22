@@ -6,7 +6,8 @@ use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 pub mod clients;
 pub mod interfaces;
 
-const STARKGATE_MANAGER: &str = include_str!("artifacts/StarkgateManager.json");
+const STARKGATE_MANAGER: &str =
+    include_str!("../../../../artifacts/starkgate-contracts/StarkgateManager.json");
 
 pub async fn deploy_starkgate_manager_behind_unsafe_proxy(
     client: Arc<LocalWalletSignerMiddleware>,

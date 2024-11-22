@@ -11,14 +11,7 @@ use utils::errors::Error;
 
 abigen!(
     ERC20Token,
-    r#"[
-        function name() public view virtual returns (string memory)
-        function symbol() public view virtual returns (string memory)
-        function totalSupply() public view virtual returns (uint256)
-        function balanceOf(address account) public view virtual returns (uint256)
-        function allowance(address owner, address spender) public view virtual returns (uint256)
-        function approve(address spender, uint256 value) public virtual returns (bool)
-    ]"#,
+    "../../../artifacts/starkgate-contracts/ERC20.json",
 );
 
 #[async_trait]

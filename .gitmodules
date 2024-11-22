@@ -10,3 +10,6 @@
 [submodule "lib/piltover"]
 	path = lib/piltover
 	url = https://github.com/keep-starknet-strange/piltover
+[submodule "lib/starkgate-contracts"]
+	path = lib/starkgate-contracts
+	url = https://github.com/starknet-io/starkgate-contracts

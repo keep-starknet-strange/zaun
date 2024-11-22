@@ -12,15 +12,7 @@ type Address = H160;
 
 abigen!(
     StarkgateRegistry,
-    r#"[
-        function enlistToken(address token, address bridge) external onlyManager
-        function blockToken(address token) external onlyManager
-
-        function selfRemove(address token) external
-
-        function identify() external pure override returns (string memory)
-        function getBridge(address token) external view returns (address)
-    ]"#,
+    "../../../artifacts/starkgate-contracts/StarkgateRegistry.json",
 );
 
 #[async_trait]

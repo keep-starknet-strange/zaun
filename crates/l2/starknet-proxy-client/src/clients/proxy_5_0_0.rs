@@ -8,24 +8,7 @@ use utils::errors::Error;
 
 abigen!(
     ProxySupport5_0_0,
-    r#"[
-        function isFrozen() external view virtual returns (bool)
-        function initialize(bytes calldata data) external notCalledDirectly
-        function upgradeTo(address newImplementation, bytes calldata data, bool finalize) external payable onlyGovernance notFinalized notFrozen
-        function addImplementation(address newImplementation, bytes calldata data, bool finalize) external onlyGovernance
-        function proxyNominateNewGovernor(address newGovernor) external
-        function proxyRemoveGovernor(address governorForRemoval) external
-        function proxyAcceptGovernance() external
-
-        function registerAppGovernor(address account) external
-        function registerAppRoleAdmin(address account) external
-        function registerGovernanceAdmin(address account) external
-        function registerOperator(address account) external
-        function registerSecurityAdmin(address account) external
-        function registerSecurityAgent(address account) external
-        function registerTokenAdmin(address account) external
-        function registerUpgradeGovernor(address account) external
-    ]"#,
+    "../../../artifacts/starkgate-contracts/Proxy_5_0_0.json",
 );
 
 #[async_trait]
@@ -33,10 +16,6 @@ impl<T, M: Middleware> ProxySupport5_0_0Trait<M> for T
 where
     T: AsRef<ProxySupport5_0_0<M>> + Send + Sync,
 {
-    async fn is_frozen(&self) -> Result<bool, Error<M>> {
-        self.as_ref().is_frozen().call().await.map_err(Into::into)
-    }
-
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .initialize(data)
@@ -89,7 +68,7 @@ where
         new_governor: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .proxy_nominate_new_governor(new_governor)
+            .register_app_governor(new_governor)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
@@ -102,17 +81,7 @@ where
         governor: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .proxy_remove_governor(governor)
-            .send()
-            .await
-            .map_err(Into::<ContractError<M>>::into)?
-            .await
-            .map_err(Into::into)
-    }
-
-    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>> {
-        self.as_ref()
-            .proxy_accept_governance()
+            .revoke_app_governor(governor)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

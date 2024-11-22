@@ -1,11 +1,13 @@
+mod core_contract;
+mod core_contract_override;
 mod governance;
 mod governed_finalizable;
 mod messaging;
 mod messaging_events;
 mod operator;
-mod sovereign_core_contract;
-mod validity_core_contract;
 
+pub use core_contract::{StarknetCoreContract, StarknetCoreContractTrait};
+pub use core_contract_override::StarknetCoreContractOverride;
 pub use governance::{StarknetGovernance, StarknetGovernanceTrait};
 pub use governed_finalizable::{GovernedFinalizable, GovernedFinalizableTrait};
 pub use messaging::{StarknetMessaging, StarknetMessagingTrait};
@@ -15,5 +17,3 @@ pub use messaging_events::{
     StarknetMessagingEvents,
 };
 pub use operator::{Operator, OperatorTrait};
-pub use sovereign_core_contract::{StarknetSovereignContract, StarknetSovereignContractTrait};
-pub use validity_core_contract::{StarknetValidityContract, StarknetValidityContractTrait};

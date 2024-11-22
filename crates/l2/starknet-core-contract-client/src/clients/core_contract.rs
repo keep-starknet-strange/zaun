@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
 use crate::interfaces::{
-    GovernedFinalizable, Operator, StarknetGovernance, StarknetMessaging, StarknetSovereignContract,
+    GovernedFinalizable, Operator, StarknetCoreContract, StarknetGovernance, StarknetMessaging,
 };
 use ethers::types::Address;
 use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport3_0_2;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 /// Client to interact with a Starknet core contract running in `Sovereign` mode
-pub struct StarknetSovereignContractClient {
-    core_contract: StarknetSovereignContract<LocalWalletSignerMiddleware>,
+pub struct StarknetCoreContractClient {
+    core_contract: StarknetCoreContract<LocalWalletSignerMiddleware>,
     messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
     operator: Operator<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport3_0_2<LocalWalletSignerMiddleware>,
@@ -18,14 +18,14 @@ pub struct StarknetSovereignContractClient {
     core_contract_implementation: Address,
 }
 
-impl StarknetSovereignContractClient {
+impl StarknetCoreContractClient {
     pub fn new(
         address: Address,
         client: Arc<LocalWalletSignerMiddleware>,
         implementation_address: Address,
     ) -> Self {
         Self {
-            core_contract: StarknetSovereignContract::new(address, client.clone()),
+            core_contract: StarknetCoreContract::new(address, client.clone()),
             messaging: StarknetMessaging::new(address, client.clone()),
             operator: Operator::new(address, client.clone()),
             proxy_support: ProxySupport3_0_2::new(address, client.clone()),
@@ -36,40 +36,38 @@ impl StarknetSovereignContractClient {
     }
 }
 
-impl AsRef<StarknetSovereignContract<LocalWalletSignerMiddleware>>
-    for StarknetSovereignContractClient
-{
-    fn as_ref(&self) -> &StarknetSovereignContract<LocalWalletSignerMiddleware> {
+impl AsRef<StarknetCoreContract<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
+    fn as_ref(&self) -> &StarknetCoreContract<LocalWalletSignerMiddleware> {
         &self.core_contract
     }
 }
-impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+impl AsRef<StarknetMessaging<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
     fn as_ref(&self) -> &StarknetMessaging<LocalWalletSignerMiddleware> {
         &self.messaging
     }
 }
-impl AsRef<ProxySupport3_0_2<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+impl AsRef<ProxySupport3_0_2<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
     fn as_ref(&self) -> &ProxySupport3_0_2<LocalWalletSignerMiddleware> {
         &self.proxy_support
     }
 }
-impl AsRef<Operator<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+impl AsRef<Operator<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
     fn as_ref(&self) -> &Operator<LocalWalletSignerMiddleware> {
         &self.operator
     }
 }
-impl AsRef<StarknetGovernance<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+impl AsRef<StarknetGovernance<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
     fn as_ref(&self) -> &StarknetGovernance<LocalWalletSignerMiddleware> {
         &self.governance
     }
 }
-impl AsRef<GovernedFinalizable<LocalWalletSignerMiddleware>> for StarknetSovereignContractClient {
+impl AsRef<GovernedFinalizable<LocalWalletSignerMiddleware>> for StarknetCoreContractClient {
     fn as_ref(&self) -> &GovernedFinalizable<LocalWalletSignerMiddleware> {
         &self.governed_finalizable
     }
 }
 
-impl StarknetContractClient for StarknetSovereignContractClient {
+impl StarknetContractClient for StarknetCoreContractClient {
     fn address(&self) -> Address {
         self.core_contract.address()
     }

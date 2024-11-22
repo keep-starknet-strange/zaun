@@ -39,7 +39,6 @@ pub trait ProxySupport3_0_2Trait<M: Middleware> {
 
 #[async_trait]
 pub trait ProxySupport5_0_0Trait<M: Middleware> {
-    async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
         &self,
@@ -65,7 +64,6 @@ pub trait ProxySupport5_0_0Trait<M: Middleware> {
         &self,
         governor: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn register_app_governor(
         &self,
         account: Address,
