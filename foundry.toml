@@ -4,6 +4,4 @@ out = "out"
 libs = ["lib"]
 solc = "0.8.27"
 evm_version = "cancun"
-remappings = [
-    "starkware/=lib/cairo-lang/src/starkware/"
-]
+remappings = ["starkware/=lib/cairo-lang/src/starkware/"]

@@ -13,3 +13,7 @@
 [submodule "lib/starkgate-contracts"]
 	path = lib/starkgate-contracts
 	url = https://github.com/starknet-io/starkgate-contracts
+[submodule "lib/starkgate-contracts-0.9"]
+	path = lib/starkgate-contracts-0.9
+	url = https://github.com/starknet-io/starkgate-contracts
+	branch = update-cairo-0.9.0

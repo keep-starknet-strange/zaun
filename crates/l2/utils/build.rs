@@ -6,6 +6,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-env-changed=FORCE_REBUILD");
 
+    Command::new("git")
+        .args(["submodule", "update", "--init", "--recursive"])
+        .status()?;
+
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
     let binding = PathBuf::from(manifest_dir);
     let root_dir = binding
@@ -17,19 +21,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match check_dependencies() {
         Ok(_) => println!("All required dependencies are installed."),
         Err(e) => {
-            println!("\n{}", "Missing Dependencies Error:");
+            println!("Missing Dependencies Error:");
             println!("{}", e);
-            println!(
-                "\n{}",
-                "Please install the missing dependencies and try again."
-            );
+            println!("\nPlease install the missing dependencies and try again.");
             std::process::exit(1);
         }
     }
 
-    Command::new("make").current_dir(&root_dir).arg("cairo-lang").status()?;
-    Command::new("make").current_dir(&root_dir).arg("local-contracts").status()?;
-    Command::new("make").current_dir(&root_dir).arg("starkgate-contracts").status()?;
+    Command::new("make")
+        .current_dir(root_dir)
+        .arg("cairo-lang")
+        .status()?;
+    Command::new("make")
+        .current_dir(root_dir)
+        .arg("local-contracts")
+        .status()?;
+    Command::new("make")
+        .current_dir(root_dir)
+        .arg("starkgate-contracts-latest")
+        .status()?;
+    Command::new("make")
+        .current_dir(root_dir)
+        .arg("starkgate-contracts-old")
+        .status()?;
     Ok(())
 }
 
@@ -97,7 +111,7 @@ pub fn check_dependencies() -> Result<(), Box<dyn std::error::Error>> {
         );
     }
 
-    println!("\n{}", "Checking dependencies...");
+    println!("Checking dependencies...");
     println!("{}", "-".repeat(50));
 
     check_and_print_version("Ganache", "ganache", &["--version"]);
@@ -114,7 +128,7 @@ pub fn check_dependencies() -> Result<(), Box<dyn std::error::Error>> {
         }));
     }
 
-    println!("{}", "All dependencies are installed! ✨");
+    println!("All dependencies are installed! ✨");
     Ok(())
 }
 

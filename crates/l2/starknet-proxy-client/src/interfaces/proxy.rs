@@ -8,7 +8,6 @@ use utils::errors::Error;
 
 #[async_trait]
 pub trait ProxySupport3_0_2Trait<M: Middleware> {
-    async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
         &self,

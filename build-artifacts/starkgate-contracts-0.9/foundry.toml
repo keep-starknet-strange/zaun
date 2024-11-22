@@ -1,0 +1,5 @@
+[profile.default]
+src = "./upgrade/"
+out = "out"
+libs = ["lib"]
+solc = "0.6.12"

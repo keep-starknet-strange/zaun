@@ -15,6 +15,28 @@ jobs:
       # before the plugin, as the cache uses the current rustc version as its cache key
       - run: rustup show
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Ganache
+        run: |
+          npm install -g ganache@7.9.0
+          ganache --version
+
+      - name: Install Solc
+        run: |
+          pip install solc-select
+          solc-select install 0.8.19
+          solc-select use 0.8.19
+          solc --version
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - uses: Swatinem/rust-cache@v2
       - name: Format and clippy
         run: |

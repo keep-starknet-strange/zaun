@@ -8,15 +8,7 @@ use utils::errors::Error;
 
 abigen!(
     ProxySupport3_0_2,
-    r#"[
-        function isFrozen() external view virtual returns (bool)
-        function initialize(bytes calldata data) external notCalledDirectly
-        function upgradeTo(address newImplementation, bytes calldata data, bool finalize) external payable onlyGovernance notFinalized notFrozen
-        function addImplementation(address newImplementation, bytes calldata data, bool finalize) external onlyGovernance
-        function proxyNominateNewGovernor(address newGovernor) external
-        function proxyRemoveGovernor(address governorForRemoval) external
-        function proxyAcceptGovernance() external
-    ]"#,
+    "../../../artifacts/starkgate-contracts-0.9/Proxy_3_0_2.json",
 );
 
 #[async_trait]
@@ -24,10 +16,6 @@ impl<T, M: Middleware> ProxySupport3_0_2Trait<M> for T
 where
     T: AsRef<ProxySupport3_0_2<M>> + Send + Sync,
 {
-    async fn is_frozen(&self) -> Result<bool, Error<M>> {
-        self.as_ref().is_frozen().call().await.map_err(Into::into)
-    }
-
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
             .initialize(data)
