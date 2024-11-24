@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::clients::{StarknetCoreContractClient, StarknetCoreContractOverrideClient};
+use crate::clients::{StarknetCoreContractClient, StarknetDevCoreContractClient};
 use starknet_proxy_client::deploy::{deploy_contract_behind_proxy, Error, ProxyVersion};
 use utils::{LocalWalletSignerMiddleware, NO_CONSTRUCTOR_ARG};
 
@@ -8,7 +8,7 @@ pub mod clients;
 pub mod interfaces;
 
 const STARKNET_CORE_CONTRACT: &str = include_str!("../../../../artifacts/cairo-lang/Starknet.json");
-const STARKNET_CORE_CONTRACT_OVERRIDE: &str =
+const STARKNET_DEV_CORE_CONTRACT: &str =
     include_str!("../../../../artifacts/StarknetOverride.json");
 
 pub enum CoreContractType {
@@ -19,7 +19,7 @@ pub enum CoreContractType {
 }
 
 pub enum CoreContractClientType {
-    Dev(StarknetCoreContractOverrideClient),
+    Dev(StarknetDevCoreContractClient),
     Production(StarknetCoreContractClient),
 }
 
@@ -32,13 +32,13 @@ pub async fn deploy_starknet_core_contract_behind_proxy(
         CoreContractType::Dev => {
             let core_contract = deploy_contract_behind_proxy(
                 client.clone(),
-                STARKNET_CORE_CONTRACT_OVERRIDE,
+                STARKNET_DEV_CORE_CONTRACT,
                 NO_CONSTRUCTOR_ARG,
                 proxy_type,
             )
             .await?;
             Ok(CoreContractClientType::Dev(
-                StarknetCoreContractOverrideClient::new(
+                StarknetDevCoreContractClient::new(
                     core_contract.0.address(),
                     client.clone(),
                     core_contract.1.address(),
