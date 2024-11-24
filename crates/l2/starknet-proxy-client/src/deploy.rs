@@ -30,7 +30,6 @@ pub enum Error {
 }
 
 const UNSAFE_PROXY: &str = include_str!("../../../../artifacts/UnsafeProxy.json");
-// TODO : find the contract in repos
 const SAFE_PROXY_3_0_2: &str =
     include_str!("../../../../artifacts/starkgate-contracts-0.9/Proxy_3_0_2.json");
 const SAFE_PROXY_5_0_0: &str =

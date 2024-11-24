@@ -3,12 +3,12 @@
 # Moreover, any project using sandbox as dependency won't build unless
 # there's Foundry installed on the machine.
 
-.PHONY: artifacts cairo-lang local-contracts starkgate-contracts-latest starkgate-contracts-old
+.PHONY: pilt-over cairo-lang local-contracts starkgate-contracts-latest starkgate-contracts-old l2-artifacts
 
 CAIRO_LANG_COMMIT_HASH="8e11b8cc65ae1d0959328b1b4a40b92df8b58595"
 STARKGATE_CONTRACTS_COMMIT_HASH="45941888479663ac93e898cd7f8504fa9066c54c"
 
-artifacts:
+pilt-over:
 	mkdir crates/starknet-proxy-client/src/artifacts || true
 	mkdir crates/starknet-core-contract-client/src/artifacts || true
 	forge build
@@ -45,7 +45,6 @@ starkgate-contracts-latest:
  	./scripts/extract_artifacts.py
 	# Copying Contracts :
 	mkdir -p artifacts/starkgate-contracts
-	cp lib/starkgate-contracts/artifacts/LegacyBridge.json artifacts/starkgate-contracts/LegacyBridge.json
 	cp lib/starkgate-contracts/artifacts/StarkgateManager.json artifacts/starkgate-contracts/StarkgateManager.json
 	cp lib/starkgate-contracts/artifacts/StarkgateRegistry.json artifacts/starkgate-contracts/StarkgateRegistry.json
 	cp lib/starkgate-contracts/artifacts/Proxy.json artifacts/starkgate-contracts/Proxy_5_0_0.json
@@ -57,8 +56,19 @@ starkgate-contracts-old:
 	solc-select install 0.6.12 && solc-select use 0.6.12
 	# Building
 	cp build-artifacts/starkgate-contracts-0.9/foundry.toml lib/starkgate-contracts-0.9/src/starkware/solidity/foundry.toml
+	cp build-artifacts/starkgate-contracts-0.9/foundry2.toml lib/starkgate-contracts-0.9/src/starkware/foundry.toml
 	cd lib/starkgate-contracts-0.9/src/starkware/solidity && \
+	forge build
+	cd lib/starkgate-contracts-0.9/src/starkware && \
 	forge build
 	# Copying Contracts :
 	mkdir -p artifacts/starkgate-contracts-0.9
 	cp lib/starkgate-contracts-0.9/src/starkware/solidity/out/Proxy.sol/Proxy.json artifacts/starkgate-contracts-0.9/Proxy_3_0_2.json
+	cp lib/starkgate-contracts-0.9/src/starkware/out/StarknetEthBridge.sol/StarknetEthBridge.json artifacts/starkgate-contracts-0.9/LegacyBridge.json
+
+l2-artifacts:
+	make cairo-lang
+	make local-contracts
+	make starkgate-contracts-latest
+	make starkgate-contracts-old
+	echo "L2 Artifacts built ✅"

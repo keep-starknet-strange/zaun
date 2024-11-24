@@ -13,24 +13,25 @@ type Address = H160;
 
 abigen!(
     StarknetEthBridge,
-    "../../../artifacts/starkgate-contracts/LegacyBridge.json",
+    "../../../artifacts/starkgate-contracts-0.9/LegacyBridge.json",
 );
 
 #[async_trait]
 pub trait StarknetEthBridgeTrait<M: Middleware> {
     async fn set_max_total_balance(
         &self,
-        address: Address,
         max_total_balance: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-
+    async fn set_max_deposit(
+        &self,
+        max_deposit: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn set_l2_token_bridge(
         &self,
         l2_token_bridge: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn deposit(
         &self,
-        amount: U256,
         l2_recipient: U256,
         fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
@@ -49,11 +50,23 @@ where
 {
     async fn set_max_total_balance(
         &self,
-        address: Address,
         max_total_balance: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .set_max_total_balance(address, max_total_balance)
+            .set_max_total_balance(max_total_balance)
+            .send()
+            .await
+            .map_err(Into::<ContractError<M>>::into)?
+            .await
+            .map_err(Into::into)
+    }
+
+    async fn set_max_deposit(
+        &self,
+        max_deposit: U256,
+    ) -> Result<Option<TransactionReceipt>, Error<M>> {
+        self.as_ref()
+            .set_max_deposit(max_deposit)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
@@ -76,12 +89,11 @@ where
 
     async fn deposit(
         &self,
-        amount: U256,
         l2_recipient: U256,
         fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .deposit(amount, l2_recipient)
+            .deposit(l2_recipient)
             .value(fee)
             .send()
             .await
@@ -96,7 +108,7 @@ where
         l1_recipient: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .withdraw_1(amount, l1_recipient)
+            .withdraw(amount, l1_recipient)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?
