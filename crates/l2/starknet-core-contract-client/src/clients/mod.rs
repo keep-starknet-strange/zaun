@@ -1,5 +1,5 @@
 mod core_contract;
-mod core_contract_override;
+mod dev_core_contract;
 
 pub use core_contract::*;
-pub use core_contract_override::*;
+pub use dev_core_contract::*;

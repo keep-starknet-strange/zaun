@@ -108,7 +108,7 @@ where
         l1_recipient: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .withdraw(amount, l1_recipient)
+            .withdraw_with_recipient(amount, l1_recipient)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

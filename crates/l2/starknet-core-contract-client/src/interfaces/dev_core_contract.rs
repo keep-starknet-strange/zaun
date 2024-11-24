@@ -8,14 +8,14 @@ use crate::interfaces::core_contract::StarknetCoreContractTrait;
 use utils::errors::Error;
 
 abigen!(
-    StarknetCoreContractOverride,
+    StarknetDevCoreContract,
     "../../../artifacts/StarknetOverride.json",
 );
 
-pub struct OverrideCoreContract<M: Middleware>(pub StarknetCoreContractOverride<M>);
+pub struct DevCoreContract<M: Middleware>(pub StarknetDevCoreContract<M>);
 
 #[allow(dead_code)]
-impl<M: Middleware> OverrideCoreContract<M> {
+impl<M: Middleware> DevCoreContract<M> {
     async fn update_state_override(
         &self,
         global_root: U256,
@@ -33,7 +33,7 @@ impl<M: Middleware> OverrideCoreContract<M> {
 }
 
 #[async_trait]
-impl<M: Middleware> StarknetCoreContractTrait<M> for OverrideCoreContract<M> {
+impl<M: Middleware> StarknetCoreContractTrait<M> for DevCoreContract<M> {
     async fn set_program_hash(
         &self,
         new_program_hash: U256,
