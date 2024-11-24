@@ -4,7 +4,7 @@ out = "out"
 libs = ["lib"]
 solc = "0.6.12"
 remappings = [
-    "contracts/starkware/solidity=./solidity",
-    "contracts/starkware/starknet=./starknet",
-    "contracts/starkware/cairo=./cairo"
+  "contracts/starkware/solidity=./solidity",
+  "contracts/starkware/starknet=./starknet",
+  "contracts/starkware/cairo=./cairo",
 ]
