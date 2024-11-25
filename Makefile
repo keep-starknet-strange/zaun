@@ -43,13 +43,18 @@ starkgate-contracts-latest:
 	FILES=$$(cat src/solidity/files_to_compile.txt) && \
  	solc $$FILES --allow-paths .=., --optimize --optimize-runs 200 --overwrite --combined-json abi,bin -o artifacts && \
  	./scripts/extract_artifacts.py
+ 	# building ERC20
+	cp build-artifacts/starkgate-contracts/foundry.toml lib/starkgate-contracts/starkware/solidity/foundry.toml && \
+	cd lib/starkgate-contracts/starkware/solidity && \
+	echo "pragma solidity ^0.8.0; import \"./ERC20.sol\"; contract ERC20_1 is ERC20 {}" > ./tokens/ERC20/ERC20_1.sol && \
+	forge build
 	# Copying Contracts :
 	mkdir -p artifacts/starkgate-contracts
 	cp lib/starkgate-contracts/artifacts/StarkgateManager.json artifacts/starkgate-contracts/StarkgateManager.json
 	cp lib/starkgate-contracts/artifacts/StarkgateRegistry.json artifacts/starkgate-contracts/StarkgateRegistry.json
 	cp lib/starkgate-contracts/artifacts/Proxy.json artifacts/starkgate-contracts/Proxy_5_0_0.json
 	cp lib/starkgate-contracts/artifacts/StarknetTokenBridge.json artifacts/starkgate-contracts/StarknetTokenBridge.json
-	cp lib/starkgate-contracts/artifacts/ERC20.json artifacts/starkgate-contracts/ERC20.json
+	cp lib/starkgate-contracts/starkware/solidity/out/ERC20_1.sol/ERC20_1.json artifacts/starkgate-contracts/ERC20.json
 
 starkgate-contracts-old:
 	# Configure solidity version

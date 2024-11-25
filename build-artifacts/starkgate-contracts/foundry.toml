@@ -1,0 +1,5 @@
+[profile.default]
+src = "./tokens/"
+out = "out"
+solc = "0.8.27"
+evm_version = "cancun"
