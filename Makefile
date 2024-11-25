@@ -71,4 +71,5 @@ l2-artifacts:
 	make local-contracts
 	make starkgate-contracts-latest
 	make starkgate-contracts-old
+	python3 build-artifacts/convert.py
 	echo "L2 Artifacts built ✅"

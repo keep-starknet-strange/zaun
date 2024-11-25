@@ -30,19 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Command::new("make")
         .current_dir(root_dir)
-        .arg("cairo-lang")
-        .status()?;
-    Command::new("make")
-        .current_dir(root_dir)
-        .arg("local-contracts")
-        .status()?;
-    Command::new("make")
-        .current_dir(root_dir)
-        .arg("starkgate-contracts-latest")
-        .status()?;
-    Command::new("make")
-        .current_dir(root_dir)
-        .arg("starkgate-contracts-old")
+        .arg("l2-artifacts")
         .status()?;
     Ok(())
 }
