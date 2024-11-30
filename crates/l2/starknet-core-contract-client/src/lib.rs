@@ -9,7 +9,7 @@ pub mod interfaces;
 
 const STARKNET_CORE_CONTRACT: &str = include_str!("../../../../artifacts/cairo-lang/Starknet.json");
 const STARKNET_DEV_CORE_CONTRACT: &str =
-    include_str!("../../../../artifacts/StarknetOverride.json");
+    include_str!("../../../../artifacts/StarknetDevCoreContract.json");
 
 pub enum CoreContractType {
     // custom contract written for testing (contains override function)

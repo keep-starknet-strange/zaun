@@ -6,6 +6,7 @@ use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 use ethers::types::Address;
 use starknet_proxy_client::clients::proxy_5_0_0::ProxySupport5_0_0;
 
+#[derive(Clone)]
 pub struct StarkgateManagerContractClient {
     manager: StarkgateManager<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport5_0_0<LocalWalletSignerMiddleware>,

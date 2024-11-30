@@ -9,7 +9,7 @@ use utils::errors::Error;
 
 abigen!(
     StarknetDevCoreContract,
-    "../../../artifacts/StarknetOverride.json",
+    "../../../artifacts/StarknetDevCoreContract.json",
 );
 
 pub struct DevCoreContract<M: Middleware>(pub StarknetDevCoreContract<M>);

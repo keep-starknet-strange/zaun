@@ -5,6 +5,7 @@ use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 use ethers::types::Address;
 
+#[derive(Clone)]
 pub struct ERC20ContractClient {
     erc20_token: ERC20Token<LocalWalletSignerMiddleware>,
 }

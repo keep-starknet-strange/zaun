@@ -13,7 +13,7 @@ type Address = H160;
 
 abigen!(
     StarknetEthBridge,
-    "../../../artifacts/starkgate-contracts-0.9/LegacyBridge.json",
+    "../../../artifacts/starkgate-contracts-0.9/StarknetLegacyBridge.json",
 );
 
 #[async_trait]
@@ -32,6 +32,7 @@ pub trait StarknetEthBridgeTrait<M: Middleware> {
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn deposit(
         &self,
+        amount: U256,
         l2_recipient: U256,
         fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
@@ -89,11 +90,12 @@ where
 
     async fn deposit(
         &self,
+        amount: U256,
         l2_recipient: U256,
         fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .deposit(l2_recipient)
+            .deposit_with_amount(amount, l2_recipient)
             .value(fee)
             .send()
             .await

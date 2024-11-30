@@ -8,6 +8,7 @@ use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport3_0_2;
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 /// Client to interact with a Starknet core contract running in `Sovereign` mode
+#[derive(Clone)]
 pub struct StarknetCoreContractClient {
     core_contract: StarknetCoreContract<LocalWalletSignerMiddleware>,
     messaging: StarknetMessaging<LocalWalletSignerMiddleware>,

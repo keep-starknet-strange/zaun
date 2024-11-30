@@ -7,6 +7,7 @@ use ethers::types::Address;
 use starknet_proxy_client::clients::proxy_5_0_0::ProxySupport5_0_0;
 
 /// Client to interact with a Token Bridge (ERC20)
+#[derive(Clone)]
 pub struct StarknetTokenBridgeContractClient {
     token_bridge: StarknetTokenBridge<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport5_0_0<LocalWalletSignerMiddleware>,

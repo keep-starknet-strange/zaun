@@ -9,6 +9,7 @@ use crate::interfaces::{
 use utils::{LocalWalletSignerMiddleware, StarknetContractClient};
 
 /// Client to interact with a Starknet core contract running in `Validity` mode
+#[derive(Clone)]
 pub struct StarknetDevCoreContractClient {
     core_contract: StarknetDevCoreContract<LocalWalletSignerMiddleware>,
     messaging: StarknetMessaging<LocalWalletSignerMiddleware>,
