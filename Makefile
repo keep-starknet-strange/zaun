@@ -34,7 +34,7 @@ starkgate-contracts-latest:
 	solc-select install 0.8.24 && solc-select use 0.8.24
 	# Building
 	cd lib/starkgate-contracts && \
-	git checkout $(STARKGATE_CONTRACTS_COMMIT_HASH) && \
+	git checkout $(STARKGATE_CONTRACTS_RELEASE_VERSION) && \
 	./scripts/setup.sh && \
 	FILES=$$(cat src/solidity/files_to_compile.txt) && \
  	solc $$FILES --allow-paths .=., --optimize --optimize-runs 200 --overwrite --combined-json abi,bin -o artifacts && \
