@@ -5,22 +5,18 @@
 
 .PHONY: piltover cairo-lang local-contracts starkgate-contracts-latest starkgate-contracts-old l2-artifacts
 
-CAIRO_LANG_COMMIT_HASH="8e11b8cc65ae1d0959328b1b4a40b92df8b58595"
-STARKGATE_CONTRACTS_COMMIT_HASH="45941888479663ac93e898cd7f8504fa9066c54c"
-STARKGATE_LEGACY_CONTRACTS_COMMIT_HASH="82e651f5f642508577b6310f47d0d457f5f9a9bb"
+CAIRO_LANG_RELEASE_VERSION="v0.13.2"
+STARKGATE_CONTRACTS_RELEASE_VERSION="v2.0.1"
+STARKGATE_LEGACY_CONTRACTS_COMMIT_HASH="82e651f5f642508577b6310f47d0d457f5f9a9bb" # branch  update 0.9.0
 
 piltover:
-	mkdir crates/starknet-proxy-client/src/artifacts || true
-	mkdir crates/starknet-core-contract-client/src/artifacts || true
-	forge build
-	cp out/StarknetSovereign.sol/Starknet.json crates/starknet-core-contract-client/src/artifacts/
 	(cd lib/piltover && scarb build && cp target/dev/* ../../crates/l3/appchain-core-contract-client/artifacts)
 
 cairo-lang:
 	# Building
 	cp build-artifacts/cairo-lang/foundry.toml lib/cairo-lang/foundry.toml
 	cd lib/cairo-lang && \
- 	git checkout $(CAIRO_LANG_COMMIT_HASH) && \
+ 	git checkout $(CAIRO_LANG_RELEASE_VERSION) && \
  	forge build
 	# Copying Contracts :
 	mkdir -p artifacts/cairo-lang
