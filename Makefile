@@ -69,7 +69,6 @@ starkgate-contracts-old:
 	# Copying Contracts :
 	mkdir -p artifacts/starkgate-contracts-0.9
 	cp lib/starkgate-contracts-0.9/src/starkware/solidity/out/Proxy.sol/Proxy.json artifacts/starkgate-contracts-0.9/Proxy_3_0_2.json
-	cp lib/starkgate-contracts-0.9/src/starkware/out/StarknetERC20Bridge.sol/StarknetERC20Bridge.json artifacts/starkgate-contracts-0.9/StarknetTokenBridge.json
 
 starkgate-contracts-82e651f:
 	# Configure solidity version
