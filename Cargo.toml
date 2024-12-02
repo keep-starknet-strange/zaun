@@ -1,12 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/l2/utils",
   "crates/l2/starknet-core-contract-client",
   "crates/l2/ethereum-instance",
   "crates/l2/starknet-eth-bridge-client",
   "crates/l2/starknet-token-bridge-client",
   "crates/l2/starkgate-manager-client",
-  "crates/l2/utils",
   "crates/l2/starknet-erc20-client",
   "crates/l2/starkgate-registry-client",
   "crates/l2/starknet-proxy-client",

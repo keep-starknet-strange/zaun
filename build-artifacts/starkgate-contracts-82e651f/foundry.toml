@@ -1,0 +1,10 @@
+[profile.default]
+src = "./starknet"
+out = "out"
+libs = ["lib"]
+solc = "0.6.12"
+remappings = [
+  "starkware/solidity=./solidity",
+  "starkware/starknet=./starknet",
+  "starkware/cairo=./cairo",
+]

@@ -13,16 +13,7 @@ type Address = H160;
 
 abigen!(
     StarknetEthBridge,
-    r#"[
-        function setMaxTotalBalance(uint256 maxTotalBalance_) external onlyGovernance
-        function setMaxDeposit(uint256 maxDeposit_) external onlyGovernance
-        function setL2TokenBridge(uint256 l2TokenBridge_) external onlyGovernance
-
-        function deposit(uint256 amount, uint256 l2Recipient) public payable override
-        function withdraw(uint256 amount, address recipient) public
-
-        function identify() external pure override returns (string memory)
-    ]"#,
+    "../../../artifacts/starkgate-contracts-0.9/StarknetLegacyBridge.json",
 );
 
 #[async_trait]
@@ -104,7 +95,7 @@ where
         fee: U256,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .deposit(amount, l2_recipient)
+            .deposit_with_amount(amount, l2_recipient)
             .value(fee)
             .send()
             .await
@@ -119,7 +110,7 @@ where
         l1_recipient: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>> {
         self.as_ref()
-            .withdraw(amount, l1_recipient)
+            .withdraw_with_recipient(amount, l1_recipient)
             .send()
             .await
             .map_err(Into::<ContractError<M>>::into)?

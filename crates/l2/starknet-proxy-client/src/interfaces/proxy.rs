@@ -8,7 +8,6 @@ use utils::errors::Error;
 
 #[async_trait]
 pub trait ProxySupport3_0_2Trait<M: Middleware> {
-    async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
         &self,
@@ -39,7 +38,6 @@ pub trait ProxySupport3_0_2Trait<M: Middleware> {
 
 #[async_trait]
 pub trait ProxySupport5_0_0Trait<M: Middleware> {
-    async fn is_frozen(&self) -> Result<bool, Error<M>>;
     async fn initialize(&self, data: Bytes) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn initialize_with<const N: usize>(
         &self,
@@ -65,7 +63,6 @@ pub trait ProxySupport5_0_0Trait<M: Middleware> {
         &self,
         governor: Address,
     ) -> Result<Option<TransactionReceipt>, Error<M>>;
-    async fn proxy_accept_governance(&self) -> Result<Option<TransactionReceipt>, Error<M>>;
     async fn register_app_governor(
         &self,
         account: Address,
@@ -110,6 +107,7 @@ pub struct CoreContractState {
 #[derive(Debug, Clone, Default, PartialEq, EthAbiType, EthAbiCodec)]
 pub struct CoreContractInitData {
     pub program_hash: U256,
+    pub aggregate_program_hash: U256,
     pub verifier_address: Address,
     pub config_hash: U256,
     pub initial_state: CoreContractState,
@@ -139,6 +137,7 @@ impl Into<Vec<u8>> for CoreContractInitData {
     fn into(self) -> Vec<u8> {
         [
             self.program_hash.encode(),
+            self.aggregate_program_hash.encode(),
             self.verifier_address.encode(),
             self.config_hash.encode(),
             self.initial_state.into(),

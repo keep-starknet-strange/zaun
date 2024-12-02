@@ -7,6 +7,7 @@ use ethers::types::Address;
 use starknet_proxy_client::clients::proxy_3_0_2::ProxySupport3_0_2;
 
 /// Client to interact with a Starknet Eth Bridge
+#[derive(Clone)]
 pub struct StarknetEthBridgeContractClient {
     eth_bridge: StarknetEthBridge<LocalWalletSignerMiddleware>,
     proxy_support: ProxySupport3_0_2<LocalWalletSignerMiddleware>,
