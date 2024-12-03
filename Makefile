@@ -5,8 +5,8 @@
 
 .PHONY: piltover cairo-lang local-contracts starkgate-contracts-latest starkgate-contracts-old l2-artifacts
 
-CAIRO_LANG_RELEASE_VERSION="v0.13.2"
-STARKGATE_CONTRACTS_RELEASE_VERSION="v2.0.1"
+CAIRO_LANG_RELEASE_VERSION="8e11b8cc65ae1d0959328b1b4a40b92df8b58595" # Version : 0.13.2, Not using version because it is causing issues in `cargo build`.
+STARKGATE_CONTRACTS_RELEASE_VERSION="45941888479663ac93e898cd7f8504fa9066c54c" # Version : 2.0.1
 STARKGATE_LEGACY_CONTRACTS_COMMIT_HASH="82e651f5f642508577b6310f47d0d457f5f9a9bb" # branch  update 0.9.0
 
 piltover:
