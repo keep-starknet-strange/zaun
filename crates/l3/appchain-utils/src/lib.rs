@@ -70,8 +70,8 @@ pub async fn call_contract(
         .map_err(|e| eyre!("Provider error: {}", e))
 }
 
-pub async fn deploy_contract<'a>(
-    signer: &'a LocalWalletSignerMiddleware,
+pub async fn deploy_contract(
+    signer: &LocalWalletSignerMiddleware,
     path_to_sierra: &Path,
     path_to_casm: &Path,
     constructor_args: Vec<Felt>,
